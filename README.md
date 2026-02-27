@@ -1,5 +1,7 @@
 # simon-bot
 
+[한국어](./README.ko.md)
+
 A 19-step deep workflow plugin for [Claude Code](https://claude.com/claude-code) that plans, implements, and verifies code with maximum rigor.
 
 Built on [oh-my-claudecode](https://github.com/nicepkg/oh-my-claudecode) multi-agent orchestration.
