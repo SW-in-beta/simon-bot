@@ -20,16 +20,16 @@ echo ""
 install_global() {
     echo "[1/2] Installing global skill..."
 
-    # Create skills directory if not exists
-    mkdir -p "$SKILLS_DIR"
+    # Create skills directory (directory-based structure)
+    mkdir -p "$SKILLS_DIR/simon-bot"
 
-    # Copy skill file (or symlink for dev)
-    if [ -L "$SKILLS_DIR/simon-bot.md" ]; then
+    # Remove old file-based skill if exists
+    if [ -f "$SKILLS_DIR/simon-bot.md" ]; then
         rm "$SKILLS_DIR/simon-bot.md"
     fi
 
-    cp "$SCRIPT_DIR/skills/simon-bot.md" "$SKILLS_DIR/simon-bot.md"
-    echo "  Skill installed: $SKILLS_DIR/simon-bot.md"
+    cp "$SCRIPT_DIR/skills/simon-bot.md" "$SKILLS_DIR/simon-bot/SKILL.md"
+    echo "  Skill installed: $SKILLS_DIR/simon-bot/SKILL.md"
     echo ""
 }
 

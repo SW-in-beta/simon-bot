@@ -1,12 +1,11 @@
+---
+name: simon-bot
+description: "19-step deep workflow plugin that plans, implements, and verifies code with maximum rigor. Use when: (1) Building new features with quality pipeline, (2) Need scope-first planning with expert review panel, (3) Want parallel execution in isolated git worktrees, (4) Need comprehensive code verification before PR."
+---
+
 # simon-bot
 
 Deep workflow skill with 19-step quality pipeline.
-
-## Metadata
-- name: simon-bot
-- version: 1.0.0
-- triggers: ["simon-bot", "simon bot", "/simon-bot"]
-- allowedTools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep", "Task", "AskUserQuestion", "Skill", "WebFetch", "WebSearch"]
 
 ## Instructions
 
