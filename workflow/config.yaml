@@ -1,0 +1,147 @@
+# simon-bot Workflow Configuration
+# Modify this file to customize the workflow behavior.
+
+# ============================================
+# Model Policy
+# ============================================
+model_policy: opus              # Default model for all agents
+# No exceptions - all agents use opus
+
+# ============================================
+# Unit Limits (PR reviewer friendly)
+# ============================================
+unit_limits:
+  max_files: 5                  # Max files per Unit
+  max_lines: 200                # Max changed lines per Unit
+
+# ============================================
+# Loop Limits
+# ============================================
+loop_limits:
+  critic_planner: 3             # Step 2: critic ↔ planner max iterations
+  step7_8: 2                    # Step 7-8: review ↔ regression max loops
+  step16: 3                     # Step 16: MEDIUM issue resolution max iterations
+  step6_executor: 3             # Step 6: executor auto-fix max attempts
+
+# ============================================
+# Issue Threshold
+# ============================================
+issue_threshold: HIGH           # Auto-fix threshold (CRITICAL and HIGH auto-fixed)
+
+# ============================================
+# Code Size Thresholds (Step 9)
+# ============================================
+size_thresholds:
+  function_lines: 50            # Max lines per function
+  file_lines: 300               # Max lines per file
+  params: 5                     # Max parameters per function
+  nesting: 3                    # Max nesting depth
+
+# ============================================
+# Experts Configuration
+# ============================================
+experts:
+  # Always run (parallel)
+  always:
+    - security-reviewer         # OWASP, injection, auth, API key exposure
+    - architect-bugs            # Race conditions, edge cases, error handling
+
+  # Auto-detected based on Step 1-A analysis (all opus)
+  auto_detect:
+    - db-expert                 # ← DB usage detected
+    - api-expert                # ← REST/gRPC/WebSocket detected
+    - concurrency-expert        # ← Multi-thread/async detected
+    - infra-expert              # ← Docker/K8s/CI detected
+    - caching-expert            # ← Caching layer detected
+    - messaging-expert          # ← Kafka/RabbitMQ detected
+    - auth-expert               # ← Auth logic is core
+
+# ============================================
+# PR Configuration
+# ============================================
+pr:
+  draft: true                   # Always create as Draft PR
+
+# ============================================
+# Test Configuration
+# ============================================
+test:
+  # NEVER use real external systems
+  mock_only: true
+  allowed_test_deps:
+    - in-memory DB (SQLite, etc.)
+    - testcontainers
+    - mock/stub libraries
+    - MSW, nock
+    - memfs
+    - localhost test servers
+
+# ============================================
+# Forbidden Commands (ABSOLUTE)
+# ============================================
+commands:
+  forbidden:
+    # Git destructive
+    - git push --force
+    - git push -f
+    - git merge main
+    - git merge master
+
+    # System destructive
+    - rm -rf
+    - chmod 777
+
+    # Code execution risk
+    - eval
+    - curl | sh
+    - wget | sh
+
+    # DB destructive
+    - DROP TABLE
+    - DROP DATABASE
+    - TRUNCATE
+
+    # External system access (real)
+    - curl (real external endpoints)
+    - wget (real external endpoints)
+    - mysql (real DB)
+    - psql (real DB)
+    - redis-cli (real DB)
+    - mongosh (real DB)
+    - ssh (real servers)
+    - scp (real servers)
+    - sftp (real servers)
+
+    # Security
+    - .env commit
+    - credentials commit
+    - secrets commit
+
+  # Auto-generated in Step 1-A based on project stack
+  allowed: []
+  # Example (auto-filled):
+  # - npm install / npm test / npm run build
+  # - pip install / pytest
+  # - go build / go test
+
+# ============================================
+# Review Paths (determined in Step 0)
+# ============================================
+review_paths:
+  SMALL:
+    steps: [5, 6, 7, 8, 17]
+    description: "Quick implementation with essential verification"
+  STANDARD:
+    steps: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+    description: "Full pipeline with all quality checks"
+  LARGE:
+    steps: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+    extra: ["extended failure mode analysis"]
+    description: "Full pipeline with extended analysis"
+
+# ============================================
+# Scope Challenge Thresholds (Step 0)
+# ============================================
+scope_challenge:
+  file_warning: 8               # Warn if > 8 files changed
+  class_warning: 2              # Warn if > 2 new classes
