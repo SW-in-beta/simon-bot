@@ -77,7 +77,7 @@ Step 0에서 리뷰 경로를 선택합니다:
 
 | 단계 | 에이전트 | 역할 |
 |------|----------|------|
-| **Pre** | `check-test-env.sh` | 테스트 환경 점검 — 미세팅 시 테스트 스킵 |
+| **Pre** | `setup-test-env.sh` | 테스트 환경 세팅 — 미설치 시 자동 설치 |
 | **5** | `executor` | 구현 (TDD 선택 시 적용) |
 | **6** | `architect` | 목적 정합성 리뷰 |
 | **7** | `security-reviewer` + `architect` + 전문가 | 버그/보안/성능 리뷰 |
@@ -113,7 +113,7 @@ Phase A (interactive)
         │ ralph + ultrawork starts
         ▼
 Phase B-E (autonomous, worktree isolated)
-  Pre: 테스트 환경 점검 (미세팅 시 테스트 스킵)
+  Pre: 테스트 환경 세팅 (미설치 시 자동 설치)
   ┌─────────────────┐  ┌─────────────────┐
   │ worktree/unit-1 │  │ worktree/unit-2 │  ← parallel
   │ Step 5~17       │  │ Step 5~17       │

@@ -11,7 +11,7 @@ echo "=== simon-bot: Test Execution ==="
 
 # Pre-check: Test environment readiness
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-if ! bash "$SCRIPT_DIR/check-test-env.sh" "$PROJECT_DIR"; then
+if ! bash "$SCRIPT_DIR/setup-test-env.sh" "$PROJECT_DIR"; then
     echo "[SKIP] Test environment not ready. Skipping all tests."
     echo "=== Test Execution: SKIPPED ==="
     exit 0
