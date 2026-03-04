@@ -70,6 +70,18 @@ install_global() {
 
     cp "$SCRIPT_DIR/skills/simon-bot-grind.md" "$GRIND_DIR/SKILL.md"
     echo "  Grind Skill: $GRIND_DIR/SKILL.md"
+
+    # Install sessions variant
+    echo "  Installing sessions variant..."
+    SESSIONS_DIR="$SKILLS_DIR/simon-bot-sessions"
+    mkdir -p "$SESSIONS_DIR"
+
+    if [ -f "$SKILLS_DIR/simon-bot-sessions.md" ]; then
+        rm "$SKILLS_DIR/simon-bot-sessions.md"
+    fi
+
+    cp "$SCRIPT_DIR/skills/simon-bot-sessions.md" "$SESSIONS_DIR/SKILL.md"
+    echo "  Sessions Skill: $SESSIONS_DIR/SKILL.md"
     echo ""
 }
 
