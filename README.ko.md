@@ -9,11 +9,21 @@
 - **범위 우선 계획** — 계획 수립 전에 기존 코드와 git 히스토리를 먼저 분석합니다
 - **19단계 품질 파이프라인** — 범위 검증부터 프로덕션 준비까지 전 과정을 다룹니다
 - **병렬 실행** — 독립적인 작업 단위를 격리된 git worktree에서 동시에 실행합니다
-- **전문가 리뷰 패널** — 최대 9명의 전문 리뷰어가 참여합니다 (보안, DB, API, 동시성 등)
+- **5개 도메인 전문가 팀** — 22명의 전문가가 팀별 토론과 합의를 통해 리뷰합니다 (Safety, Code Design, Data, Integration, Ops)
+- **Code Design 사전 분석** — 컨벤션, 관용구, 패턴, 테스트 가능성 전문가들이 레포를 사전 분석합니다
+- **인터랙티브 가이드 리뷰** — 계획과 매핑된 코드 리뷰, 변경 전/후 풍부한 맥락 제공
 - **컨텍스트 효율적** — 스크립트가 결정적 작업을 처리하고, 메모리 파일이 컨텍스트 손실을 방지합니다
 - **PR 리뷰어 친화적** — 작업을 작은 단위로 분할합니다 (3-5개 파일, 최대 200줄)
 - **자기 개선** — 회고 피드백이 자동으로 다음 실행을 개선합니다
 - **안전 설계** — force push, 실제 DB/API 접근, 파괴적 명령을 사용하지 않습니다
+
+## 변형
+
+| 스킬 | 설명 |
+|------|------|
+| `/simon-bot` | 표준 19-step 파이프라인 |
+| `/simon-bot-grind` | 열일모드 — 모든 재시도 한계를 10으로 설정, 자동 진단/복구/전략 전환 |
+| `/simon-bot-sessions` | 세션 관리 — 이전 작업 조회, 이어서 작업, 삭제 |
 
 ## 설치
 
@@ -25,7 +35,7 @@ chmod +x install.sh
 ```
 
 설치되는 항목:
-- 글로벌 스킬 → `~/.claude/skills/simon-bot.md`
+- 글로벌 스킬 → `~/.claude/skills/simon-bot/SKILL.md`
 - 프로젝트 워크플로우 → `.omc/workflow/` (설정, 프롬프트, 스크립트, 템플릿)
 
 ### 프로젝트 전용 설치
@@ -57,12 +67,12 @@ simon-bot으로 결제 시스템 구현해줘
 | 단계 | 에이전트 | 역할 |
 |------|----------|------|
 | **0** | `architect` | 범위 검증 — 기존 코드, 최소 변경, 리뷰 경로 결정 |
-| **1-A** | `explore-medium` → `analyst` | 프로젝트 분석 + 원칙 권장 사항 |
+| **1-A** | `explore-medium` → `analyst` → **Code Design Team** | 프로젝트 분석 + 레포 컨벤션/패턴/관용구 사전 분석 |
 | **1-B** | `planner` | 인터뷰 모드 → 작업 단위 분할 + 계획 수립 |
-| **2** | `critic` ↔ `planner` | 계획 리뷰 반복 (최대 3회) |
-| **3** | `architect` | critic 리뷰의 메타 검증 |
-| **4** | `architect` | 과잉 설계 점검 (YAGNI/KISS) |
-| **4-B** | 전문가 패널 | 구현 전 계획 사전 리뷰 — 전문가들이 우려사항/위험요소 식별 |
+| **2** | `critic` ↔ `planner` (Agent Team) | 직접 토론으로 계획 리뷰 (최대 3회) |
+| **3** | `architect` (Agent Team) | critic 리뷰의 메타 검증 |
+| **4** | `architect` (Agent Team) | 과잉 설계 점검 (YAGNI/KISS) |
+| **4-B** | 5개 도메인 전문가팀 | 구현 전 계획 사전 리뷰 — 팀별 토론으로 우려사항 도출 |
 
 Step 0에서 리뷰 경로를 선택합니다:
 
@@ -70,22 +80,22 @@ Step 0에서 리뷰 경로를 선택합니다:
 |------|------|-------------|
 | **SMALL** | 5→6→7→8→17 | 버그 수정, 소규모 기능 |
 | **STANDARD** | 5→6→7→...→17 | 대부분의 기능 개발 |
-| **LARGE** | 5→6→7→...→17 + 추가 단계 | 아키텍처 변경 |
+| **LARGE** | 5→6→7→...→17 + 추가 분석 | 아키텍처 변경 |
 
 ### Phase B-E: 구현 및 검증 (자율 실행)
 
 `ralph + ultrawork` 모드로 자동 실행됩니다.
 
-**Pre-Phase: Base Branch Sync** — 최신 `origin/main` (또는 `master`)을 fetch한 후, 사용자가 입력한 브랜치명으로 worktree를 생성합니다. 이를 통해 여러 세션이 동일한 base에서 시작하여 충돌을 방지합니다.
+**Pre-Phase: Base Branch Sync** — 최신 `origin/main` (또는 `master`)을 fetch한 후, 사용자가 입력한 브랜치명으로 worktree를 생성합니다.
 
 각 Unit은 격리된 git worktree에서 실행됩니다.
 
 | 단계 | 에이전트 | 역할 |
 |------|----------|------|
 | **Pre** | `setup-test-env.sh` | 테스트 환경 세팅 — 미설치 시 자동 설치 |
-| **5** | `executor` | 구현 (Step 4-B 우려사항 반영, TDD 선택 시 적용) |
+| **5** | `executor` | 구현 (전문가 우려사항 + Code Design 분석 반영) |
 | **6** | `architect` | 목적 정합성 리뷰 |
-| **7-A** | `security-reviewer` + `architect` + 전문가 | 버그/보안/성능 리뷰 |
+| **7-A** | 5개 도메인 전문가팀 | 실제 diff 기반 버그/보안/성능 팀 토론 검증 |
 | **7-B** | `architect` | Step 4-B 사전 우려사항 대조, 누락 항목 보완 |
 | **8** | `architect` | 회귀 검증 |
 | **9** | `architect` → `executor` | 파일/함수 분할 |
@@ -94,17 +104,58 @@ Step 0에서 리뷰 경로를 선택합니다:
 | **12** | `code-reviewer` | 전체 변경 사항 리뷰 |
 | **13** | `architect` → `executor` | 불필요한 코드 정리 |
 | **14** | `code-reviewer` | 코드 품질 평가 |
-| **15** | `architect` | UX 흐름 검증 |
+| **15** | `architect` | 흐름 검증 (백엔드/데이터/에러/이벤트 흐름) |
 | **16** | `architect` | MEDIUM 이슈 해결 |
 | **17** | `architect` + `security-reviewer` | 프로덕션 준비 완료 확인 |
 
-### 통합 및 보고
+### 마무리
 
 | 단계 | 역할 |
 |------|------|
-| **통합** | 사용자 지정 브랜치에 커밋 → 충돌 해결 → Draft PR 생성 |
+| **통합** | 사용자 지정 브랜치에 커밋 → 충돌 해결 → 빌드/테스트 확인 |
 | **18** | 작업 보고서 (변경 전후 흐름, 트레이드오프, 리스크, 테스트) |
-| **19** | 회고 (사용자 피드백 → feedback.md에 영속 기록 → 워크플로우 개선) |
+| **18-B** | 리뷰 시퀀스 — 변경사항을 논리적 단위로 그룹핑, 계획과 매핑 |
+| **19** | **인터랙티브 가이드 리뷰 → PR 생성** |
+
+## Step 19: 인터랙티브 가이드 리뷰
+
+Step 19는 모든 구현/검증이 완료된 후 사용자와 진행하는 대화형 코드 리뷰입니다. **PR은 리뷰 후에 생성됩니다.**
+
+### 19-A: 리뷰 개요 (계획 매핑 기반)
+
+단순 통계가 아닌, **계획과 구현의 매핑**을 보여줍니다:
+
+- **계획 요약 리마인드** — 원래 목표와 핵심 요구사항
+- **구현 매핑 테이블** — 계획의 각 Unit이 어떤 변경 단위로 구현되었는지
+- **변경 단위 간 관계도** — 변경들이 어떻게 맞물리는지 흐름 설명
+- **리뷰 순서 안내** — 왜 이 순서로 진행하는지 (상류→하류)
+
+### 19-B: 순차 리뷰 (풍부한 맥락 제공)
+
+각 논리적 변경 단위마다 다음 맥락을 제공합니다:
+
+| 항목 | 설명 |
+|------|------|
+| **계획 매핑** | "이 변경은 계획의 [Unit N]을 구현합니다" |
+| **변경 전 상태** | 기존 코드의 역할, 동작 방식, 한계점 |
+| **변경 내용** | 어떤 부분을 어떻게 개선/추가했는지 |
+| **핵심 코드 diff** | Before/After (중요 부분 발췌) |
+| **다른 변경과의 연관** | 이전/이후 변경 단위와의 관계 |
+| **리뷰 포인트** | 주의 깊게 봐야 할 부분 |
+| **전문가 우려사항 반영** | 관련 우려가 어떻게 반영되었는지 |
+| **트레이드오프** | 설계 결정과 그 이유 |
+
+각 단위에 대해 **OK / 수정 요청 / 질문** 피드백을 수집합니다.
+
+### 19-C: PR 생성 및 마무리
+
+리뷰 완료 후 사용자가 선택합니다:
+
+- **Draft PR 생성** — `gh pr create --draft`
+- **Ready PR 생성** — `gh pr create` (바로 Ready 상태)
+- **추가 수정 필요** — 19-B로 돌아가 추가 리뷰
+
+Step 18 보고서 내용이 PR description에 포함됩니다.
 
 ## 세션 관리
 
@@ -134,58 +185,67 @@ Startup: 브랜치명 입력 (사용자가 직접 지정)
 Step 0: Scope Challenge
   └─ git history + what exists → SMALL / STANDARD / LARGE
         │
-Phase A (interactive)
-  ├─ 1-A Analysis (Context7)
-  ├─ 1-B Planning (Unit split, NOT in scope, Unresolved)
-  ├─ 2-4 Review loop
-  └─ 4-B Expert Plan Review (구현 전 우려사항 식별)
+Phase A (대화형)
+  ├─ 1-A 분석 + Code Design Team (컨벤션, 관용구, 패턴, 테스트 가능성)
+  ├─ 1-B 계획 수립 (Unit 분할, NOT in scope, Unresolved)
+  ├─ 2-4 리뷰 루프 (Agent Team: planner ↔ critic ↔ architect)
+  └─ 4-B 전문가 사전 리뷰 (5개 도메인팀 토론)
         │
 Pre-Phase: Base Branch Sync
   └─ git fetch origin main → origin/main 기준 worktree 생성
-        │ ralph + ultrawork starts
+        │ ralph + ultrawork 시작
         ▼
-Phase B-E (autonomous, worktree isolated)
+Phase B-E (자율 실행, worktree 격리)
   Pre: 테스트 환경 세팅 (미설치 시 자동 설치)
   ┌─────────────────┐  ┌─────────────────┐
-  │ worktree/unit-1 │  │ worktree/unit-2 │  ← parallel
+  │ worktree/unit-1 │  │ worktree/unit-2 │  ← 병렬
   │ Step 5~17       │  │ Step 5~17       │
   └────────┬────────┘  └────────┬────────┘
            └──────┬─────────────┘
                   ▼
-          worktree/unit-3 (depends on 1,2)
+          worktree/unit-3 (1,2에 의존)
                   │
                   ▼
-          Integration → Draft PR
+          통합 (커밋, 빌드, 테스트)
                   │
                   ▼
-          Report → Retrospective → feedback.md
-                                    (세션 간 영속 기록)
+          보고서 → 리뷰 시퀀스
+                  │
+                  ▼
+          인터랙티브 가이드 리뷰 (19-A → 19-B → 19-C)
+                  │
+                  ▼
+          PR 생성 → feedback.md
+                    (세션 간 영속 기록)
 ```
 
-## 전문가 패널 (Step 4-B & Step 7)
+## 전문가 패널 (5개 도메인팀)
+
+전문가들은 개별 리뷰가 아닌 **팀 내 토론**을 통해 합의 기반으로 우려사항을 도출합니다.
+
+### 팀 구성
+
+| 팀 | 멤버 | 활성화 | 토론 초점 |
+|----|------|--------|----------|
+| **Safety** | appsec, auth, infrasec, stability | 항상 (appsec+stability) | 보안 경계, 인증 우회, 장애 복구 |
+| **Code Design** | convention, idiom, design-pattern, testability | 항상 (convention+idiom) | 레포 컨벤션, 언어 관용구, 설계 패턴, 테스트 가능성 |
+| **Data** | rdbms, cache, nosql | auto-detect (min 2) | 데이터 일관성, 캐시 무효화, 스토리지 정합성 |
+| **Integration** | sync-api, async, external-integration, messaging | auto-detect (min 2) | 동기/비동기 경계, 에러 전파, 장애 격리 |
+| **Ops** | infra, observability, performance, concurrency | auto-detect (min 2) | 운영 안정성, 관측 가능성, 성능 |
+
+### 리뷰 경로별 팀 활성화
+
+| 경로 | 활성화 팀 |
+|------|----------|
+| SMALL | Safety + Code Design (always 멤버만) |
+| STANDARD | Safety + Code Design + auto-detect된 Data/Integration/Ops |
+| LARGE | 전체 + extended failure mode analysis |
+
+### 전문가 개입 시점
 
 전문가들은 워크플로우에서 **두 번** 개입합니다:
-1. **Step 4-B** (계획 사전 리뷰): 구현 전에 계획을 검토하고 우려사항/위험요소를 식별
-2. **Step 7** (구현 검증): 구현 결과를 검증하고, 사전 우려사항 누락 여부를 대조
-
-항상 활성화:
-
-| 전문가 | 중점 영역 | 사전 리뷰 시 초점 |
-|--------|-----------|------------------|
-| `security-reviewer` | OWASP Top 10, 인젝션, 인증 | 설계 단계의 보안 취약점 |
-| `architect` (버그) | 레이스 컨디션, 엣지 케이스, 에러 핸들링 | 안정성/에러 처리 설계 누락 |
-
-프로젝트 분석 결과에 따라 자동 감지:
-
-| 전문가 | 활성화 조건 | 사전 리뷰 시 초점 |
-|--------|-------------|------------------|
-| DB 전문가 | 데이터베이스 사용이 감지된 경우 | 스키마 변경, 마이그레이션, 쿼리 성능 |
-| API 전문가 | REST/gRPC/WebSocket이 감지된 경우 | API 설계, 호환성, 버전관리 |
-| 동시성 전문가 | 멀티스레드/비동기 패턴이 감지된 경우 | 동시성, 데드락, 레이스컨디션 |
-| 인프라 전문가 | Docker/K8s/CI 코드가 감지된 경우 | 배포, 인프라 영향 |
-| 캐싱 전문가 | 캐싱 레이어가 감지된 경우 | 캐시 무효화, 일관성 |
-| 메시징 전문가 | Kafka/RabbitMQ가 감지된 경우 | 메시지 순서, 멱등성 |
-| 인증 전문가 | 인증 로직이 핵심인 경우 | 인증/인가 플로우 |
+1. **Step 4-B** (계획 사전 리뷰): 팀 내 토론으로 계획의 우려사항 도출 (CRITICAL/HIGH/MEDIUM)
+2. **Step 7** (구현 검증): 실제 diff 기반 팀 검증 + 사전 우려사항 누락 여부 대조
 
 ## 커스터마이징
 
@@ -194,22 +254,30 @@ Phase B-E (autonomous, worktree isolated)
 임계값, 반복 제한, 전문가 설정을 조정할 수 있습니다:
 
 ```yaml
-# Change unit size limits
+model_policy: opus              # 전체 에이전트 모델
+language: ko                    # 보고서 언어
+
 unit_limits:
   max_files: 5
   max_lines: 200
 
-# Adjust code size thresholds
 size_thresholds:
   function_lines: 50
   file_lines: 300
 
-# 루프 제한 (전문가 사전 리뷰 포함)
 loop_limits:
-  step4b_critical: 2    # Step 4-B: CRITICAL 우려 시 계획 수정 최대 반복
-  step7b_recheck: 1     # Step 7-B: 누락 우려 fix 후 재검증 최대 반복
+  critic_planner: 3
+  step4b_critical: 2
+  step7b_recheck: 1
+  step7_8: 2
+  step6_executor: 3
+  step16: 3
 
-# 테스트 환경 점검 (의존성 미설치 시 테스트 스킵)
+expert_panel:
+  mode: agent-team
+  discussion_rounds: 2
+  require_consensus: true
+
 test_env:
   check_before_test: true
   skip_on_missing: true
@@ -217,29 +285,18 @@ test_env:
 
 ### 전문가 프롬프트
 
-`.omc/workflow/prompts/*.md`에서 전문가 리뷰 기준을 수정할 수 있습니다:
-
-```
-.omc/workflow/prompts/
-├─ db-expert.md
-├─ api-expert.md
-├─ concurrency-expert.md
-├─ infra-expert.md
-├─ caching-expert.md
-├─ messaging-expert.md
-└─ auth-expert.md
-```
+`.omc/workflow/prompts/*.md`에서 전문가 리뷰 기준을 수정할 수 있습니다 (22개 전문가 프롬프트).
 
 ### 회고
 
-이전 피드백은 `.omc/memory/retrospective.md`에 저장되며, 이후 실행 시 자동으로 참조됩니다. 워크플로우는 사용자의 피드백을 바탕으로 지속적으로 개선됩니다.
+이전 피드백은 `.omc/memory/retrospective.md`에 저장되며, 이후 실행 시 자동으로 참조됩니다.
 
 ## 안전 규칙
 
 다음 작업은 **어떠한 경우에도 절대 금지**됩니다:
 
 - `git push --force` — 어떤 상황에서도 사용 불가
-- `main`/`master`에 직접 병합 — Draft PR만 허용
+- `main`/`master`에 직접 병합 — PR만 허용
 - `rm -rf` — 파괴적 삭제 금지
 - 실제 DB 접근 — `mysql`, `psql`, `redis-cli`, `mongosh`
 - 실제 API 호출 — 외부 엔드포인트로의 `curl`, `wget`

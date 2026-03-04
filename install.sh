@@ -20,16 +20,43 @@ echo ""
 install_global() {
     echo "[1/2] Installing global skill..."
 
+    SKILL_DIR="$SKILLS_DIR/simon-bot"
+
     # Create skills directory (directory-based structure)
-    mkdir -p "$SKILLS_DIR/simon-bot"
+    mkdir -p "$SKILL_DIR"
 
     # Remove old file-based skill if exists
     if [ -f "$SKILLS_DIR/simon-bot.md" ]; then
         rm "$SKILLS_DIR/simon-bot.md"
     fi
 
-    cp "$SCRIPT_DIR/skills/simon-bot.md" "$SKILLS_DIR/simon-bot/SKILL.md"
-    echo "  Skill installed: $SKILLS_DIR/simon-bot/SKILL.md"
+    # Copy SKILL.md
+    cp "$SCRIPT_DIR/skills/simon-bot.md" "$SKILL_DIR/SKILL.md"
+    echo "  Skill: $SKILL_DIR/SKILL.md"
+
+    # Copy install.sh (for project-only install from skill context)
+    cp "$SCRIPT_DIR/install.sh" "$SKILL_DIR/install.sh"
+    chmod +x "$SKILL_DIR/install.sh"
+    echo "  Installer: $SKILL_DIR/install.sh"
+
+    # Copy workflow files (source for project-only install)
+    mkdir -p "$SKILL_DIR/workflow/prompts"
+    mkdir -p "$SKILL_DIR/workflow/scripts"
+    mkdir -p "$SKILL_DIR/workflow/templates"
+
+    cp "$SCRIPT_DIR/workflow/config.yaml" "$SKILL_DIR/workflow/config.yaml"
+
+    for f in "$SCRIPT_DIR/workflow/prompts/"*.md; do
+        [ -f "$f" ] && cp "$f" "$SKILL_DIR/workflow/prompts/"
+    done
+    for f in "$SCRIPT_DIR/workflow/scripts/"*.sh; do
+        [ -f "$f" ] && cp "$f" "$SKILL_DIR/workflow/scripts/" && chmod +x "$SKILL_DIR/workflow/scripts/$(basename "$f")"
+    done
+    for f in "$SCRIPT_DIR/workflow/templates/"*.md; do
+        [ -f "$f" ] && cp "$f" "$SKILL_DIR/workflow/templates/"
+    done
+
+    echo "  Workflow files copied to skill directory"
     echo ""
 }
 
