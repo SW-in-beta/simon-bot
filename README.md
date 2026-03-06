@@ -1,257 +1,101 @@
+<div align="center">
+
 # simon-bot
+
+**A 19-step autonomous coding pipeline for Claude Code —<br>22 experts, 5 domain teams, zero shortcuts.**
+
+[![GitHub Stars](https://img.shields.io/github/stars/SW-in-beta/simon-bot?style=flat-square)](https://github.com/SW-in-beta/simon-bot/stargazers)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
+[![Claude Code](https://img.shields.io/badge/Claude_Code-compatible-blueviolet?style=flat-square)](https://claude.com/claude-code)
 
 [한국어](./README.ko.md)
 
-A modular skill family for [Claude Code](https://claude.com/claude-code) — from deep implementation workflows to project management, analysis reports, and self-improvement.
+</div>
 
-## Skills
+---
 
-| Skill | Description |
-|-------|-------------|
-| `/simon-bot` | 19-step deep workflow — plans, implements, and verifies code with maximum rigor |
-| `/simon-bot-grind` | Tenacious variant — all retry limits set to 10, auto-diagnosis/recovery/strategy pivots |
-| `/simon-bot-sessions` | Session management — list, resume, delete worktree-based work sessions |
-| `/simon-bot-boost` | External resource analysis — reads links (blogs, GitHub, papers) and suggests skill improvements |
-| `/simon-bot-pm` | Project Manager — plans entire apps via PRD and distributes tasks to simon-bot instances |
-| `/simon-bot-report` | Pre-analysis reports — RFC, status analysis, or custom format docs via expert team discussion |
+## Why simon-bot?
 
-## Features
+Most AI coding assistants generate code and hope for the best. simon-bot treats every task like a production deployment:
 
-- **Scope-first planning** — Analyzes existing code and git history before planning
-- **19-step quality pipeline** — From scope challenge to production readiness
-- **Parallel execution** — Independent work units run simultaneously in isolated git worktrees
-- **5 domain expert teams** — 22 specialists organized into teams that discuss and reach consensus (Safety, Code Design, Data, Integration, Ops)
-- **Code Design pre-analysis** — Convention, idiom, pattern, and testability experts analyze the repo before planning
-- **Interactive guided review** — Plan-mapped code review with rich before/after context
-- **Mandatory TDD** — RED→GREEN→REFACTOR cycle enforced in every implementation step
-- **CONTEXT.md** — At-a-glance working document per session (git-excluded, auto-updated at each step)
-- **Success Criteria checklist** — Explicit completion gate verified at Step 17 and before PR creation
-- **Context-efficient** — Scripts handle deterministic tasks; memory files prevent context loss
-- **PR-reviewer friendly** — Work split into small units (3-5 files, 200 lines max)
-- **Self-improving** — Retrospective feedback automatically improves future runs
-- **Safe by design** — No force push, no real DB/API access, no destructive commands
+- **Ship with confidence** — A 19-step pipeline with mandatory TDD, 5 expert-team reviews, and a success-criteria gate means code is verified before you ever see a PR.
+- **Scale without chaos** — Each work unit runs in an isolated git worktree. Parallel execution, zero interference, clean history.
+- **Get smarter over time** — Built-in retrospectives feed back into future runs. A dedicated boost skill lets you teach it new tricks from articles, repos, and papers.
+- **Stay safe by default** — No force pushes, no real DB access, no destructive commands. Ever.
 
-## Architecture
+## How It Works
 
-```
-skills/
-├── simon-bot/
-│   ├── SKILL.md                    # Core 19-step workflow
-│   └── references/                 # Phase-specific detail files
-│       ├── phase-a-planning.md
-│       ├── phase-b-implementation.md
-│       ├── integration-and-review.md
-│       ├── agent-teams.md
-│       ├── error-resilience.md
-│       └── ...
-├── simon-bot-grind/
-│   ├── SKILL.md                    # Grind overrides (extends simon-bot)
-│   └── references/
-├── simon-bot-sessions/
-│   └── SKILL.md
-├── simon-bot-boost/
-│   └── SKILL.md
-├── simon-bot-pm/
-│   ├── SKILL.md                    # 7-phase PM pipeline
-│   └── references/
-└── simon-bot-report/
-    └── SKILL.md
+```mermaid
+graph LR
+    A["Scope & Analyze"] --> B["Plan & Review"]
+    B --> C["Expert Teams\n(22 specialists)"]
+    C --> D["Implement\n(TDD enforced)"]
+    D --> E["Multi-step\nVerification"]
+    E --> F["Guided Review\n& PR"]
+
+    style A fill:#e8f4f8,stroke:#2196F3
+    style B fill:#e8f4f8,stroke:#2196F3
+    style C fill:#fff3e0,stroke:#FF9800
+    style D fill:#e8f5e9,stroke:#4CAF50
+    style E fill:#e8f5e9,stroke:#4CAF50
+    style F fill:#f3e5f5,stroke:#9C27B0
 ```
 
-Skills are **modular**: each SKILL.md contains the core instructions while heavy details are split into `references/` subdirectories. Reference files are loaded on-demand per phase to minimize context consumption.
-
-Cross-cutting protocols (Error Resilience, Agent Teams, Decision Trail, Auto-Verification Hook) are shared across skills and defined once in the core `simon-bot` skill.
-
-Install path: `~/.claude/skills/`
-
-## Installation
+## Quick Start
 
 ```bash
-git clone https://github.com/yourname/simon-bot
+git clone https://github.com/SW-in-beta/simon-bot.git
 cd simon-bot
-chmod +x install.sh
 ./install.sh
 ```
 
-This installs:
-- All 6 skills → `~/.claude/skills/simon-bot*/`
-- Project workflow files → `.claude/workflow/` (config, prompts, scripts, templates)
-
-### Project-only install
-
-If you only need workflow files in a specific project:
-
-```bash
-./install.sh --project-only
-```
-
-## Usage
-
-In Claude Code:
+Then in Claude Code:
 
 ```
 /simon-bot implement user authentication with JWT
 ```
 
-Or naturally:
+## Skills
 
-```
-simon-bot으로 결제 시스템 구현해줘
-```
+| Skill | What it does |
+|-------|-------------|
+| `/simon-bot` | Full 19-step pipeline — plan, implement, verify, PR |
+| `/simon-bot-grind` | Same pipeline, maximum tenacity — 10x retries, auto-diagnosis, strategy pivots |
+| `/simon-bot-sessions` | List, resume, or clean up worktree-based work sessions |
+| `/simon-bot-boost` | Read external resources and improve simon-bot's own skills |
+| `/simon-bot-pm` | Project manager — PRD-driven planning, distributes tasks to simon-bot instances |
+| `/simon-bot-report` | Analysis documents (RFC, status report) via expert discussion — no code changes |
 
-### When to use which skill
+### Pick the Right Skill
 
-| Situation | Skill |
-|-----------|-------|
-| Implement a feature or fix a bug | `/simon-bot` |
-| Must not fail — complex codebase, many retries needed | `/simon-bot-grind` |
-| Resume or manage previous work sessions | `/simon-bot-sessions` |
-| Found a useful article/repo — improve simon-bot skills | `/simon-bot-boost` |
-| Build an entire app or manage a multi-feature project | `/simon-bot-pm` |
-| Need an RFC, architecture analysis, or status report (no code changes) | `/simon-bot-report` |
+| I want to... | Use |
+|--------------|-----|
+| Build a feature or fix a bug | `/simon-bot` |
+| Tackle something complex that can't fail | `/simon-bot-grind` |
+| Resume or manage previous sessions | `/simon-bot-sessions` |
+| Improve simon-bot from an article or repo | `/simon-bot-boost` |
+| Plan and build an entire app | `/simon-bot-pm` |
+| Get an RFC or analysis without changing code | `/simon-bot-report` |
 
-## Workflow (simon-bot)
+<details>
+<summary><strong>Expert Teams (5 domains, 22 specialists)</strong></summary>
 
-### Phase A: Planning (Interactive)
+Experts operate as **teams that discuss and reach consensus**, not individual reviewers.
 
-| Step | Agent | Role |
-|------|-------|------|
-| **0** | `architect` | Scope Challenge — what exists, minimum change, review path |
-| **1-A** | `explore-medium` → `analyst` → **Code Design Team** | Project analysis + repo convention/pattern/idiom pre-analysis |
-| **1-B** | `planner` | Interview mode → Unit breakdown + plan |
-| **2** | `critic` ↔ `planner` (Agent Team) | Plan review via direct discussion (max 3 iterations) |
-| **3** | `architect` (Agent Team) | Meta-verification of critic's review |
-| **4** | `architect` (Agent Team) | Over-engineering check (YAGNI/KISS) |
-| **4-B** | 5 domain expert teams | Pre-implementation plan review — teams discuss and flag concerns |
-
-User chooses a review path in Step 0:
-
-| Path | Steps | Best for |
-|------|-------|----------|
-| **SMALL** | 5→6→7→8→17 | Bug fixes, small features |
-| **STANDARD** | 5→6→7→...→17 | Most features |
-| **LARGE** | 5→6→7→...→17 + extras | Architecture changes |
-
-### Phase B-E: Implementation & Verification (Autonomous)
-
-Runs automatically with `ralph + ultrawork` mode.
-
-**Pre-Phase: Base Branch Sync** — Fetches latest `origin/main` (or `master`) and creates a worktree with the user-provided branch name. Creates `CONTEXT.md` (git-excluded working document) with plan summary, expert concerns, and success criteria checklist.
-
-Each Unit executes in an isolated git worktree.
-
-| Step | Agent | Role |
-|------|-------|------|
-| **Pre** | `setup-test-env.sh` | Test environment setup — auto-install deps if missing |
-| **5** | `executor` | Implementation — **mandatory TDD** (RED→GREEN→REFACTOR) |
-| **6** | `architect` | Purpose alignment review |
-| **7-A** | 5 domain expert teams | Bug/security/performance verification via team discussion |
-| **7-B** | `architect` | Cross-check against Step 4-B concerns; fix missed items |
-| **8** | `architect` | Regression verification |
-| **9** | `architect` → `executor` | File/function splitting |
-| **10** | `architect` → `executor` | Integration/reuse review |
-| **11** | `architect` | Side effect check |
-| **12** | `code-reviewer` | Full change review |
-| **13** | `architect` → `executor` | Dead code cleanup |
-| **14** | `code-reviewer` | Code quality assessment |
-| **15** | `architect` | Flow verification (backend/data/error/event flows) |
-| **16** | `architect` | MEDIUM issue resolution |
-| **17** | `architect` + `security-reviewer` | Production readiness |
-
-### Finalization
-
-| Step | Role |
-|------|------|
-| **Integration** | Commit to user-named branch → resolve conflicts → build/test verification |
-| **18** | Work report (before/after flow, trade-offs, risks, tests) |
-| **18-B** | Review sequence — group changes into logical units, map to plan |
-| **19** | **Interactive guided review → Success Criteria verification → PR creation** |
-
-## simon-bot-grind
-
-Extends simon-bot with maximum tenacity:
-
-- **All retry limits = 10** — never gives up easily
-- **Escalation Ladder** — simple fix → root cause analysis → strategy pivot → last stand
-- **Auto-Diagnosis** — failure tracking, pattern detection, strategy pivots
-- **Checkpoints** — `git tag checkpoint-step{N}-attempt{M}` before every pivot for safe rollback
-- **Progress Detection** — 2 consecutive stalls trigger immediate strategy switch
-- **Total Retry Budget** — 50 retries across the entire workflow, with 70% warning
-- **Confidence Scoring** — all agent outputs tagged with confidence + impact
-
-## simon-bot-pm
-
-A 7-phase Project Manager pipeline:
-
-| Phase | Name | What happens |
-|-------|------|--------------|
-| 0 | Project Setup | Project type detection, execution mode selection |
-| 1 | Spec-Driven Design | Interview → Spec(WHAT) → Architecture(HOW) → PRD |
-| 2 | Task Breakdown | PRD → feature decomposition → dependency graph → execution plan |
-| 3 | Environment Setup | Scaffolding, dependencies, configuration |
-| 4 | Feature Execution | Distributes features to simon-bot/grind instances (parallel where possible) |
-| 5 | Full Verification | Integration testing, architecture review, security review |
-| 6 | Delivery | Final report, guided review, PR creation |
-
-Automatically assigns `simon-bot` or `simon-bot-grind` to each feature based on complexity. Includes a Scope Guard to redirect small tasks to simon-bot directly.
-
-## simon-bot-report
-
-Produces pre-implementation analysis documents without modifying code:
-
-- **Document types**: RFC, status analysis, custom format
-- **Expert team discussion**: Uses the same 5-domain expert structure as simon-bot
-- **Interactive guided review**: Section-by-section review with user feedback
-- **Seamless handoff**: After review, can launch simon-bot or simon-bot-pm with the analysis as context
-
-## simon-bot-boost
-
-Reads external resources (blog posts, GitHub repos, papers, articles) and improves simon-bot skills:
-
-- **5-expert panel**: Workflow Architect, Prompt Engineer, Innovation Scout, Quality & Safety Guardian, DX Specialist
-- **Targets all skills**: Analyzes all 5 skill files + references
-- **User-controlled**: Every improvement proposal requires explicit approval before applying
-- **Change tracking**: All applied changes logged in `.claude/boost/applied-log.md`
-
-## Session Management
-
-Use `/simon-bot-sessions` to manage work sessions across Claude Code sessions.
-
-| Command | Description |
-|---------|-------------|
-| `/simon-bot-sessions list` | List all active worktree sessions |
-| `/simon-bot-sessions info feat/add-auth` | Show session details (commits, memory files, status) |
-| `/simon-bot-sessions delete feat/add-auth` | Delete session (worktree + branch) |
-| `/simon-bot-sessions resume feat/add-auth` | Resume previous work with context restoration |
-| `/simon-bot-sessions pr feat/add-auth` | Create PR from session |
-
-Or use the shell script directly:
-
-```bash
-bash ~/.claude/skills/simon-bot/workflow/scripts/manage-sessions.sh list
-bash ~/.claude/skills/simon-bot/workflow/scripts/manage-sessions.sh info <branch>
-bash ~/.claude/skills/simon-bot/workflow/scripts/manage-sessions.sh delete <branch>
-```
-
-## Expert Panel (5 Domain Teams)
-
-Experts operate as **teams that discuss and reach consensus**, not as individual reviewers.
-
-### Team Structure
-
-| Team | Members | Activation | Discussion Focus |
-|------|---------|------------|------------------|
+| Team | Members | Activation | Focus |
+|------|---------|------------|-------|
 | **Safety** | appsec, auth, infrasec, stability | Always (appsec + stability) | Security boundaries, auth bypass, failure recovery |
-| **Code Design** | convention, idiom, design-pattern, testability | Always (convention + idiom) | Repo conventions, language idioms, design patterns, testability |
+| **Code Design** | convention, idiom, design-pattern, testability | Always (convention + idiom) | Repo conventions, idioms, design patterns, testability |
 | **Data** | rdbms, cache, nosql | Auto-detect (min 2) | Data consistency, cache invalidation, cross-storage integrity |
 | **Integration** | sync-api, async, external-integration, messaging | Auto-detect (min 2) | Sync/async boundaries, error propagation, failure isolation |
 | **Ops** | infra, observability, performance, concurrency | Auto-detect (min 2) | Operational stability, observability, performance |
 
-## Customization
+</details>
 
-### config.yaml
+<details>
+<summary><strong>Configuration (config.yaml)</strong></summary>
 
-Adjust thresholds, loop limits, and expert configuration:
+Adjust thresholds, loop limits, and expert behavior in `.claude/workflow/config.yaml`:
 
 ```yaml
 model_policy: opus              # Model for all agents
@@ -283,15 +127,13 @@ test_env:
   skip_on_missing: true
 ```
 
-### Expert Prompts
-
-Modify expert review criteria in `.claude/workflow/prompts/*.md` (22 expert prompts).
-
-### Retrospective
-
+Customize expert review criteria in `.claude/workflow/prompts/*.md` (22 expert prompts).
 Past feedback is stored in `.claude/memory/retrospective.md` and automatically referenced in future runs.
 
-## Safety Rules
+</details>
+
+<details>
+<summary><strong>Safety Rules</strong></summary>
 
 The following actions are **absolutely forbidden** at all times:
 
@@ -303,6 +145,55 @@ The following actions are **absolutely forbidden** at all times:
 - Real server access — `ssh`, `scp`, `sftp`
 - Secret commits — `.env`, credentials, API keys
 - Tests with real external systems — mock/stub only
+
+</details>
+
+<details>
+<summary><strong>Full Workflow Details (19 steps)</strong></summary>
+
+### Phase A: Planning (Interactive)
+
+| Step | What happens |
+|------|-------------|
+| **0** | Scope challenge — analyze existing code, determine minimum change, select review path (SMALL / STANDARD / LARGE) |
+| **1-A** | Project analysis + Code Design Team pre-analysis (conventions, patterns, idioms) |
+| **1-B** | Interview mode — break work into units, build plan |
+| **2** | Critic-planner discussion (up to 3 rounds) |
+| **3** | Meta-verification of critic's review |
+| **4** | Over-engineering check (YAGNI/KISS) |
+| **4-B** | All 5 expert teams review the plan, flag concerns |
+
+### Phase B-E: Implementation & Verification (Autonomous)
+
+Each unit runs in an isolated git worktree with mandatory TDD (RED -> GREEN -> REFACTOR).
+
+| Step | What happens |
+|------|-------------|
+| **5** | Implementation with TDD |
+| **6** | Purpose alignment review |
+| **7-A** | 5 expert teams verify against real diff |
+| **7-B** | Cross-check against Step 4-B concerns |
+| **8** | Regression verification |
+| **9** | File/function splitting |
+| **10** | Integration/reuse review |
+| **11** | Side effect check |
+| **12** | Full change review |
+| **13** | Dead code cleanup |
+| **14** | Code quality assessment |
+| **15** | Flow verification (backend/data/error/event) |
+| **16** | MEDIUM issue resolution |
+| **17** | Production readiness + success criteria gate |
+
+### Finalization
+
+| Step | What happens |
+|------|-------------|
+| **Integration** | Commit, resolve conflicts, build/test verification |
+| **18** | Work report (before/after flows, trade-offs, risks) |
+| **18-B** | Group changes into logical review units |
+| **19** | Interactive guided review, success criteria verification, PR creation |
+
+</details>
 
 ## Requirements
 
