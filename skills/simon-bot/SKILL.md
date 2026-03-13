@@ -16,6 +16,14 @@ You are executing the **simon-bot** deep workflow. This is a 19-step quality pip
 
 ## Cross-Cutting Protocols
 
+이 섹션의 프로토콜은 두 종류로 나뉜다:
+- **Instruction** (행동 지시): 특정 상황에서 반드시 수행해야 할 구체적 행동. 무시하면 워크플로가 깨진다.
+  - Auto-Verification Hook, Stop-and-Fix Gate, Deterministic Gate Principle, Step Transition Gate
+- **Guidance** (행동 규범): 전반적으로 따라야 할 원칙이지만 상황에 따라 유연하게 적용 가능. 무시하면 품질이 저하된다.
+  - Over-engineering 방지, Parallel Tool Invocation, Prompt Altitude Calibration, Docs-First Protocol
+
+LLM은 두 종류를 구분하지 못하면 모든 것을 Guidance로 취급하여 중요한 게이트를 건너뛸 수 있다. Instruction을 명시적으로 식별하여 준수율을 높인다.
+
 ### Error Resilience
 
 모든 실패를 ENV_INFRA / CODE_LOGIC / WORKFLOW_ERROR로 분류한 후 자동 복구한다. 사용자가 명시적으로 중단을 요청하지 않는 한 워크플로를 중단하지 않는다.
@@ -48,6 +56,8 @@ mkdir -p "${SESSION_DIR}/memory" "${SESSION_DIR}/reports"
 이 워크플로는 Agent Teams 기능을 우선 사용한다 (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` 필요). TeamCreate 실패 시 subagent 기반 fallback으로 자동 전환한다.
 
 For lifecycle, rules, fallback, termination protocol details, read [agent-teams.md](references/agent-teams.md).
+
+Agent Team 운영 중 오케스트레이터는 TaskList를 주기적으로 확인하여 사용자에게 진행 상황을 보고한다. 상세 프로토콜은 `agent-teams.md`의 Heartbeat Protocol 섹션 참조.
 
 ### Cognitive Independence
 
@@ -83,7 +93,7 @@ For detailed protocol, read [context-separation.md](references/context-separatio
 - **적용 제외**: `.md` 파일, `.json` 설정 파일, 커밋 메시지 등 비소스코드
 - **코드 품질 검토**: 구현 일단락 시점(Step 5 완료, Refinement Cycle 완료, Integration 완료)에서 `/simplify` 스킬을 실행하여 변경 코드의 재사용성, 품질, 효율성을 검토한다.
 
-**Hook 기반 강화 (권장사항 — 프로젝트 첫 실행 시 설정)**: `auto-verify.sh`를 `.claude/settings.json`의 `hooks.PostToolUse`에 등록하면, Edit/Write 후 셸 레벨에서 자동 실행되어 LLM 기억에 의존하지 않는 결정론적 검증이 가능하다. 컨텍스트 압축과 무관하게 100% 실행이 보장되므로, Stop-and-Fix Gate의 실효성이 구조적으로 강화된다.
+**Hook 기반 구조적 강제**: Forbidden Rules는 `~/.claude/settings.json`의 `hooks.PreToolUse`에 등록된 `forbidden-guard.sh`로 결정론적 차단된다. ABSOLUTE FORBIDDEN 패턴 매칭 시 exit 2로 명령이 차단되며, 컨텍스트 압축·장시간 세션·다중 에이전트 상황에서도 100% 작동한다. `auto-verify.sh`도 `hooks.PostToolUse`에 등록하여 Edit/Write 후 빌드/린트를 자동 실행할 수 있다.
 
 ```bash
 # auto-verify.sh 동작 흐름:
@@ -130,6 +140,15 @@ ENV_INFRA로 테스트 실행 자체가 불가능한 경우, 사용자 명시적
 
 독립적인 도구 호출(Read, Grep, Glob 등)은 병렬로 실행한다. 의존성이 있는 호출만 순차 실행한다. 병렬화로 컨텍스트 소비를 줄이고 응답 속도를 높인다.
 
+### Prompt Altitude Calibration
+
+에이전트에게 전달하는 프롬프트의 구체성 수준을 의도적으로 조절한다. 너무 구체적이면 경직되어 예외 상황에 대응하지 못하고, 너무 모호하면 행동 신호가 부족하여 기대와 다른 결과를 낳는다.
+
+- **Instruction** (행동 지시): 구체적으로 — "E2E 테스트를 Playwright로 작성한다", "빌드 실패 시 다음 Step으로 진행하지 않는다"
+- **Guidance** (행동 규범): 유연하게 — "테스트는 서로 독립적이어야 한다", "plan-summary.md에 명시된 변경만 구현한다"
+
+프롬프트 작성 시 각 지시문이 Instruction인지 Guidance인지 구분하고, Guidance에 불필요한 구체성을 넣거나 Instruction에서 핵심 세부사항을 빠뜨리지 않는다.
+
 ### Reference Loading Policy (컨텍스트 효율)
 
 각 Phase 진입 시 해당 Phase의 레퍼런스 파일만 읽는다. 모든 레퍼런스를 사전 로딩하지 않는다.
@@ -140,8 +159,9 @@ ENV_INFRA로 테스트 실행 자체가 불가능한 경우, 사용자 명시적
 | Phase B-E 구현 진입 | `phase-b-implementation.md` |
 | Phase B-E 검증 진입 (Step 6+) | `phase-b-verification.md` |
 | Integration/Review 진입 | `integration-and-review.md` |
-| Agent Team 생성 시 | `agent-teams.md` (+ fallback 필요 시 `agent-teams-fallback.md`) |
+| Agent Team 생성 시 | `agent-teams.md` |
 | 에러 발생 시 | `error-resilience.md` |
+| Step 6/7/17 검증 진입 시 | `context-separation.md` |
 | 전문가 팀 findings 작성 시 | `expert-output-schema.md` |
 | Forbidden Rules 참조 필요 시 | `forbidden-rules.md` |
 | 외부 라이브러리/서비스 사용 시 | `docs-first-protocol.md` |
@@ -159,6 +179,20 @@ subagent는 다음 경우에 사용한다:
    - 결정론적 검증(빌드, 테스트 실행)은 제외 — 코드 실행으로 확인 가능한 것에 subagent를 쓰지 않음
 
 단일 파일 수정, 간단한 검색, 단순 명령 실행은 직접 수행한다. 불필요한 subagent 생성은 컨텍스트를 낭비한다.
+
+**역할별 maxTurns 가이드라인:**
+
+| 용도 | maxTurns | 예시 |
+|------|----------|------|
+| 코드 탐색 | 20 | explore-medium, explore-quick |
+| 구현 (TDD) — SMALL | 50 | executor (단일 Unit) |
+| 구현 (TDD) — STANDARD | 100 | executor (복합 Unit) |
+| 구현 (TDD) — LARGE | 200 | executor (대규모 Unit) |
+| 검증/리뷰 | 30 | reviewer, verifier (.claude/agents/) |
+| 전략 판단 | 30 | architect, security-reviewer |
+| expert team member | 20 | Agent Team 내 전문가 |
+
+maxTurns 초과 시 에이전트가 자동 종료된다. 오케스트레이터는 종료 사유를 사용자에게 보고하고, 필요 시 더 높은 maxTurns로 재시도할지 결정한다.
 
 ### Over-engineering 방지
 
@@ -236,7 +270,7 @@ For detailed protocol (적용 기준, 도구 우선순위, 조회 불가 시 대
 2. 워크플로 파일 읽기 (parallel OK):
    - `.claude/workflow/config.yaml`
    - `.claude/memory/retrospective.md` (있으면)
-   - `.claude/project-memory.json` (있으면 Read)
+   - `.claude/project-memory.json` (있으면 Read — 이전 세션에서 학습된 빌드 에러 패턴, 테스트 환경 quirk, 기각된 접근법 포함)
    - `.claude/memory/handoff-manifest.json` (있으면 — P-009 Handoff 감지)
 3. **브랜치명 자동 생성** (P-001): 사용자 요청에서 브랜치명을 자동 생성한다. 예: "인증 기능 추가해줘" → `feat/add-auth`. AskUserQuestion 없이 통보: `[Default] Branch: feat/add-auth — 변경하려면 알려주세요.` → `.claude/memory/branch-name.md`에 저장
 3-B. **SESSION_DIR 초기화**: 브랜치명 확정 후 세션 디렉토리를 생성한다.
@@ -250,6 +284,7 @@ For detailed protocol (적용 기준, 도구 우선순위, 조회 불가 시 대
    - `context_files`를 자동 로딩하여 컨텍스트 복원
    - `skip_steps`에 명시된 Step은 건너뛰기
    - `failure_context`가 있으면 `failure-log.md` 초기값으로 설정
+   - `force_path`가 있으면 Step 0 Scope Challenge를 skip하고 해당 경로로 직행 (단, `config.yaml`의 `high_impact_paths`에 매칭되는 파일이 포함되면 STANDARD 이상을 강제)
 5. **Pre-flight 환경 검증**: Phase A 진입 전에 bash 기반 환경 검증을 수행한다 (LLM 토큰 0). Phase A에서 전문가 패널 분석과 계획서 작성에 대량 토큰을 소비한 후에야 환경 문제를 발견하는 것을 방지한다.
    - `.claude/workflow/scripts/preflight.sh` 실행 (없으면 skip)
    - 검증 항목: 빌드 도구 존재, 런타임 버전, Docker 상태 (필요 시), 디스크 여유, 포트 충돌
@@ -345,6 +380,7 @@ For detailed instructions, read [integration-and-review.md](references/integrati
 
 **Step 20: Self-Improvement (회고 기반 스킬 개선)**
 - 워크플로 전반의 사용자 피드백 종합 (user-feedback-log.md)
+- `project-memory.json` 갱신 — 이번 세션에서 발견한 빌드 에러 패턴, 환경 quirk, 기각된 접근법을 추가
 - Finding Acceptance Summary 분석 — 수용률 < 50% 도메인의 프롬프트 검토, REJECTED 사유 패턴 분석
 - 스킬 개선 패턴 식별 → 사용자 확인 → skill-creator 호출
 
@@ -393,6 +429,26 @@ For full rule list and Runtime Guard (P-008), read [forbidden-rules.md](referenc
 ## Context Window Management
 
 컨텍스트 윈도우가 자동 압축(compact)되므로, 토큰 예산 걱정으로 작업을 조기에 중단하지 않는다. 압축이 발생해도 `.claude/memory/`에 상태가 저장되어 있으므로 작업을 계속 진행한다.
+
+### 선제적 Compaction 전략
+
+자동 압축에만 의존하면 이미 회상 정확도가 저하된(context rot) 상태에서 압축이 실행될 수 있다.
+Step 전환 시점에서 다음을 권장한다:
+
+1. `/context`로 활용률을 확인한다
+2. 70% 이상이면 핵심 상태(현재 Step, 활성 규칙, Done-When Checks)를 memory 파일에 저장한 후 `/compact`를 실행한다
+3. 이전 Step의 도구 결과(긴 빌드 출력, 대량 grep 결과 등)는 compaction 시 자연스럽게 요약되어 컨텍스트 효율이 향상된다
+
+이를 통해 "attention budget"을 효율적으로 사용하고, 후반 Step에서의 성능 저하를 방지한다.
+
+### Compaction 후 상태 검증
+
+자동 또는 수동 compaction 후 다음 항목이 컨텍스트에 유지되고 있는지 확인한다:
+1. 현재 진행 중인 Step 번호와 상태
+2. 활성 Forbidden Rules (특히 ABSOLUTE FORBIDDEN)
+3. 현재 Unit의 Done-When Checks
+
+유지되지 않는 항목이 있으면 해당 memory 파일을 다시 읽는다. compaction 시 규칙이 소실되면 게이트가 무력화될 수 있으므로(Deterministic Gate Principle 참조), 이 검증으로 구조적으로 방지한다.
 
 ### 새 세션 시작 프로토콜
 

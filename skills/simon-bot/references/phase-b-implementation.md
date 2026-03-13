@@ -118,6 +118,7 @@ Each Unit runs in an **isolated git worktree**. Independent Units run in **paral
 - All verification/review: ONLY changed files (git diff based). 변경하지 않은 파일을 리뷰하면 노이즈가 증가하고 핵심 변경점을 놓칠 수 있다.
 - Use `.claude/workflow/scripts/*.sh` for deterministic tasks (save context)
 - Record findings in `.claude/memory/unit-{name}/*.md` after each step
+- **병렬 Unit 파일 격리**: 병렬 Unit 실행 시 공유 파일(decision-journal.md, failure-log.md 등)에 동시 쓰기를 방지한다. 각 Unit은 자신의 `unit-{name}/` 디렉토리에만 기록하고, Integration Stage에서 오케스트레이터가 병합한다. session-scoped 파일(retrospective.md, project-memory.json)은 오케스트레이터만 기록한다.
 - Read memory files at start of each step
 - Tests: NEVER use real DB or external APIs. 테스트가 실제 시스템에 부작용을 일으키면 프로덕션 데이터가 손상되거나 외부 서비스에 의도치 않은 요청이 발생한다. mock/stub만 사용하라.
 - Commands: NEVER access real external systems. CONTEXT-SENSITIVE 규칙에 해당하는 경우 SKILL.md의 판단 절차를 따른다.
@@ -143,7 +144,7 @@ Each Unit runs in an **isolated git worktree**. Independent Units run in **paral
 - **먼저 읽기**: `expert-plan-concerns.md`, `code-design-analysis.md`, `verify-commands.md`
 - **검증 명령 활용**: `verify-commands.md`에 기록된 통합 검증 명령을 TDD 사이클의 VERIFY 단계에서 사용. 프로젝트 고유의 lint/build/test를 한번에 실행하여 빠른 피드백을 확보한다.
 - **Docs-First**: 처음 사용하는 라이브러리 API·DB 기능·프레임워크 설정은 구현 전 context7 또는 WebFetch로 공식 문서를 조회한다. 코드베이스에 이미 동일 패턴이 있으면 생략 가능.
-- Spawn `executor`, parallel for independent files
+- Spawn `executor`, parallel for independent files (maxTurns: SKILL.md Subagent 사용 기준 테이블 참조 — SMALL 50, STANDARD 100, LARGE 200)
 - executor에게 코드를 전달할 때도 Context Preparation 원칙을 적용한다 — 파일 전체가 아닌 변경 대상 함수/메서드 단위로 추출하고, diff는 노이즈를 제거한 후 전달한다.
 - executor는 code-design-analysis.md의 컨벤션과 패턴을 따라 구현
 - 전문가 우려사항 중 HIGH 이상 항목을 구현 시 반드시 고려

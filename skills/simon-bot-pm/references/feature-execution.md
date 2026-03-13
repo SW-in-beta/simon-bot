@@ -215,10 +215,13 @@ simon-bot으로 실행 중 3회 연속 실패 시:
     "last_error_summary": "...",
     "attempted_strategies": ["..."]
   },
-  "skip_steps": []
+  "skip_steps": [],
+  "force_path": "SMALL"
 }
 ```
 전환받는 스킬은 Startup 시 이 manifest를 감지하여 `context_files`를 자동 로딩하고, `failure_context`를 failure-log.md 초기값으로 사용한다.
+
+**force_path 필드**: PM이 Feature의 scope를 이미 판단한 경우, `force_path`에 경로를 지정하면 simon-bot이 Step 0 Scope Challenge를 skip하고 해당 경로로 직행한다. 단, `config.yaml`의 `high_impact_paths`에 매칭되는 파일이 포함되면 STANDARD 이상을 강제한다.
 
 ### 3단계: 사용자 에스컬레이션
 
