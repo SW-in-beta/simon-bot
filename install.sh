@@ -63,6 +63,7 @@ install_global() {
 
     # Install all skills
     install_skill "simon-bot"
+    install_skill "simon-bot-auto-boost"
     install_skill "simon-bot-boost"
     install_skill "simon-bot-boost-capture"
     install_skill "simon-bot-boost-review"

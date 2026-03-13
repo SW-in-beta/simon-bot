@@ -70,6 +70,7 @@ graph LR
 | `/simon-bot-review` | PR 기반 코드 리뷰 — Draft PR 생성, 인라인 리뷰 코멘트, CI Watch, 피드백 루프 |
 | `/simon-bot-sessions` | 세션 관리 — worktree 기반 작업 세션 조회, 이어서 작업, 삭제 |
 | `/simon-bot-report` | 사전 분석 보고서 — 전문가 팀 토론을 통한 RFC, 현황 분석, 커스텀 포맷 |
+| `/simon-bot-auto-boost` | 자동 웹 검색 기반 스킬 개선 — 최신 AI 코딩 에이전트 best practices를 검색하여 스킬 자동 개선 |
 | `/simon-bot-boost` | 외부 리소스 분석 — 링크를 읽고 스킬 개선을 제안 |
 | `/simon-bot-boost-capture` | 작업 중 스킬 개선점 백그라운드 캡처 — 작업 흐름을 멈추지 않고 인사이트 기록 |
 | `/simon-bot-boost-review` | 축적된 개선 인사이트 리뷰 & 적용 — 캡처된 개선안을 검토하고 스킬에 반영 |
@@ -88,6 +89,7 @@ graph LR
 | 이전 작업 세션 이어서 하기 | `/simon-bot-sessions` |
 | RFC, 아키텍처 분석, 보고서 (코드 변경 없음) | `/simon-bot-report` |
 | 유용한 아티클/레포 발견 — 스킬 개선 | `/simon-bot-boost` |
+| 최신 트렌드 자동 검색 — 스킬 자동 개선 | `/simon-bot-auto-boost` |
 | 작업 중 스킬 개선점 메모 (작업 흐름 유지) | `/simon-bot-boost-capture` |
 | 축적된 개선안 일괄 검토 & 적용 | `/simon-bot-boost-review` |
 | 완성된 앱 라이브 데모 시연 | `/simon-presenter` |
@@ -186,7 +188,9 @@ simon-bot이 생성한 `review-sequence.md`가 있으면 활용하고, 없으면
 
 **simon-bot-report** — 코드 변경 없이 구현 전 분석 문서(RFC, 현황 분석, 커스텀 포맷)를 생성합니다. simon-bot과 동일한 5개 도메인 전문가 팀 토론 구조를 사용하며, 리뷰 후 simon-bot / simon-bot-pm으로 원활하게 핸드오프할 수 있습니다.
 
-**simon-bot-boost** — 외부 리소스(블로그, GitHub, 논문)를 읽고 5인 전문가 패널이 스킬 개선을 제안합니다. 모든 제안은 적용 전 명시적 승인이 필요하며 `.claude/boost/applied-log.md`에 기록됩니다.
+**simon-bot-auto-boost** — Claude Code 공식 문서, Hacker News, Medium, YouTube 등에서 최신 AI 코딩 에이전트 best practices를 자동 검색하고, 6인 전문가 패널 분석 → 사용자 승인 → 적용 → 스킬 가이드라인 검증 → 스모크 테스트까지 수행합니다. 마지막 검색 시점을 기록하여 이후 콘텐츠만 처리합니다.
+
+**simon-bot-boost** — 외부 리소스(블로그, GitHub, 논문)를 읽고 6인 전문가 패널이 스킬 개선을 제안합니다. 모든 제안은 적용 전 명시적 승인이 필요하며 `.claude/boost/applied-log.md`에 기록됩니다.
 
 **simon-bot-boost-capture** — 작업 중 발견한 스킬 개선점을 백그라운드로 분석·기록합니다. 작업 흐름을 멈추지 않고 인사이트를 캡처하여 나중에 일괄 처리할 수 있습니다.
 

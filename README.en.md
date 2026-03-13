@@ -65,6 +65,7 @@ Then in Claude Code:
 | `/simon-bot-review` | PR-based code review — Draft PR creation, inline review comments, CI Watch, feedback loop |
 | `/simon-bot-sessions` | List, resume, or clean up worktree-based work sessions |
 | `/simon-bot-report` | Analysis documents (RFC, status report) via expert discussion — no code changes |
+| `/simon-bot-auto-boost` | Auto web search skill improvement — searches latest AI coding agent best practices and auto-improves skills |
 | `/simon-bot-boost` | Read external resources and improve simon-bot's own skills |
 | `/simon-bot-boost-capture` | Background capture of skill improvements — record insights without interrupting workflow |
 | `/simon-bot-boost-review` | Review & apply accumulated improvement insights from boost-capture |
@@ -83,6 +84,7 @@ Then in Claude Code:
 | Resume or manage previous sessions | `/simon-bot-sessions` |
 | Get an RFC or analysis without changing code | `/simon-bot-report` |
 | Improve simon-bot from an article or repo | `/simon-bot-boost` |
+| Auto-search latest trends and improve skills | `/simon-bot-auto-boost` |
 | Note a skill improvement without stopping work | `/simon-bot-boost-capture` |
 | Batch-review and apply accumulated improvements | `/simon-bot-boost-review` |
 | Demo a finished app with live browser interaction | `/simon-presenter` |
@@ -180,9 +182,11 @@ Runs finished apps with a Playwright headed browser for interactive live demonst
 </details>
 
 <details>
-<summary><strong>Boost Family (boost / boost-capture / boost-review)</strong></summary>
+<summary><strong>Boost Family (auto-boost / boost / boost-capture / boost-review)</strong></summary>
 
-**simon-bot-boost** — Reads external resources (blogs, GitHub, papers) and a 5-person expert panel proposes skill improvements. All proposals require explicit approval before application.
+**simon-bot-auto-boost** — Automatically searches Claude Code docs, Hacker News, Medium, YouTube and more for the latest AI coding agent best practices. A 6-person expert panel analyzes findings, proposes improvements with user approval, then verifies against skill writing guidelines and runs smoke tests. Tracks last search timestamp to only process new content.
+
+**simon-bot-boost** — Reads external resources (blogs, GitHub, papers) and a 6-person expert panel proposes skill improvements. All proposals require explicit approval before application.
 
 **simon-bot-boost-capture** — Records skill improvement insights in the background during active work. Captures ideas without interrupting your workflow for later batch processing.
 
