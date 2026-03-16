@@ -156,11 +156,12 @@ Phase 4 진입 시 PM은 Phase 1-3의 과정을 컨텍스트에서 제거하고 
 - **Draft PR 생성** — 변경사항 분석 기반 PR 자동 생성 + Review Guide 섹션 포함
 - **Blind-First 2-Pass 리뷰** — review-sequence.md에 anchoring되지 않도록 diff만으로 먼저 분석 후 대조
 - **기존 패턴 스캔** — diff에 도입된 새 패턴에 대해 코드베이스 내 기존 대안을 능동적으로 탐색
+- **공식 문서 검증** — 사용된 API/패턴을 공식 문서(context7 MCP, WebSearch)로 fact-check하여 deprecated API, anti-pattern 사전 식별
 - **영향 분석 Pass** — 변경되지 않았지만 영향받을 수 있는 코드를 1-depth 탐색하여 인라인 코멘트 작성
 - **대규모 PR 처리** — 100+ 파일 PR은 Core/Support/Generated로 분류, 핵심 파일에 80% 집중
 - **CI Watch** — CI 파이프라인 모니터링 및 실패 자동 수정 (max 3 cycles)
 - **Comment Auto-Watch** — 1분 간격 PR 댓글 자동 감지, 새 피드백 즉시 반영
-- **전문가 검증 피드백 루프** — 사용자 코멘트에 대해 도메인 전문가 Agent를 호출하여 검증 후 처리 (AGREE/PARTIAL/COUNTER verdict)
+- **전문가 검증 피드백 루프** — 사용자 코멘트에 대해 도메인 전문가 Agent를 호출하여 검증 후 처리 (AGREE/PARTIAL/COUNTER verdict, 공식 문서 기반 fact-check 포함)
 - **피드백 루프** — 코드 수정 → 커밋 → 인라인 리뷰 재작성 → CI 재확인
 
 STANDALONE 모드에서는 3개 Agent Team(architect, writer, impact-analyzer)이 병렬 분석하여 review-sequence를 자체 생성합니다.
