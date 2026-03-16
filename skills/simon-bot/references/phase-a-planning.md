@@ -28,6 +28,22 @@
   - [Lead의 Cross-team Synthesis](#lead의-cross-team-synthesis)
 - [Phase A Calibration Checklist](#phase-a-calibration-checklist-phase-b-진입-전-검증)
 
+### Phase A Progress Pulse
+
+Phase A에서 Agent Team 토론이나 Expert Review가 진행되는 동안, 사용자에게 1줄 진행 상태를 출력한다. AskUserQuestion이 아닌 단순 텍스트 출력으로, 사용자 흐름을 중단시키지 않되 가시성을 확보한다.
+
+출력 형식:
+```
+[Phase A] Code Design Team 토론 시작 (convention, idiom, design-pattern, testability)
+[Phase A] Code Design Team 합의 완료 — code-design-analysis.md 저장
+[Phase A] Plan Review 시작 (planner ↔ critic, max 3 iterations)
+[Phase A] Plan Review 2/3 완료 — Completeness 4, Feasibility 5, Safety 4, Clarity 3
+[Phase A] Expert Review 시작 (Safety + Code Design + auto-detect 팀)
+[Phase A] Expert Review 완료 — CRITICAL 0, HIGH 2, MEDIUM 7
+```
+
+각 Agent Team 생성/해산, 토론 완료, 주요 checkpoint에서 해당 형식의 1줄을 출력한다.
+
 ## Step 0: Scope Challenge
 
 - Spawn `architect`: Analyze git history for past problem areas
@@ -142,6 +158,30 @@ AI의 실수를 가장 빠르게 잡아내는 것은 자동화된 검증이다. 
 ```
 
 - Save: `.claude/memory/requirements.md`, `.claude/memory/code-design-analysis.md`, `.claude/memory/verify-commands.md`
+
+### Structured Research Protocol (Step 1-A)
+
+explore-medium과 analyst에게 다음 리서치 프레임워크를 적용한다. 단일 가설 확인 패턴(하나의 해석을 세우고 뒷받침 증거만 모으는 것)은 확인 편향을 일으키기 때문이다.
+
+**1. 초기 가설 생성 (2-3개)**
+프로젝트 구조 초기 스캔 후, 아키텍처/패턴에 대한 경쟁 가설을 수립한다.
+예:
+- H1: "Clean Architecture (의존성 역전 적용)" — 신뢰도: 0.4
+- H2: "Layered Architecture (전통적 N-tier)" — 신뢰도: 0.3
+- H3: "혼합 (모듈별 상이한 패턴)" — 신뢰도: 0.3
+
+**2. 증거 수집 (각 가설에 대해)**
+각 가설을 지지하는 증거와 반박하는 증거를 의도적으로 탐색한다.
+수집 후 각 가설의 신뢰도를 갱신한다.
+
+**3. 자기 비판**
+"내 현재 최고 신뢰도 가설에서 가장 약한 부분은 무엇인가?"를 자문하고, 그 약점을 검증할 추가 탐색을 수행한다.
+
+**4. 조사 노트 기록**
+`.claude/memory/research-notes.md`에 가설, 증거, 신뢰도 변화를 기록:
+
+| 가설 | 초기 신뢰도 | 지지 증거 | 반박 증거 | 최종 신뢰도 |
+|------|-----------|----------|----------|-----------|
 
 ## Step 1-B: Plan Creation
 
@@ -390,7 +430,27 @@ Step 1-B 완료 후, 기술 용어로 작성된 AC가 사용자의 실제 의도
 ### Findings 품질 원칙 — "깊이 > 수량" (P-008)
 
 각 전문가 에이전트 prompt에 다음 품질 원칙을 포함:
-> "구체적 근거가 있는 5건이 모호한 설명의 20건보다 낫다. 각 finding에는 (1) 구체적 코드 위치, (2) 왜 문제인지, (3) 영향 범위를 반드시 포함하라. 추측성 보고와 변경하지 않은 코드에 대한 일반 조언은 포함하지 마라."
+> 각 finding은 (1) 구체적 코드 위치, (2) 왜 문제인지, (3) 영향 범위를 포함한다.
+> 구체적 근거가 있는 5건이 모호한 설명의 20건보다 낫다.
+
+<finding_quality_examples>
+**Good finding** (구체적, 검증 가능):
+- 코드 위치: `internal/auth/handler.go:47` — `ValidateToken()` 함수
+- 문제: JWT 서명 검증 없이 payload를 디코딩하여 사용. 공격자가 변조된 토큰으로 다른 사용자의 세션에 접근 가능
+- 영향 범위: `/api/protected/*` 하위 모든 엔드포인트 (현재 12개)
+- severity: CRITICAL
+
+**Bad finding** (모호, 검증 불가):
+- 코드 위치: auth 모듈
+- 문제: 인증 처리가 불안전할 수 있음
+- 영향 범위: 시스템 전반
+- severity: HIGH
+
+**Scope 밖 finding** (변경하지 않는 코드에 대한 일반 조언 — 작성하지 않는다):
+- 코드 위치: `internal/user/repository.go:15`
+- 문제: 기존 코드에 에러 래핑이 없음 (이번 변경과 무관)
+- → git diff 대상 파일만 검토한다.
+</finding_quality_examples>
 
 - MEDIUM findings가 10개 이상이면 architect가 영향도 기준 상위 5개만 활성 처리하고 나머지는 backlog로 분류
 - 핵심 비즈니스 로직 > 내부 유틸리티 순으로 분석 깊이를 조절

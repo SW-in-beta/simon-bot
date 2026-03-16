@@ -76,7 +76,24 @@ loop_limits:
   # 조정 가이드: SMALL path는 30, STANDARD는 50(기본값), LARGE는 80.
   # 외부 API 연동이 많은 작업은 +20 가산 — 환경 변수에 의한 실패가 빈번.
   budget_warning_pct: 70        # 예산 N% 소비 시 사용자 경고
+
+  # ── Checkpoint Policy ─────────────────────
+  checkpoint_policy:
+    tier_boundary: true    # Attempt 3→4, 6→7 전환 시 자동 checkpoint
+    on_progress: true      # Progress Detection "진전 있음" 시 best 태그
+    strategy_pivot: true   # 기존과 동일
+    rollback_target: best  # pivot 시 initial 대신 best로 롤백 (없으면 initial)
 ```
+
+### Reference Loading Policy
+
+| 트리거 | 읽을 파일 |
+|--------|----------|
+| Startup | simon-bot SKILL.md + grind SKILL.md |
+| Phase A 진입 | grind-phase-a.md + simon-bot phase-a-planning.md |
+| Phase B-E 진입 | grind-phase-b.md + simon-bot phase-b-implementation.md |
+| 에러 발생 시 | grind-error-resilience.md |
+| Cross-cutting 참조 시 | grind-cross-cutting.md |
 
 ## Instructions
 

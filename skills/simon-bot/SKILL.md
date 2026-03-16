@@ -16,6 +16,8 @@ You are executing the **simon-bot** deep workflow. This is a 19-step quality pip
 
 ## Cross-Cutting Protocols
 
+> **향후 경량화 후보**: Session Isolation Protocol, Composable CLI Script Toolkit, Context Window Management, Docs-First Protocol은 startup/session 시에만 필요하므로 별도 reference(`cross-cutting-protocols.md`)로 분리 가능하다. 현재는 SKILL.md에 유지하되, 500줄 초과 시 분리를 실행한다.
+
 이 섹션의 프로토콜은 두 종류로 나뉜다:
 - **Instruction** (행동 지시): 특정 상황에서 반드시 수행해야 할 구체적 행동. 무시하면 워크플로가 깨진다.
   - Auto-Verification Hook, Stop-and-Fix Gate, Deterministic Gate Principle, Step Transition Gate
@@ -264,7 +266,7 @@ For detailed protocol (적용 기준, 도구 우선순위, 조회 불가 시 대
 
 ## Startup
 
-**Execute these steps SEQUENTIALLY.**
+Startup 단계는 순서 의존성이 있으므로 순차 실행한다.
 
 1. `.claude/workflow/` 존재 확인. 없으면: `bash ~/.claude/skills/simon-bot/install.sh --project-only`
 2. 워크플로 파일 읽기 (parallel OK):
@@ -405,7 +407,7 @@ For detailed instructions, read [integration-and-review.md](references/integrati
 
 ## Global Forbidden Rules
 
-되돌릴 수 없는 피해를 방지하기 위해 ABSOLUTE FORBIDDEN / CONTEXT-SENSITIVE / AUDIT-REQUIRED 3계층으로 분류된다. 모든 에이전트가 항시 준수해야 한다.
+되돌릴 수 없는 피해를 방지하기 위해 ABSOLUTE FORBIDDEN / CONTEXT-SENSITIVE / AUDIT-REQUIRED 3계층으로 분류된다. hooks.PreToolUse에서 자동 차단된다. 차단 시 에러 메시지를 확인하고 안전한 대안을 탐색한다.
 
 For full rule list and Runtime Guard (P-008), read [forbidden-rules.md](references/forbidden-rules.md).
 
@@ -433,7 +435,7 @@ For full rule list and Runtime Guard (P-008), read [forbidden-rules.md](referenc
 ### 선제적 Compaction 전략
 
 자동 압축에만 의존하면 이미 회상 정확도가 저하된(context rot) 상태에서 압축이 실행될 수 있다.
-Step 전환 시점에서 다음을 권장한다:
+Step 전환 시점에서 다음을 수행한다 (**Instruction** — 상태 저장은 필수):
 
 1. `/context`로 활용률을 확인한다
 2. 70% 이상이면 핵심 상태(현재 Step, 활성 규칙, Done-When Checks)를 memory 파일에 저장한 후 `/compact`를 실행한다
@@ -443,12 +445,13 @@ Step 전환 시점에서 다음을 권장한다:
 
 ### Compaction 후 상태 검증
 
-자동 또는 수동 compaction 후 다음 항목이 컨텍스트에 유지되고 있는지 확인한다:
-1. 현재 진행 중인 Step 번호와 상태
-2. 활성 Forbidden Rules (특히 ABSOLUTE FORBIDDEN)
-3. 현재 Unit의 Done-When Checks
+자동 또는 수동 compaction 후 다음 파일을 **무조건 재로딩**한다 ("기억하고 있는지 판단"하는 비용보다 "1개 파일 다시 읽는" 비용이 더 예측 가능하고 안전하기 때문이다):
 
-유지되지 않는 항목이 있으면 해당 memory 파일을 다시 읽는다. compaction 시 규칙이 소실되면 게이트가 무력화될 수 있으므로(Deterministic Gate Principle 참조), 이 검증으로 구조적으로 방지한다.
+1. CONTEXT.md — 현재 Step 번호와 상태 복원
+2. 현재 Step의 레퍼런스 파일 — Done-When Checks 복원
+3. `jq '.hooks.PreToolUse' ~/.claude/settings.json` — forbidden-guard.sh 등록 확인 (결정론적 검증)
+
+"유지되지 않는 항목이 있으면"이라는 조건부 재로딩이 아닌, compaction 감지 시 무조건 재로딩으로 안전을 보장한다.
 
 ### 새 세션 시작 프로토콜
 
@@ -473,7 +476,7 @@ Step 전환 시점에서 다음을 권장한다:
 ## Memory Persistence
 
 Record at: Step 완료 시, agent 전환 시, loop rollback 시, Unit 완료 시.
-Always read relevant `.claude/memory/*.md` before starting any step.
+각 Step 시작 전에 관련 memory 파일을 읽는다 — 이전 판단과 상태를 복원하여 일관된 진행을 보장하기 위함이다.
 
 ## Unresolved Decision Tracking
 

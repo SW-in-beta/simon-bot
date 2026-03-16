@@ -86,9 +86,8 @@ WORKFLOW_ERROR도 동일한 10회 escalation ladder를 따른다:
 
 ## CODE_LOGIC 실패 처리 (Auto-Diagnosis Escalation Ladder)
 
-1. **워크플로 중단 금지** — 에러 출력을 읽고 즉시 분석한다. 에러를 보고만 하고 멈추면 grind의 존재 의미가 없다.
+1. **핵심 행동 원칙 적용** — 에러 출력을 읽고 즉시 분류 → Escalation Ladder 완주 → Ladder 소진 후 선택지 제시 (위 "핵심 행동 원칙" 참조).
 2. **Auto-Diagnosis Escalation Ladder** (아래 참조): 10회까지 자동 재시도
-3. **10회 모두 실패 시에도 중단하지 않는다**: AskUserQuestion으로 선택지 제시
 
 ### Anti-Hardcoding 원칙
 
@@ -115,16 +114,16 @@ WORKFLOW_ERROR도 동일한 10회 escalation ladder를 따른다:
 
 **Progress Detection 연계**: 진전 없는 재시도가 2회 연속되면 현재 tier를 건너뛰고 다음 tier로 즉시 이동한다 (상세: grind-cross-cutting.md의 Progress Detection 참조).
 
-## 핵심 원칙
+## 핵심 행동 원칙
 
-다음 원칙들은 grind의 자동 복구 능력을 보장하기 위해 항상 지킨다:
+grind의 차별점은 자동 복구 능력이다. 다음 순서를 따른다:
 
-- **에러가 발생해도 멈추지 않는다** — grind는 끝까지 물고 늘어지는 것이 핵심이다. 에러를 보고만 하고 멈추면 일반 워크플로와 다를 바 없다.
-- **Escalation Ladder를 소진하기 전에 사용자에게 넘기지 않는다** — 자동 복구할 수 있는 여지가 남아 있는데 사용자에게 떠넘기는 것은 grind의 가치를 낭비하는 것이다.
-- **실패 유형을 먼저 분류한다** — 분류 없이 수정하면 ENV_INFRA 문제에 코드를 고치는 등 방향이 엇나간다 (위 Error Classification Tree 참조).
-- **ENV_INFRA 문제에 코드를 수정하지 않는다** — 환경 문제는 환경에서 해결해야 한다. 코드 수정은 증상만 가리고 근본 원인을 남긴다.
-
-이 원칙들은 모든 단계의 모든 실패에 적용된다.
+1. **분류 먼저**: 에러 출력에서 유형(ENV_INFRA / CODE_LOGIC / WORKFLOW_ERROR)을 즉시 식별한다.
+   잘못된 분류(예: 네트워크 문제에 코드 수정)는 시간을 낭비하기 때문이다.
+2. **Escalation Ladder 완주**: Attempt 1에서 10까지 단계적으로 강도를 높이며 자동 복구한다.
+   자동 복구 여지가 남아 있는 상태에서 사용자에게 보고하면 grind의 가치가 낭비되기 때문이다.
+3. **Ladder 소진 후 선택지 제시**: 10회 모두 실패하면 AskUserQuestion으로 사용자에게 선택지를 제시한다.
+   (사용자가 중간에 명시적으로 중단을 요청하면 즉시 중단한다.)
 
 ## Test Environment Setup (Enhanced)
 

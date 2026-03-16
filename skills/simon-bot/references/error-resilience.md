@@ -127,11 +127,28 @@ WorkflowError
 
 ## 공통 원칙
 
-다음은 에러 처리 시 지켜야 할 원칙이다:
-- 에러가 발생했다고 "워크플로를 종료합니다"라고 선언하지 않는다
-- 사용자에게 묻지 않고 자의적으로 워크플로를 포기하지 않는다
-- 에러를 무시하고 넘어가지 않는다 — 분석 후 수정을 시도한다
-- 실패 유형을 분류한 후에 복구를 시작한다
-- ENV_INFRA 문제에 대해 코드를 수정하려고 시도하지 않는다
+에러 발생 시 다음 순서를 따른다:
+
+1. **즉시 분류**: 에러 출력에서 실패 유형(ENV_INFRA / CODE_LOGIC / WORKFLOW_ERROR)을 식별한다.
+   분류 없이 수정하면 환경 문제에 코드를 고치는 등 방향이 엇나가기 때문이다.
+2. **유형별 복구 실행**: ENV_INFRA는 환경 복구 Ladder, CODE_LOGIC은 코드 수정 Ladder를 적용한다.
+   ENV_INFRA에 코드 수정을 시도하면 증상만 가리고 근본 원인이 남기 때문이다.
+3. **Ladder 소진 후 사용자 보고**: 자동 복구가 모두 실패하면 AskUserQuestion으로 선택지를 제시한다.
+   자동 복구 여지가 남아 있는 상태에서 사용자에게 보고하면 불필요한 중단이 발생하기 때문이다.
+
+에러를 무시하고 다음 Step으로 진행하면 미수정 실패가 누적되어 디버깅 비용이 기하급수적으로 증가한다 (Stop-and-Fix Gate 참조).
+
+### Recovery Progress Pulse
+
+에러 복구 중 각 단계에서 사용자에게 1줄 상태를 출력한다:
+
+```
+[Recovery] ENV_INFRA: 기본 재시작 시도 (1/5)
+[Recovery] ENV_INFRA: 기본 재시작 실패 → 클린 재시작 시도 (2/5)
+[Recovery] CODE_LOGIC/TEST_FAILURE: 에러 기반 코드 수정 시도 (2/6) — assert: expected 200 got 404
+[Recovery] CODE_LOGIC: 1차 전략 실패 → 2차 전략(Root Cause Analysis) 전환 (4/6)
+```
+
+AskUserQuestion이 아닌 단순 텍스트 출력으로, 사용자를 중단시키지 않되 복구 진행 상황의 가시성을 확보한다.
 
 **적용 범위:** build 실패, test 실패, typecheck 실패, lint 실패, docker 명령 실패, git 명령 실패, script 실행 실패 등 모든 종류의 명령어 실행 실패에 적용

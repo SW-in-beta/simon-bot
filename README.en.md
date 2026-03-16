@@ -60,7 +60,7 @@ Then in Claude Code:
 | Skill | What it does |
 |-------|-------------|
 | `/simon-bot` | Full 19-step pipeline — plan, implement, verify, PR |
-| `/simon-bot-grind` | Same pipeline, maximum tenacity — 10x retries, auto-diagnosis, strategy pivots |
+| `/simon-bot-grind` | Same pipeline, maximum tenacity — 10x retries, auto-diagnosis, checkpoint policy, strategy pivots |
 | `/simon-bot-pm` | Project manager — PRD-driven planning, distributes tasks to simon-bot instances |
 | `/simon-bot-review` | PR-based code review — Draft PR creation, inline review comments, CI Watch, feedback loop |
 | `/simon-bot-sessions` | List, resume, or clean up worktree-based work sessions |

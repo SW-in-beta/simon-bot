@@ -204,6 +204,7 @@ simon-bot으로 실행 중 3회 연속 실패 시:
   "from_skill": "simon-bot",
   "to_skill": "simon-bot-grind",
   "timestamp": "ISO-8601",
+  "dispatch_mode": "PM",
   "context_files": [
     ".claude/pm/tasks/{feature-id}/spec.md",
     ".claude/pm/tasks/{feature-id}/result.md",
@@ -222,6 +223,18 @@ simon-bot으로 실행 중 3회 연속 실패 시:
 전환받는 스킬은 Startup 시 이 manifest를 감지하여 `context_files`를 자동 로딩하고, `failure_context`를 failure-log.md 초기값으로 사용한다.
 
 **force_path 필드**: PM이 Feature의 scope를 이미 판단한 경우, `force_path`에 경로를 지정하면 simon-bot이 Step 0 Scope Challenge를 skip하고 해당 경로로 직행한다. 단, `config.yaml`의 `high_impact_paths`에 매칭되는 파일이 포함되면 STANDARD 이상을 강제한다.
+
+### PM_DISPATCH 모드
+
+PM이 simon-bot에게 Feature 구현을 위임할 때, Handoff Manifest에 `"dispatch_mode": "PM"`을 포함한다. simon-bot이 이 플래그를 감지하면:
+
+- **Phase A 전체 SKIP**: Step 0 ~ Step 4-B + Calibration Checklist를 건너뛴다. PM이 Phase 1-2에서 이미 전문가 분석과 계획 수립을 완료했으므로 재분석은 중복이다.
+- **Task Spec → plan-summary.md**: PM이 전달한 `tasks/{task-id}/spec.md`를 simon-bot의 `plan-summary.md`로 직접 사용한다.
+- **PM 산출물 참조**: `code-design-analysis.md`와 `expert-plan-concerns.md`를 PM 세션에서 그대로 참조한다.
+- **Phase B Pre-Phase부터 시작**: worktree 생성, CONTEXT.md 생성부터 진행한다.
+- 이 규칙은 **Instruction**이다: `high_impact_paths` 매칭과 무관하게 적용한다.
+
+**PM_DISPATCH에서도 유지되는 Step**: Step 5(TDD 구현), Step 6(Purpose Alignment), Step 7(Expert Review — 구현 결과 검증), Step 8(Regression), Step 17(Production Readiness). 코드 수준 검증은 PM이 대체할 수 없다.
 
 ### 3단계: 사용자 에스컬레이션
 

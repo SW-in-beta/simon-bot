@@ -2,19 +2,21 @@
 
 simon-bot 스킬 패밀리 전체에서 공유하는 금지 규칙. 모든 스킬은 이 파일을 참조한다.
 
-## ABSOLUTE FORBIDDEN — 어떤 상황에서도 예외 없이 금지
+## 되돌릴 수 없는 작업 — 안전한 대안을 사용한다
 
-되돌릴 수 없는 데이터 손실, 보안 경계 파괴, 임의 코드 실행을 방지한다.
+아래 작업은 실행 후 되돌릴 수 없다. 모든 항목에 안전한 대안이 존재하며, `forbidden-guard.sh` PreToolUse 훅이 결정론적으로 차단하므로 컨텍스트 압축이나 장시간 세션에서도 우회되지 않는다.
 
-- `git push --force` / `git push -f` — 다른 사람의 커밋을 영구 삭제할 수 있음
-- `git merge` to main/master branch — 리뷰 없이 프로덕션 코드가 변경됨
-- `rm -rf` — 복구 불가능한 파일 삭제
-- `DROP TABLE` / `TRUNCATE` — 복구 불가능한 데이터 손실
-- Commit `.env` or secret files — 시크릿이 git 히스토리에 영구 기록됨
-- `chmod 777` — 모든 사용자에게 전체 권한을 부여하여 보안 경계가 무너짐
-- `eval` with untrusted input — 임의 코드 실행 취약점 (RCE)
-- `curl | sh` or `wget | sh` — 검증 없이 원격 코드를 실행
-- Any test that calls real DB or external API — 테스트가 실제 시스템에 부작용을 일으키면 프로덕션 데이터가 손상되거나 외부 서비스에 의도치 않은 요청이 발생한다. mock/stub만 사용하라.
+| 위험 작업 | 위험성 | 안전한 대안 |
+|---|---|---|
+| `git push --force` | 다른 사람의 커밋 영구 삭제 | `git push --force-with-lease` |
+| `git merge` to main/master | 리뷰 없이 프로덕션 변경 | PR을 통해 병합 |
+| `rm -rf` | 복구 불가능한 삭제 | 개별 파일 삭제 + 삭제 전 확인 |
+| `DROP TABLE` / `TRUNCATE` | 데이터 영구 손실 | 트랜잭션 내 soft delete 또는 백업 후 진행 |
+| `.env`/시크릿 커밋 | git 히스토리에 영구 기록 | `.gitignore`에 추가 + env.example 커밋 |
+| `chmod 777` | 전체 권한 부여로 보안 경계 파괴 | 최소 필요 권한만 부여 (`chmod 644`, `755`) |
+| `eval` with untrusted input | RCE 취약점 | 입력 검증 후 명시적 명령 실행 |
+| `curl \| sh` / `wget \| sh` | 원격 코드 검증 없이 실행 | 다운로드 → 검토 → 실행 분리 |
+| 테스트에서 실제 DB/외부 API 호출 | 프로덕션 데이터 손상 | mock/stub 사용 (localhost 테스트 DB는 CONTEXT-SENSITIVE 참조) |
 
 ## Runtime Guard (P-008)
 

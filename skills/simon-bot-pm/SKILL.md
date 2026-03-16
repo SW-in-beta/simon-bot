@@ -256,7 +256,10 @@ Final Report → Guided Review → **Code Review (simon-bot-review)** → Comple
 |------|------|----------|
 | 1 | Phase 1 완료 후 | spec.md, plan.md, constitution.md, research.md, prd.md |
 | 2 | Phase 2 완료 후 | tasks.json, tasks/*/spec.md |
+| 2.5 | Phase 3 완료 후 | state.json (phase=4 ready), 환경 검증 결과 |
 | 3 | Phase 4 중간 (그룹 완료 시) | progress.md, tasks/*/result.md |
 | 4 | Phase 5 완료 후 | verification.md |
+
+Phase 4 진입 시 PM은 Phase 1-3의 "과정"(인터뷰 대화, 패널 토론 기록, scaffolding 출력)을 컨텍스트에서 제거하고, `state.json`의 `load_files`가 가리키는 "결과물"만 로딩한다. Phase 1-3의 상세 맥락이 필요한 상황(Re-planning Gate에서 spec 변경 필요 등)이 발생하면 그때 선택적으로 읽는다.
 
 복원: `.claude/pm/state.json` + 해당 시점의 저장 파일 읽기 → 다음 Phase/Step 이어서 실행

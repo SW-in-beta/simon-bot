@@ -120,10 +120,10 @@ Each Unit runs in an **isolated git worktree**. Independent Units run in **paral
 - Record findings in `.claude/memory/unit-{name}/*.md` after each step
 - **병렬 Unit 파일 격리**: 병렬 Unit 실행 시 공유 파일(decision-journal.md, failure-log.md 등)에 동시 쓰기를 방지한다. 각 Unit은 자신의 `unit-{name}/` 디렉토리에만 기록하고, Integration Stage에서 오케스트레이터가 병합한다. session-scoped 파일(retrospective.md, project-memory.json)은 오케스트레이터만 기록한다.
 - Read memory files at start of each step
-- Tests: NEVER use real DB or external APIs. 테스트가 실제 시스템에 부작용을 일으키면 프로덕션 데이터가 손상되거나 외부 서비스에 의도치 않은 요청이 발생한다. mock/stub만 사용하라.
+- **테스트 격리**: 테스트는 mock/stub으로 외부 의존성을 격리한다. 테스트가 실제 DB나 외부 API를 호출하면 프로덕션 데이터가 손상되거나 의도치 않은 외부 요청이 발생하기 때문이다.
 - Commands: NEVER access real external systems. CONTEXT-SENSITIVE 규칙에 해당하는 경우 SKILL.md의 판단 절차를 따른다.
-- **환각 방지**: 읽지 않은 코드에 대해 추측하지 않는다. 파일은 반드시 Read로 열어본 후에 의견을 제시한다. 추측 기반 수정은 새로운 버그를 만들 수 있다.
-- **Anti-hardcoding**: 테스트를 통과시키기 위해 특정 입력값을 하드코딩하지 않는다. 일반적 해결책을 구현한다. 하드코딩은 테스트만 통과시키고 실제 문제를 숨긴다.
+- **코드 확인 후 의견**: 파일은 Read로 열어본 후에 의견을 제시한다. 추측 기반 수정은 기존 코드의 숨겨진 의도를 놓쳐 새로운 버그를 만들기 때문이다.
+- **일반적 해결책 우선**: 모든 유효한 입력에 대해 올바르게 동작하는 일반적 해결책을 구현한다. 특정 테스트 입력에 맞춘 하드코딩은 해당 테스트만 통과시키고 실제 문제를 숨기기 때문이다.
 - **Auto-Verification Hook**: 소스코드 파일 수정(Edit/Write) 후 `verify-commands.md`의 빌드/린트 명령을 즉시 실행한다. 실패 시 **Stop-and-Fix Gate 적용** — 수정 완료 전까지 다음 작업 진행 금지. `.md`, `.json` 등 비소스코드는 제외. (SKILL.md Cross-Cutting Protocol 참조)
 - **Step Transition Gate**: Step N에서 Step N+1로 진입하기 전에 `verify-commands.md`의 빌드/린트/테스트를 실행하여 전부 통과해야 한다. 이전 Step의 미수정 실패를 다음 Step으로 넘기면 디버깅이 기하급수적으로 어려워진다. 실패 시 Stop-and-Fix Gate가 자동 발동된다. (SMALL 경로에서도 적용)
 - **Plan Immutability**: Phase A에서 확정된 `plan-summary.md`는 Phase B 이후 암묵적으로 변경할 수 없다. 변경이 필요한 경우 다음 절차를 따른다: (1) 변경 사유를 `.claude/memory/plan-amendments.md`에 기록, (2) 영향받는 Unit/Step 식별, (3) 사용자에게 변경 승인 요청 (AskUserQuestion), (4) 승인 후 plan-summary.md와 관련 memory 파일 일괄 갱신. 이 절차 없이 계획을 조용히 변경하면 Acceptance Criteria와 실제 구현이 괴리되어 Step 17에서 대규모 재작업이 발생한다.
@@ -169,6 +169,16 @@ TDD 사이클을 따르는 이유: 테스트를 먼저 작성하면 요구사항
 - **Step 5c: REFACTOR** — 테스트 통과 상태를 유지하며 코드를 정리한다. 불필요하면 skip
 - **Step 5d: VERIFY** — 전체 테스트 스위트를 실행한다. 모든 테스트가 통과한 후에 다음 단계로 진행한다
 - **Step 5e: Working Example Spot-check** — Unit 구현 완료 후, plan-summary.md의 Behavior Changes에서 핵심 시나리오 1개를 선택하여 실제 동작을 확인한다 (테스트 통과 ≠ 실제 동작). CLI 실행, curl dry-run, 또는 사용 예제 코드 실행으로 검증. 실패 시 Step 5b로 회귀.
+
+### TDD Cycle 반성 단계
+
+각 TDD 단계의 도구 결과를 받은 직후, 다음 동작으로 넘어가기 전에 결과의 의미를 반성한다. 도구 결과에 곧바로 반응하면 false green(잘못된 이유로 통과)이나 부수적 실패를 놓칠 수 있기 때문이다.
+
+**RED 이후**: "이 테스트가 올바른 이유로 실패하고 있는가? 의도한 AC를 정확하게 검증하고 있는가, 아니면 부수적 문제(import 오류, 설정 누락)로 실패하고 있는가?"
+
+**GREEN 이후**: "이 테스트가 올바른 이유로 통과하고 있는가? 하드코딩이나 trivial implementation으로 통과한 것은 아닌가?"
+
+**VERIFY 이후**: "새 테스트가 통과하면서 기존 테스트가 깨진 것은 없는가? 경고(warning)가 새로 발생한 것은 없는가? 테스트 실행 시간이 비정상적으로 늘어난 것은 없는가?"
 
 - Run via tmux: build + test + typecheck simultaneously
 

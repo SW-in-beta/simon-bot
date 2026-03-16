@@ -38,3 +38,11 @@ PRD의 기술 스택에 따라:
 - 개발 서버 기동 확인 (해당 시)
 
 Save: 환경 세팅 결과를 `.claude/pm/progress.md`에 기록
+
+### Phase 3 완료 시 상태 저장
+
+Phase 3 완료 시 `state.json`을 갱신하여 Phase 4 진입 준비를 기록한다:
+- `current_phase`: 4
+- `completed_phases`: [0, 1, 2, 3]
+- `env_verified`: true
+- `load_files`: Phase 4에서 필요한 파일 목록 (prd.md, tasks.json, constitution.md, tasks/*/spec.md)
