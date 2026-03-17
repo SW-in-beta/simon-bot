@@ -22,6 +22,7 @@ Most AI coding assistants generate code and hope for the best. simon-bot treats 
 - **Scale without chaos** — Each work unit runs in an isolated git worktree. Parallel execution, zero interference, clean history.
 - **Get smarter over time** — Built-in retrospectives feed back into future runs. A dedicated boost skill lets you teach it new tricks from articles, repos, and papers.
 - **Stay safe by default** — No force pushes, no real DB access, no destructive commands. Ever.
+- **Never lose your place** — State-Driven Execution restores the exact step position from workflow-state.json on every turn, surviving compaction and session resumption.
 
 ## How It Works
 
