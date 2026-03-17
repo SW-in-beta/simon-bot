@@ -87,6 +87,7 @@ Refs: Unit {N} — {Unit 목적 한줄 요약}
 - **다른 변경 단위와의 연관**: 의존/호출/데이터 흐름 관계
 - **전문가 우려사항 반영**: Step 4-B/7에서 관련 우려 반영 내용
 - **트레이드오프**: 설계 결정과 그 이유
+- **아키텍처 영향 분석**: code-design-analysis.md 대비 구현된 변경의 아키텍처 영향 (의존성 방향, 모듈 경계, 확장성, 데이터 흐름). STANDARD+ 경로에서만 포함. 이 정보는 simon-bot-review의 Review Summary Architecture Impact 섹션에서 활용된다.
 - **테스트 커버리지 요약**: `.claude/memory/unit-{name}/test-case-summary.md`에서 해당 변경 단위의 테스트 분류를 발췌. 어떤 시나리오가 Happy Path로 검증되고, 어떤 시나리오가 Edge/Error Case로 검증되는지 포함한다. test-case-summary.md가 없으면 테스트 코드를 직접 분석하여 동등한 분류를 생성한다. (예: "Happy Path 2개, Edge Case 3개, Error Case 1개 — 빈 입력, 최대 길이 초과, DB 타임아웃 등 검증")
 - **영향 분석**: 변경되지 않았지만 영향받을 수 있는 코드. 변경된 함수의 직접 호출자, 인터페이스 소비자, 공유 상태 독자, 데이터 흐름 하류를 1-depth로 Grep 탐색하여 식별한다. 각 항목에 파일:라인, 영향받는 이유, 필요 조치를 포함한다.
 
@@ -109,6 +110,8 @@ review-sequence.md 작성 시, Step 7의 `review-findings.md`에서 CRITICAL/HIG
 ## Step 19: simon-bot-review 스킬 호출
 
 Step 18-B 완료 후, `simon-bot-review` 스킬을 호출하여 Draft PR 생성부터 인라인 코드 리뷰, CI Watch, 피드백 루프, 최종 마무리까지 위임한다.
+
+**simon-bot-review 중단 시 복구 책임**: simon-bot-review 실행 중 push 실패, API 오류 등으로 흐름이 중단되면, 문제 해결 후 simon-bot-review의 잔여 워크플로(특히 Step 2 인라인 리뷰, Step 3 CI Watch)를 자동 재개해야 한다. PR 생성만으로 Step 19가 "완료"되지 않는다 — simon-bot-review의 Completion Summary가 출력될 때까지가 Step 19의 범위다.
 
 simon-bot-review는 `.claude/memory/review-sequence.md`를 감지하여 CONNECTED 모드로 동작하며, 아래 산출물을 활용한다:
 > **Blind-First 2-Pass**: CONNECTED 모드에서 simon-bot-review는 review-sequence.md를 읽기 전에 diff를 먼저 독립 분석하여, 구현자 프레이밍에 anchoring되지 않는 독립적 리뷰를 수행한다 (`context-separation.md` 참조).

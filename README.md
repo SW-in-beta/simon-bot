@@ -123,6 +123,8 @@ simon-bot을 최대 집요함으로 확장합니다:
 - **자동 진단** — 실패 추적, 패턴 감지, 전략 전환
 - **체크포인트 정책** — 티어 경계(Attempt 3→4, 6→7) 자동 체크포인트, 진전 시 best 태그, 전략 전환 시 best로 롤백
 - **진행 감지** — 2회 연속 정체 시 즉시 전략 전환
+- **Cross-Step Compounding Failure 감지** — 동일 파일이 3개 이상 Step에서 반복 실패 시 기초 설계 결정 재검토
+- **Architecture Sanity Check** — Step 8 이후 전체 diff의 아키텍처 일관성 1-pass 검증 (STANDARD+ 경로)
 - **총 재시도 예산** — 전체 50회, 70% 도달 시 경고
 - **레퍼런스 지연 로딩** — Startup/Phase 진입/에러 발생 시점에 필요한 파일만 로딩
 - **신뢰도 점수** — 모든 에이전트 출력에 신뢰도 + 영향도 태깅
@@ -155,14 +157,16 @@ Phase 4 진입 시 PM은 Phase 1-3의 과정을 컨텍스트에서 제거하고 
 작업 완료 후 PR 생성과 코드 리뷰를 수행합니다:
 
 - **Draft PR 생성** — 변경사항 분석 기반 PR 자동 생성 + Review Guide 섹션 포함
-- **Blind-First 2-Pass 리뷰** — review-sequence.md에 anchoring되지 않도록 diff만으로 먼저 분석 후 대조
+- **Blind-First 2-Pass 리뷰** — review-sequence.md에 anchoring되지 않도록 diff만으로 먼저 분석 후 대조. 독립 severity 판정 후 구현자 판정과 불일치 시 `[SEVERITY-DISPUTED]` 태깅
 - **기존 패턴 스캔** — diff에 도입된 새 패턴에 대해 코드베이스 내 기존 대안을 능동적으로 탐색
 - **공식 문서 검증** — 사용된 API/패턴을 공식 문서(context7 MCP, WebSearch)로 fact-check하여 deprecated API, anti-pattern 사전 식별
 - **영향 분석 Pass** — 변경되지 않았지만 영향받을 수 있는 코드를 1-depth 탐색하여 인라인 코멘트 작성
+- **Architecture Impact** — Review Summary에 의존성 방향, 모듈 경계, 확장성, 데이터 흐름 관점의 아키텍처 영향 분석 포함 (STANDARD+ 경로)
 - **대규모 PR 처리** — 100+ 파일 PR은 Core/Support/Generated로 분류, 핵심 파일에 80% 집중
 - **CI Watch** — CI 파이프라인 모니터링 및 실패 자동 수정 (max 3 cycles)
 - **Comment Auto-Watch** — 1분 간격 PR 댓글 자동 감지, 새 피드백 즉시 반영
-- **전문가 검증 피드백 루프** — 사용자 코멘트에 대해 도메인 전문가 Agent를 호출하여 검증 후 처리 (AGREE/PARTIAL/COUNTER verdict, 공식 문서 기반 fact-check 포함)
+- **전문가 검증 피드백 루프** — 사용자 코멘트에 대해 도메인 전문가 Agent를 호출하여 검증 후 처리 (AGREE/PARTIAL/COUNTER verdict, Self-Agreement Bias 견제 포함)
+- **중단 복구 프로토콜** — push 실패, API 오류 등으로 중단 시 잔여 워크플로를 자동 재개. 인라인 리뷰 누락 방지
 - **피드백 루프** — 코드 수정 → 커밋 → 인라인 리뷰 재작성 → CI 재확인
 
 STANDALONE 모드에서는 3개 Agent Team(architect, writer, impact-analyzer)이 병렬 분석하여 review-sequence를 자체 생성합니다.

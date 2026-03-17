@@ -118,7 +118,7 @@ mkdir -p "${SESSION_DIR}/reports"
 
 **Agent Team 해산**
 
-**Agent Teams Fallback**: Agent Teams가 비활성 상태이면 `~/.claude/skills/simon-bot/references/agent-teams-fallback.md`의 subagent fallback을 적용한다.
+**Agent Teams Fallback**: Agent Teams가 비활성 상태이면 `~/.claude/skills/simon-bot/references/agent-teams.md`의 Fallback 섹션을 참조하여 subagent fallback을 적용한다.
 
 **중간 보고 (Progressive Disclosure):**
 - 코드 설계 분석 완료 시 사용자에게 주요 발견 요약 출력 (예: "코드 설계 분석 완료. 주요 발견: Layered Architecture 사용 중, 테스트 커버리지 낮음, 네이밍 규칙 일관됨.")

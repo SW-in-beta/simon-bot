@@ -151,13 +151,16 @@ Past feedback is stored in `.claude/memory/retrospective.md` and automatically r
 Handles PR creation and code review after work is complete:
 
 - **Draft PR creation** — auto-generates PR based on change analysis with Review Guide section
-- **Blind-First 2-Pass review** — analyzes diff independently before consulting review-sequence.md to avoid anchoring bias
+- **Blind-First 2-Pass review** — analyzes diff independently before consulting review-sequence.md to avoid anchoring bias. Independent severity assessment with `[SEVERITY-DISPUTED]` tagging when assessments diverge
 - **Existing pattern scan** — proactively searches the codebase for existing alternatives to newly introduced patterns
+- **Official docs verification** — fact-checks used APIs/patterns against official docs (context7 MCP, WebSearch) to pre-identify deprecated APIs and anti-patterns
 - **Impact analysis pass** — identifies unchanged code that may be affected by changes (1-depth caller/consumer search)
+- **Architecture Impact** — Review Summary includes architecture impact analysis covering dependency direction, module boundaries, extensibility, and data flow (STANDARD+ path)
 - **Large PR handling** — 100+ file PRs classified as Core/Support/Generated, 80% focus on core files
 - **CI Watch** — monitors CI pipeline and auto-fixes failures (max 3 cycles)
 - **Comment Auto-Watch** — polls PR comments every minute, auto-applies new feedback
-- **Expert-verified feedback loop** — spawns domain expert Agents to verify user comments before acting (AGREE/PARTIAL/COUNTER verdict)
+- **Expert-verified feedback loop** — spawns domain expert Agents to verify user comments before acting (AGREE/PARTIAL/COUNTER verdict with Self-Agreement Bias mitigation)
+- **Interruption recovery protocol** — auto-resumes remaining workflow after push failures, API errors, etc. Prevents inline review omission
 - **Feedback loop** — code fix → commit → inline review rewrite → CI re-check
 
 In STANDALONE mode, 3 Agent Teams (architect, writer, impact-analyzer) run parallel analysis to self-generate the review-sequence.

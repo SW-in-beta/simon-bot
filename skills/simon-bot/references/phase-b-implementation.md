@@ -50,6 +50,28 @@ Each Unit runs in an **isolated git worktree**. Independent Units run in **paral
 ## 주의사항
 {expert-plan-concerns.md에서 해당 파일/도메인 관련 HIGH+ 항목만 필터}
 
+## Decision Authority
+
+plan-summary.md의 Files Changed 테이블과 code-design-analysis.md가 아래 기준의 판단 근거다.
+
+### 자율 결정 (보고 불필요)
+- Files Changed 테이블에 명시된 파일 내의 구현 세부사항 (내부 함수 분할, 변수/상수 네이밍)
+- code-design-analysis.md 패턴 범위 내의 에러 처리 방식 선택
+- 테스트 헬퍼/픽스처 설계
+- 코드 내 주석/구조 정리
+
+### 통보 후 진행 (decision-journal에 기록)
+- Files Changed에 없는 파일 수정 (1-2개 이내)
+- 기존 함수의 시그니처 변경 (파라미터 추가/타입 변경)
+- 새 유틸리티 함수/상수 정의
+
+### 에스컬레이션 필수 (오케스트레이터 판단 대기)
+- 새 패키지/모듈/디렉토리 생성
+- 외부 의존성(라이브러리) 추가
+- 다른 Unit의 파일 수정
+- plan-summary.md의 AC와 충돌하는 구현 방향
+- Done-When Checks를 달성할 수 없다고 판단될 때
+
 ## 참고 컨텍스트
 {code-design-analysis.md에서 해당 파일/모듈의 컨벤션 발췌}
 ```
