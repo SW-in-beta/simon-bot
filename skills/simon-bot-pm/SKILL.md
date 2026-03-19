@@ -1,6 +1,6 @@
 ---
 name: simon-bot-pm
-description: "프로젝트 매니저 - 앱 전체를 기획하고 simon-bot에게 작업을 분배하여 완성합니다. Use when: (1) 새 앱/서비스를 처음부터 만들고 싶을 때 ('앱 만들어줘', '서비스 구축해줘', '프로젝트 시작하자'), (2) 대규모 마이그레이션이나 리팩토링을 체계적으로 진행할 때, (3) 여러 기능을 조율하며 전체 프로젝트를 완성해야 할 때. 단일 기능이 아닌 '전체 프로젝트'를 관리하는 PM 역할입니다."
+description: "프로젝트 매니저 - 앱 전체를 기획하고 simon-bot에게 작업을 분배하여 완성합니다. Use when: (1) 새 앱/서비스를 처음부터 만들고 싶을 때 ('앱 만들어줘', '서비스 구축해줘', '프로젝트 시작하자'), (2) 대규모 마이그레이션이나 리팩토링을 체계적으로 진행할 때, (3) 여러 기능을 조율하며 전체 프로젝트를 완성해야 할 때. 단일 기능이 아닌 '전체 프로젝트'를 관리하는 PM 역할입니다. 다중 팀(3+) 필요한 대규모 프로젝트는 /simon-company를 직접 호출하세요."
 compatibility:
   tools: [Agent, AskUserQuestion]
   skills: [simon-bot, simon-bot-grind, simon-bot-report, simon-bot-review, git-push-pr]
@@ -190,7 +190,22 @@ PRD를 구현 가능한 단위 작업(Feature)으로 분해한다.
 
 `execution_groups` 순서대로 진행하며, 각 그룹 완료 후 통합 검증 + Re-planning Gate를 거친다. 진행 현황을 `.claude/pm/progress.md`에 유지한다.
 
-**Plan Reuse Protocol**: PM이 이미 Phase 1-2에서 충분한 Spec과 Plan을 수립했으므로, simon-bot에게 작업을 위임할 때 Phase A를 간소화해야 한다. Feature별 Task Spec (`.claude/pm/tasks/{task-id}/spec.md`)을 simon-bot의 `requirements.md`로 직접 전달하고, simon-bot의 Step 0에서 SMALL path를 강제 지정한다. 이렇게 하면 simon-bot이 독자적인 전문가 패널 분석과 계획 수립을 반복하지 않는다.
+**Plan Reuse Protocol**: PM이 simon-bot에게 Feature를 위임할 때, simon-bot의 Handoff Manifest(P-009) 형식으로 컨텍스트를 전달한다:
+
+```json
+{
+  "from_skill": "simon-bot-pm",
+  "to_skill": "simon-bot",
+  "force_path": "SMALL",
+  "transfer_files": ["tasks/{task-id}/spec.md", "constitution.md", "research.md (관련 항목)"],
+  "skip_steps": ["Step 0", "Step 1-A"],
+  "context_note": "PM이 Spec과 Plan을 이미 수립함. Task Spec을 requirements.md로 사용."
+}
+```
+
+PM Phase 1에서 CTO 패널이 식별한 기술 제약과 gotchas도 전달한다 — plan.md의 기술 제약 → simon-bot의 expert-plan-concerns.md 초기값, research.md → Docs-First 중복 조회 방지. simon-bot은 Startup의 Handoff Manifest 처리에서 이 manifest를 감지하여 Phase A를 자동 간소화한다.
+
+Handoff Notification 형식: `[Handoff] PM → simon-bot (F{N}: {기능명}): PM 계획 재사용, Phase A 간소화 (SMALL path)`
 
 <!-- Decomposition Note: Phase 4는 가장 큰 Phase. Feature 단위로 subagent에 위임하는 구조이므로 이미 내부적으로 분해되어 있다. -->
 

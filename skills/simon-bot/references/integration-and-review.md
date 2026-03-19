@@ -154,6 +154,8 @@ simon-bot-review가 처리하는 항목:
    - `CAPABILITY`: 새 기능/도구 필요
    - `REMOVAL`: 불필요한 단계 제거
 
+- **반복 교정 → Gotchas 자동 변환**: user-feedback-log.md에서 2건+ 동일 유형 수정 요청(반복 교정)이 감지되면, 해당 패턴이 프로젝트 고유 gotcha인지 판단한다. 프로젝트 고유이면 `~/.claude/projects/{slug}/state/gotchas.jsonl`에 append한다 — 형식: `{"id": "G-xxx", "category": "...", "gotcha": "...", "source_step": "Step 20", "source_session": "{branch}", "added_at": "YYYY-MM-DD"}`. project-memory.json의 빌드 에러 패턴과 중복되지 않도록 교차 확인한다.
+
 ### 20-B: 개선 제안
 
 1. 일회성 선호가 아닌 **체계적 패턴**만 제안 대상으로 선별

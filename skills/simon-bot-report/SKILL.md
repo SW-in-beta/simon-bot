@@ -169,6 +169,8 @@ mkdir -p "${SESSION_DIR}/reports"
 - 형식: `## [{날짜}] {주제} — {핵심 발견 3줄 요약} | 관련 파일: {파일 목록}`
 - 이 누적 기록은 향후 Step 1-0에서 활용된다
 
+**Gotchas 연동**: 보고서의 Code Design 분석 결과 중 "이 프로젝트의 관습이 Claude의 기본 패턴과 다른 항목"을 `~/.claude/projects/{slug}/state/gotchas.jsonl`에 append한다 — 코드 변경 없는 분석(report)에서도 gotchas를 축적하여 이후 simon-bot 실행 시 사전 인지하기 위함이다. 형식: `{"id": "G-xxx", "category": "convention|build|test", "gotcha": "...", "source_step": "report", "source_session": "report-{slug}", "added_at": "YYYY-MM-DD"}`.
+
 ### Step 5: Interactive Guided Review (인터랙티브 가이드 리뷰)
 
 **목적**: 보고서의 각 섹션을 순서대로 하나씩 제시하며, 사용자와 대화형으로 리뷰 진행.

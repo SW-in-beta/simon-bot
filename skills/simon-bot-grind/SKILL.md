@@ -1,6 +1,6 @@
 ---
 name: simon-bot-grind
-description: "열일모드 — simon-bot의 끈질긴 변형. 모든 재시도 한계를 10으로 설정하고, 자동 진단/복구/전략 전환으로 끝까지 물고 늘어집니다. Use when: (1) 반드시 성공해야 하는 고위험 피처 (\"절대 실패하면 안 돼\", \"끝까지 해결해\", \"포기하지 마\"), (2) 빌드/테스트 실패가 잦은 복잡한 코드베이스, (3) 사람 개입 최소화하고 끝까지 자동으로 해결하고 싶을 때. simon-bot보다 더 강력한 자동 복구가 필요하면 이 스킬을 사용하세요."
+description: "열일모드 — simon-bot의 끈질긴 변형. 모든 재시도 한계를 10으로 설정하고, 자동 진단/복구/전략 전환으로 끝까지 물고 늘어집니다. Use when: (1) 반드시 성공해야 하는 고위험 피처 (\"절대 실패하면 안 돼\", \"끝까지 해결해\", \"포기하지 마\"), (2) 빌드/테스트 실패가 잦은 복잡한 코드베이스, (3) 사람 개입 최소화하고 끝까지 자동으로 해결하고 싶을 때. simon-bot보다 더 강력한 자동 복구가 필요하면 이 스킬을 사용하세요. Do NOT use when: 사용자가 끈질긴 해결을 명시적으로 요청하지 않은 일반 피처 구현 — simon-bot으로 충분하다. simon-bot이 3회+ 실패한 작업을 이어받을 때도 적합하다."
 compatibility:
   tools: [Agent, AskUserQuestion]
   skills: [simon-bot]
@@ -161,11 +161,13 @@ For detailed Phase A enhancements, read [grind-phase-a.md](references/grind-phas
 simon-bot Phase B-E를 따르되, 모든 Step에 10회 retry + escalation ladder를 적용합니다.
 For per-step override details, read [grind-phase-b.md](references/grind-phase-b.md).
 
-**핵심 패턴 (모든 Step 공통):**
-- Attempt 1-3: Simple fix (`executor`)
-- Attempt 4-6: Root Cause Analysis (`architect` → `executor`)
-- Attempt 7-9: Strategy Pivot (checkpoint → alternative approach)
-- Attempt 10: Last Stand (architect + executor collaborative)
+**재시도 원칙 (모든 Step 공통):**
+- 초기(1-3): 최소 변경으로 직접 수정한다. 과도한 분석보다 빠른 피드백이 낫다.
+- 중기(4-6): 실패 패턴을 분석하여 근본 원인을 파악한 뒤 수정한다.
+- 후기(7-9): 접근 방식 자체를 변경한다. checkpoint로 안전망을 확보한 뒤 대안을 시도한다.
+- 최종(10): 사용 가능한 모든 정보를 종합하여 최후 시도한다.
+
+각 Step에서 "근본 원인 분석"과 "접근 방식 변경"의 구체적 의미는 Step 성격에 따라 다르다 — Step 5(빌드 실패)의 전략 전환과 Step 12(코드 리뷰)의 전략 전환은 완전히 다른 행동이기 때문이다. 상세는 grind-phase-b.md 참조.
 
 **Step별 주요 변경:**
 

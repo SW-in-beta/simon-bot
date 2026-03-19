@@ -75,6 +75,8 @@ SESSIONS_DIR="${HOME}/.claude/projects/${PROJECT_SLUG}/sessions"
 
 핵심 흐름: 현황 파악 → 작업 선택 → 방향 확인 → 맥락 복원 (State Integrity Check 포함) → 작업 실행
 
+**자동 진행 강화**: Resume Default 자동 진행 조건(세션 1개 + 정상 + 24h 이내) 충족 시, 방향 확인(Step 3)도 생략한다. workflow-state.json의 next_step을 읽어 자동으로 해당 Step부터 진행하고 1줄 통보만 출력한다: `[Resume] {branch} — Step {N}({Step명})부터 이어갑니다.` 방향 확인은 blocked 상태이거나 에러 중단인 경우에만 유지한다 — "이어서 해줘"라는 사용자의 의도는 이미 명백하기 때문이다.
+
 > **Reference Loading**: 세부 구현(작업 선택 UI, 방향 확인 질문, 맥락 복원 절차, Context Dashboard 형식, State Integrity Check, Handoff Manifest 감지)은 [session-commands.md](references/session-commands.md)의 "resume 명령 상세" 및 "State Integrity Check" 섹션을 읽고 따른다.
 
 ---

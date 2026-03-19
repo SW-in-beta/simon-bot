@@ -65,6 +65,7 @@ For detailed protocol (적용 기준, 도구 우선순위, 조회 불가 시 대
 - `reviews.jsonl`: 리뷰 결과 (severity, file, finding, resolution, timestamp, expires_at)
 - `decisions.jsonl`: 아키텍처 결정 (decision, rationale, rejected_alternatives, timestamp)
 - `test-insights.jsonl`: 반복 실패 패턴, 환경 의존 테스트 목록
+- `gotchas.jsonl` — 프로젝트에서 Claude가 반복적으로 잘못하는 패턴. **유효기간 없음** (영구 축적). 카테고리: build, convention, test, api, infra.
 
 **유효기간**: 7일. Startup에서 유효 항목만 로딩하여 이전 세션의 이슈를 사전 인지한다.
 **기록 시점**: Step 완료 시 해당 Step의 판단/결과를 append한다.

@@ -234,7 +234,8 @@ Agent에 전달할 컨텍스트:
       **[GATE]** 전문가 Agent 호출 없이 직접 수정하거나 답변하는 것은 금지.
    e. 수정된 부분에 `[R{N}]` 접두사로 인라인 리뷰 재작성
       (양식: `~/.claude/skills/simon-bot-review/references/inline-review-format.md`)
-   f. 사용자에게 수정 완료 안내
+   f. **[코드 변경 시] CI Watch 재시작** — AGREE/PARTIAL로 코드를 수정 + push한 경우, background agent로 CI Watch를 재시작한다 (Step 4-D 절차 참조). COUNTER의 경우 생략.
+   g. 사용자에게 수정 완료 안내
    g. `last-comment-check.md`를 현재 시점으로 갱신
 5. **종료 조건 확인**: 새 댓글 중 "LGTM" / "approve" / "승인" 패턴이 있으면 → 폴링 종료, Step 5로 진행 안내
 6. 종료 조건 미충족 → 60초 대기 후 1번으로 복귀

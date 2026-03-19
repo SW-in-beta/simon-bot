@@ -1,6 +1,6 @@
 ---
 name: simon-company
-description: "풀스택 소프트웨어 회사 — 기획부터 배포·운영까지 전체 라이프사이클을 다중 전문 팀(PM, Design, Frontend, Backend, QA, DBA, DevOps, ML)이 협업하여 완성합니다. 이 스킬은 명시적 호출 전용입니다. 사용자가 '/simon-company' 또는 'simon-company 스킬'이라고 직접 언급한 경우에만 사용하세요. 암묵적으로 추론하여 자동 호출하지 마세요. 기능: (1) 대규모 풀스택 서비스를 다중 팀 협업으로 기획→디자인→개발→QA→배포→운영까지 완성, (2) 의뢰 모드로 불명확한 아이디어를 구조화된 인터뷰로 구체화, (3) Scope Guard로 소규모 프로젝트는 simon-bot-pm으로 리다이렉트."
+description: "풀스택 소프트웨어 회사 — 다중 전문 팀(PM, Design, FE, BE, QA, DBA, DevOps, ML)이 기획→배포→운영까지 협업합니다. 이 스킬은 명시적 호출 전용입니다. '/simon-company' 직접 호출 시에만 사용하세요. 암묵적으로 추론하여 자동 호출하지 마세요. Do NOT use when: 팀 2개 이하로 충분한 프로젝트 — simon-bot-pm을 사용하세요.
 compatibility:
   tools: [Agent, AskUserQuestion, TeamCreate, SendMessage]
   skills: [simon-bot-pm, simon-bot, simon-bot-grind, simon-bot-report, git-push-pr]
