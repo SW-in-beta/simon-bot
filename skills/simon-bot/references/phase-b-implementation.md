@@ -28,6 +28,13 @@ Each Unit runs in an **isolated git worktree**. Independent Units run in **paral
 4. worktree 생성: `git worktree add .claude/worktrees/{branch-name} -b {branch-name} origin/{base_branch}`
 5. 해당 worktree로 작업 디렉토리 이동
 6. base commit SHA를 `.claude/memory/base-commit.md`에 기록
+7. **[GATE — Base Stability]** worktree에서 빌드+기존 테스트를 실행하여 base branch가 안정적인지 검증한다. 깨진 base 위에 구현하면 Phase B 전체가 낭비되기 때문이다.
+   - `verify-commands.md`의 빌드/테스트 명령 실행
+   - **PASS** → Unit Runbook 생성으로 진행
+   - **FAIL** → 구현 진입 차단. 실패 원인을 분석하고 대응:
+     - base branch 자체의 문제 → 사용자에게 보고 (`[Base Unstable] {실패 요약} — base branch 수정이 필요합니다.`)
+     - 환경 설정 문제 (의존성 미설치 등) → setup-test-env.sh 재실행 후 재시도 (최대 2회)
+   - **테스트 환경 미구성 시** (setup-test-env.sh exit code 1): 빌드+타입체크만 통과하면 PASS로 간주
 
 **중요:** 현재 로컬 브랜치를 checkout/변경하지 않음 (안전)
 

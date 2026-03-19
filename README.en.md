@@ -70,6 +70,7 @@ Then in Claude Code:
 | `/simon-bot-boost` | Read external resources and improve simon-bot's own skills |
 | `/simon-bot-boost-capture` | Background capture of skill improvements — record insights without interrupting workflow |
 | `/simon-bot-boost-review` | Review & apply accumulated improvement insights from boost-capture |
+| `/simon-bot-healthcheck` | Skill health dashboard — structural quality verification for the entire simon-bot family |
 | `/simon-company` | Full-stack software company — multi-team collaboration from planning to deployment & ops |
 | `/simon-presenter` | Live demo presenter — run apps with Playwright for interactive demonstrations |
 
@@ -88,6 +89,7 @@ Then in Claude Code:
 | Auto-search latest trends and improve skills | `/simon-bot-auto-boost` |
 | Note a skill improvement without stopping work | `/simon-bot-boost-capture` |
 | Batch-review and apply accumulated improvements | `/simon-bot-boost-review` |
+| Check skill quality, verify after boost | `/simon-bot-healthcheck` |
 | Demo a finished app with live browser interaction | `/simon-presenter` |
 
 <details>

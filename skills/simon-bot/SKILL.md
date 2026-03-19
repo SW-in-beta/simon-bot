@@ -34,6 +34,7 @@ workflow-state.json이 없으면 Startup부터 시작한다.
   "next_step": "0",
   "blocked": false,
   "blocked_reason": null,
+  "done_when_checks": [],
   "last_updated": "2026-03-17T00:00:00+09:00"
 }
 ```
@@ -44,6 +45,9 @@ workflow-state.json이 없으면 Startup부터 시작한다.
 - Phase 전환: `current_phase` 갱신
 - 중단/에러: `blocked: true`, `blocked_reason` 기록
 - SMALL path에서 Steps 9-16 skip 시: `skipped_steps`에 기록, `skip_reason` 명시
+- Phase A 완료 시: plan-summary.md의 Done-When Checks를 `done_when_checks` 배열로 추출 (각 항목: `{"id": "DW-001", "description": "...", "type": "mechanical|behavioral", "verified": false}`)
+- 검증 통과 시: 해당 항목의 `verified`를 `true`로 갱신 (Step 5d VERIFY, Step 6, Step 17에서 갱신)
+- Step 17: `done_when_checks`에 `verified: false` 항목이 있으면 FAIL — LLM이 Markdown 체크리스트를 임의로 체크하는 것과 달리 JSON boolean은 명시적 갱신이 필요하므로 조기 완료 선언을 방지한다
 
 ### Cross-Session State
 
