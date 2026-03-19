@@ -1,0 +1,13 @@
+{
+  "eval_id": 2,
+  "eval_name": "github-skills-repo",
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "Report follows boost template (P-XXX IDs, Executive Summary, Source section)", "passed": true, "evidence": "Full boost report with Source section, Executive Summary, P-001 through P-010, Cross-Cutting Observations, Not Recommended"},
+    {"text": "Source content accurately analyzed", "passed": true, "evidence": "Accurately covers SDK features: hooks (PreToolUse/PostToolUse), AgentDefinition, MCP tools, SandboxSettings, permission modes, max_turns"},
+    {"text": "Proposals reference specific skills and file paths", "passed": true, "evidence": "Every proposal has specific target skills and files, e.g. P-002: 'references/error-resilience.md, references/grind-error-resilience.md'"},
+    {"text": "Proposals are actionable with concrete changes", "passed": true, "evidence": "P-002 includes detailed error hierarchy tree, P-005 has JSON schema for session metadata, P-007 has agent-roles.md example structure"},
+    {"text": "Analysis covers 3+ expert perspectives", "passed": true, "evidence": "All 5 experts present with consensus notes per proposal (e.g. 'Workflow Architect(주도), Quality Guardian(강력 지지)')"},
+    {"text": "Includes Not Recommended section with rejected ideas", "passed": true, "evidence": "4 rejected ideas: stateless query, bidirectional client, plugin system, ThinkingConfig control — each with clear reasoning"}
+  ]
+}

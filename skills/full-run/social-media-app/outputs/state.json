@@ -1,0 +1,26 @@
+{
+  "project_name": "InstaClone - Social Media Web App",
+  "project_type": "greenfield",
+  "execution_mode": "auto",
+  "current_phase": 7,
+  "phases": {
+    "0": { "status": "completed", "timestamp": "2026-03-07T00:00:00Z" },
+    "1": { "status": "completed", "timestamp": "2026-03-07T00:01:00Z" },
+    "2": { "status": "completed", "timestamp": "2026-03-07T00:02:00Z" },
+    "3": { "status": "completed", "timestamp": "2026-03-07T00:03:00Z" },
+    "4": { "status": "completed", "timestamp": "2026-03-07T00:04:00Z" },
+    "5": { "status": "completed", "timestamp": "2026-03-07T00:05:00Z" },
+    "6": { "status": "completed", "timestamp": "2026-03-07T00:06:00Z" },
+    "7": { "status": "completed", "timestamp": "2026-03-07T00:07:00Z" }
+  },
+  "decision_trail": [
+    "[Decision] Design팀 활성화 - 소셜 미디어 앱은 사진 피드, 프로필 등 풍부한 UI 필요",
+    "[Decision] Frontend팀 활성화 - Next.js 14 App Router 기반 웹 UI 구현",
+    "[Decision] Backend팀 활성화 - REST API (인증, 게시물, 팔로우, 좋아요, 댓글, 알림)",
+    "[Decision] DBA팀 활성화 - SQLite 기반 데이터 모델링 (사용자, 게시물, 관계 등)",
+    "[Decision] DevOps팀 활성화 - Docker 컨테이너화 + CI/CD 파이프라인",
+    "[Decision] ML팀 비활성화 - 피드 알고리즘은 단순 최신순으로 ML 불필요",
+    "[Decision] API route slug 충돌 해결 - /api/users/[id]/follow → /api/follows/[id]로 분리",
+    "[Decision] ZodError .errors → .issues 수정 - Zod v3 API 호환"
+  ]
+}

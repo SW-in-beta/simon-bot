@@ -1,0 +1,22 @@
+{
+  "eval_id": 2,
+  "eval_name": "cli-tool-scope-guard",
+  "configuration": "without_skill",
+  "expectations": [
+    {
+      "text": "프로젝트가 simon-company 규모가 아님을 감지함 (필요 팀 수, 인프라, 디자인, Feature 수 기준)",
+      "passed": false,
+      "evidence": "출력 파일 3개 모두 CSV to JSON CLI 도구의 요구사항/설계/계획을 그대로 수행했으며, 프로젝트 규모가 simon-company에 부적합하다는 감지나 언급이 전혀 없음. 1인 5일 규모의 소형 프로젝트임에도 규모 판단 없이 진행."
+    },
+    {
+      "text": "simon-bot-pm 또는 simon-bot 사용을 제안함",
+      "passed": false,
+      "evidence": "출력 파일 어디에서도 simon-bot-pm, simon-bot, 또는 다른 도구/봇 사용을 제안하지 않음. 대안 도구에 대한 언급이 전혀 없음."
+    },
+    {
+      "text": "리다이렉트 제안 시 이유를 설명함 (UI 없음, 1-2팀 규모, 인프라 불필요 등)",
+      "passed": false,
+      "evidence": "리다이렉트 제안 자체가 존재하지 않으므로 이유 설명도 없음. 프로젝트가 UI 없는 CLI 도구이고 1인 개발 규모임에도 이에 대한 분석이나 리다이렉트 없이 그대로 진행."
+    }
+  ]
+}

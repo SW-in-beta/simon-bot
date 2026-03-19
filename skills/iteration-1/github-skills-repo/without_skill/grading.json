@@ -1,0 +1,13 @@
+{
+  "eval_id": 2,
+  "eval_name": "github-skills-repo",
+  "configuration": "without_skill",
+  "expectations": [
+    {"text": "Report follows boost template (P-XXX IDs, Executive Summary, Source section)", "passed": false, "evidence": "Uses P1/P2/P3 priority format, numbered sections 1-5, no P-XXX IDs or Source/Executive Summary structure"},
+    {"text": "Source content accurately analyzed", "passed": true, "evidence": "Good analysis of SDK features: hooks, MCP tools, session API, thinking config, permissions, sandbox"},
+    {"text": "Proposals reference specific skills and file paths", "passed": true, "evidence": "References specific skills and provides code-like examples for each proposal"},
+    {"text": "Proposals are actionable with concrete changes", "passed": true, "evidence": "Includes concrete code examples (@tool decorators, hook patterns) and 3-phase migration strategy"},
+    {"text": "Analysis covers 3+ expert perspectives", "passed": false, "evidence": "Single analysis voice, no multi-expert analysis or cross-discussion"},
+    {"text": "Includes Not Recommended section with rejected ideas", "passed": false, "evidence": "No section for rejected or not-recommended ideas"}
+  ]
+}

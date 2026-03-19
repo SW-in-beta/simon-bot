@@ -1,0 +1,27 @@
+{
+  "eval_id": 4,
+  "eval_name": "discovery-interview",
+  "configuration": "with_skill",
+  "expectations": [
+    {
+      "text": "요청이 불명확함을 감지하고 의뢰 모드(Discovery Interview Protocol)를 제안하거나 자동 전환함",
+      "passed": true,
+      "evidence": "mode-selection.md에서 불명확성 지표 6개를 분석하여 '의뢰 모드 감지됨' 판정. phase-0-analysis.md에서 modeAutoDetected: true 설정. ceo-initial-response.md에서 사용자에게 의뢰 모드를 '강력히 추천'하며 3가지 모드 선택지 제시."
+    },
+    {
+      "text": "PM이 비전/목표를 파악하는 질문을 시작함 (예: 핵심 목표, 현재 상황, 기대 효과 등)",
+      "passed": true,
+      "evidence": "interview-output.md Stage 1 '비전 & 맥락'에서 Q1(어떤 종류의 고객 데이터를 쌓고 있는지), Q2(현재 데이터 분석 방식), Q3(어떤 직원이 데이터를 봐야 하는지), Q4(고객이 불편해하는 점/경쟁사 벤치마크)로 핵심 목표와 현재 상황을 체계적으로 파악."
+    },
+    {
+      "text": "한 번에 최대 2개의 질문만 제시하여 사용자에게 부담을 주지 않음",
+      "passed": true,
+      "evidence": "interview-output.md의 모든 라운드(Round 1-1~5-2)에서 질문이 정확히 2개씩 제시됨. 인터뷰 원칙 준수 체크리스트에서도 '한 번에 질문 최대 2개: O' 확인. ceo-initial-response.md에서도 '한 번에 질문은 2개 이하, 부담 없이 대화하듯 진행'이라고 사전 안내."
+    },
+    {
+      "text": "질문이 구조화되어 있음 (단순 나열이 아닌 단계적 접근)",
+      "passed": true,
+      "evidence": "5단계 구조 적용: Stage 1(비전 & 맥락) -> Stage 2(사용자 여정 탐색) -> Stage 3(기능별 심층 인터뷰) -> Stage 4(우선순위 & 범위 조정) -> Stage 5(제약 조건 & 품질 기준). 각 Stage는 이전 Stage 답변 확인 후 진행하는 의존 관계이며, 큰 그림에서 세부 사항으로 좁혀가는 단계적 접근. 총 10라운드 18개 질문이 체계적으로 배분됨."
+    }
+  ]
+}

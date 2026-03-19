@@ -1,0 +1,22 @@
+{
+  "eval_id": 3,
+  "eval_name": "simple-cli-tool",
+  "config": "with_skill",
+  "expectations": [
+    {
+      "text": "이 요청이 전체 프로젝트 관리가 아닌 단일 기능임을 인식한다",
+      "passed": true,
+      "evidence": "'이 요청은 단일 기능의 간단한 CLI 도구 하나를 만드는 작업'이라고 명시적으로 인식"
+    },
+    {
+      "text": "simon-bot 또는 더 간단한 접근을 제안하거나, PM 워크플로 전체를 적용하지 않는다",
+      "passed": true,
+      "evidence": "'이 작업은 simon-bot 스킬이 훨씬 적합합니다'라고 명시적으로 리다이렉트. PM 워크플로 미적용"
+    },
+    {
+      "text": "단순한 요청에 대해 7-phase 파이프라인 전체를 강제하지 않는다",
+      "passed": true,
+      "evidence": "Phase 0~6 오버헤드가 가치를 제공하지 않는다고 설명하며 simon-bot으로 전환 권고"
+    }
+  ]
+}

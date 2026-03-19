@@ -1,0 +1,50 @@
+{
+  "project_name": "ml-recommender",
+  "teams": {
+    "pm": {
+      "active": true,
+      "lead": "PM",
+      "reason": "항상 활성 — 요구사항 정의 및 우선순위 관리"
+    },
+    "cto": {
+      "active": true,
+      "lead": "CTO",
+      "reason": "항상 활성 — 기술 아키텍처 결정 및 품질 기준 관리"
+    },
+    "design": {
+      "active": true,
+      "lead": "Design Lead",
+      "reason": "[Decision] Design팀 활성화 — 관리자 대시보드 UI/UX 설계 필요 (추천 성능 지표 시각화, 차트, 대시보드 레이아웃)"
+    },
+    "frontend": {
+      "active": true,
+      "lead": "Frontend Lead",
+      "reason": "[Decision] Frontend팀 활성화 — 관리자 대시보드 웹 인터페이스 구현 필요 (차트 렌더링, 실시간 지표 업데이트)"
+    },
+    "backend": {
+      "active": true,
+      "lead": "Backend Lead",
+      "reason": "[Decision] Backend팀 활성화 — REST API 추천 엔드포인트 + 관리자 API + 사용자 행동 수집 API 필요"
+    },
+    "qa": {
+      "active": true,
+      "lead": "QA Lead",
+      "reason": "항상 활성 — 추천 품질 검증, API 테스트, E2E 시나리오, ML 모델 성능 검증"
+    },
+    "dba": {
+      "active": true,
+      "lead": "DBA",
+      "reason": "[Decision] DBA팀 활성화 — 사용자 행동 로그, 상품 메타데이터, 추천 결과, 성능 지표 등 대량 데이터 저장/조회 필요"
+    },
+    "devops": {
+      "active": true,
+      "lead": "DevOps Lead",
+      "reason": "[Decision] DevOps팀 활성화 — ML 모델 서빙 인프라, API 배포, 모니터링 대시보드 인프라, CI/CD 파이프라인 필요"
+    },
+    "ml": {
+      "active": true,
+      "lead": "ML Lead",
+      "reason": "[Decision] ML팀 활성화 — Collaborative Filtering 기반 추천 모델 설계, 학습 파이프라인, 피처 엔지니어링, 모델 서빙 필요"
+    }
+  }
+}

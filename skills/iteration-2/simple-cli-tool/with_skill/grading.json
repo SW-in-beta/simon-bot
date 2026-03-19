@@ -1,0 +1,22 @@
+{
+  "eval_id": 3,
+  "eval_name": "simple-cli-tool",
+  "config": "with_skill",
+  "expectations": [
+    {
+      "text": "이 요청이 전체 프로젝트 관리가 아닌 단일 기능임을 명시적으로 언급한다",
+      "passed": true,
+      "evidence": "'단일 기능 요청입니다. 마크다운 파일을 읽어서 목차를 자동 생성하는 하나의 명확한 기능만 있습니다'라고 명시"
+    },
+    {
+      "text": "simon-bot을 명시적으로 언급하며 리다이렉트를 제안한다",
+      "passed": true,
+      "evidence": "'simon-bot을 사용하시는 것을 추천합니다' + 실제 호출 예시 '/simon-bot ...' 제시"
+    },
+    {
+      "text": "Scope Guard 기준 (기능 수, 파일 수, 의존성 등)을 근거로 들어 왜 PM이 과한지 설명한다",
+      "passed": true,
+      "evidence": "4개 기준 (기능 수 1개, 파일 수 5개 미만, 의존성 없음, PRD 불필요) 테이블로 명시적 평가"
+    }
+  ]
+}

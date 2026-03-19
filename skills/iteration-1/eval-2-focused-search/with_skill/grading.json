@@ -1,0 +1,45 @@
+{
+  "run_id": "eval-2-with_skill",
+  "expectations": [
+    {
+      "text": "검색 결과가 마크다운 테이블 형태로 제시됨 (제목/출처/날짜/관련성 열 포함)",
+      "passed": true,
+      "evidence": "search-results.md 28행에 마크다운 테이블이 존재하며, 열 헤더가 '| # | 제목 | 출처 | 날짜 | 관련성 | 요약 |'으로 구성되어 있다. 요구된 4개 열(제목/출처/날짜/관련성)이 모두 포함되어 있고, 15개 검색 결과가 테이블 행으로 정리되어 있다."
+    },
+    {
+      "text": "4개 카테고리(공식문서, 커뮤니티, 튜토리얼, AI에이전트 일반) 모두 검색됨",
+      "passed": true,
+      "evidence": "search-results.md 8-24행에 4개 카테고리가 명시되어 있다: 카테고리 1 — Claude Code 공식 & 핵심 (공식문서), 카테고리 2 — 커뮤니티 & 뉴스, 카테고리 3 — 튜토리얼 & 사례, 카테고리 4 — AI 코딩 에이전트 일반. 각 카테고리별로 검색 쿼리가 나열되어 있으며, 총 10개 병렬 쿼리가 수행되었다."
+    },
+    {
+      "text": "각 콘텐츠에 대해 구조화된 소스 요약본 생성 (URL/출처/핵심내용/관련성)",
+      "passed": true,
+      "evidence": "source-summaries.md에 4개 소스(Martin Fowler, Anthropic Engineering Blog 2건, Medium)에 대해 각각 구조화된 요약이 존재한다. 각 소스별로 URL, 출처, 날짜, 핵심 내용, 주요 기법/패턴, simon-bot 관련성 필드가 일관된 형식으로 제공된다. 예: 소스 1은 URL(martinfowler.com/...), 출처(Martin Fowler), 핵심 내용('프롬프트 엔지니어링에서 컨텍스트 엔지니어링으로의 패러다임 전환'), 관련성(simon-bot SKILL.md와의 대응 분석)이 포함되어 있다."
+    },
+    {
+      "text": "6명 전문가의 개별 분석 존재",
+      "passed": true,
+      "evidence": "expert-findings.md에 6명의 전문가 개별 분석이 존재한다: Expert 1 Workflow Architect (P-001, P-002), Expert 2 Prompt Engineer (P-003, P-004), Expert 3 Innovation Scout (P-005, P-006), Expert 4 Quality & Safety Guardian (P-007), Expert 5 DX Specialist (P-008), Expert 6 Skill Craft Specialist (P-009). 각 전문가가 역할, 분석 내용, 개선 제안을 개별적으로 제시하고 있다."
+    },
+    {
+      "text": "P-001 형식의 구조화된 개선 제안서 생성 (심각도/대상스킬/대상파일/현재상태/개선안/근거)",
+      "passed": true,
+      "evidence": "improvement-proposals.md에 P-001부터 P-009까지 9개의 구조화된 개선 제안서가 존재한다. 각 제안에 심각도(HIGH/MEDIUM/LOW), 대상 스킬(simon-bot), 대상 파일(SKILL.md 등), 현재 상태, 개선안(diff 형식), 근거 필드가 포함되어 있다. 예: P-001은 심각도 HIGH, 대상 스킬 simon-bot, 대상 파일 SKILL.md, 현재 상태('수동적 대응...'), 개선안(선제적 Compaction 전략), 근거('Anthropic 블로그에서 context rot 공식 인정')가 모두 포함되어 있다."
+    },
+    {
+      "text": "스킬 가이드라인 검증 보고서 생성 (6개 카테고리별 PASS/FAIL 테이블)",
+      "passed": true,
+      "evidence": "verification-report.md Step 5-2에 6개 카테고리별 PASS/FAIL 테이블이 존재한다: 1. Progressive Disclosure (5항목), 2. Skill Decomposition (3항목), 3. Description 트리거링 (3항목), 4. Writing Patterns (4항목), 5. Frontmatter 유효성 (4항목), 6. Reference 구조 (4항목). 각 항목에 검증 항목, 결과(PASS/FAIL/N/A), 상세 열이 테이블로 구성되어 있으며, 전체 결과는 '6/6 카테고리, 24/24 항목 통과'로 요약되어 있다."
+    },
+    {
+      "text": "상태 파일 JSON 내용 생성 (last_search_at, processed_urls, search_history)",
+      "passed": true,
+      "evidence": "final-summary.md 9-28행에 auto-boost-state.json의 JSON 내용이 코드블록으로 포함되어 있다. last_search_at('2026-03-13T12:00:00+09:00'), processed_urls(4개 URL 배열), search_history(searched_at, urls_found, urls_selected, improvements_applied, focus_areas, dry_run 필드를 가진 객체 배열) 세 필드가 모두 존재한다."
+    },
+    {
+      "text": "프롬프트 엔지니어링/컨텍스트 관리 관심 영역이 분석과 제안에 반영됨",
+      "passed": true,
+      "evidence": "improvement-proposals.md의 9개 제안 중 8개(89%)가 프롬프트 엔지니어링 또는 컨텍스트 관리와 직접 관련된다. 컨텍스트 관리: P-001(선제적 Compaction), P-004(서브에이전트 반환 크기), P-006(JIT Retrieval), P-007(Compaction 후 검증), P-008(컨텍스트 활용률 표시), P-009(컨텍스트 전략 선택). 프롬프트 엔지니어링: P-003(Altitude Calibration), P-005(Instructions vs Guidance 분류). 유일하게 P-002(Startup Verification)만 워크플로 안전성 범주이다. 89%로 50% 기준을 크게 초과한다."
+    }
+  ]
+}

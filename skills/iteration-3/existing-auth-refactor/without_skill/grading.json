@@ -1,0 +1,32 @@
+{
+  "eval_id": 2,
+  "eval_name": "existing-auth-refactor",
+  "config": "without_skill",
+  "expectations": [
+    {
+      "text": "Phase 0에서 프로젝트 유형을 existing으로 자동 판별한다",
+      "passed": false,
+      "evidence": "응답에서 'Phase 0'이나 프로젝트 유형 자동 판별 과정이 전혀 없음. Phase 1부터 시작하며 프로젝트 유형을 'existing'으로 분류하는 로직이나 언급이 없다."
+    },
+    {
+      "text": "simon-bot-report로 사전 분석 보고서 작성을 제안한다",
+      "passed": false,
+      "evidence": "응답에 'simon-bot-report'에 대한 언급이 전혀 없음. 사전 분석 보고서 작성을 제안하지 않고, 대신 사용자에게 직접 질문으로 정보를 수집하는 방식을 취한다."
+    },
+    {
+      "text": "5개 서비스 연동에 대한 질문이나 고려를 포함한다",
+      "passed": true,
+      "evidence": "5개 서비스에 대한 질문과 고려가 여러 곳에 포함됨: '5개 서비스 목록: 어떤 서비스들이 관련되어 있는지, 각각의 언어/프레임워크는?' (line 15), '현재 인증 흐름 전체 매핑 (5개 서비스 각각)' (line 40), '영향받는 5개 서비스의 인증 사용 패턴 분석' (line 68)."
+    },
+    {
+      "text": "CTO/Architect 에이전트 패널이 기술 아키텍처 결정에 참여한다",
+      "passed": false,
+      "evidence": "CTO나 Architect 에이전트 패널에 대한 언급이 전혀 없음. 응답은 단일 대화 형태로 작성되었으며, 에이전트 기반 패널 참여나 위임 없이 직접 질문-응답 방식으로 진행한다."
+    },
+    {
+      "text": "프로젝트 원칙(Constitution) 또는 제약 조건을 명시적으로 정의한다",
+      "passed": false,
+      "evidence": "프로젝트 원칙(Constitution)을 명시적으로 정의하지 않음. '인프라 및 제약사항' 섹션에서 제약 조건에 대해 질문하긴 하지만, 이를 프로젝트 원칙으로 정의하거나 문서화하지는 않는다. 질문만 하고 원칙 수립 단계가 없다."
+    }
+  ]
+}

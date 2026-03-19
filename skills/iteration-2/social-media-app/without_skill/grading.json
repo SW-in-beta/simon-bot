@@ -1,0 +1,40 @@
+{
+  "eval_id": 1,
+  "eval_name": "social-media-app",
+  "configuration": "without_skill",
+  "expectations": [
+    {
+      "text": "roster.json 파일이 생성되고 Design, Frontend, Backend, DBA 팀이 활성화됨",
+      "passed": false,
+      "evidence": "roster.json 파일이 생성되지 않았다. 팀 구성 정보는 02_team_composition.md에 마크다운 형태로 존재하며, 팀은 Frontend, Backend, Design, QA, DevOps로 구성되어 있고 DBA 팀은 포함되지 않았다."
+    },
+    {
+      "text": "User Story에 INVEST 기준이 적용됨 (Independent, Valuable, Small, Testable 등의 관점이 반영됨)",
+      "passed": true,
+      "evidence": "04_user_stories.md에서 각 스토리가 INVEST 원칙을 암묵적으로 반영한다: Independent(에픽별 독립적 스토리), Valuable('그래야 ~하기 때문이다' 형식의 가치 기술), Negotiable(인수 조건으로 협상 가능), Estimable(1~8 SP로 추정됨), Small(개별 기능 단위 분리), Testable(모든 스토리에 구체적 인수 조건 포함). 다만 INVEST라는 용어가 명시적으로 언급되지는 않았다."
+    },
+    {
+      "text": "Story Map이 Activity → Task → Story 계층 구조로 생성됨",
+      "passed": false,
+      "evidence": "Story Map 형태의 문서가 생성되지 않았다. 04_user_stories.md는 Epic → User Story 2단계 구조를 사용하며, Activity → Task → Story의 3단계 Story Mapping 계층 구조는 존재하지 않는다."
+    },
+    {
+      "text": "Walking Skeleton이 식별됨 (핵심 흐름의 최소 구현이 Release 1 또는 Sprint 1으로 지정)",
+      "passed": false,
+      "evidence": "09_project_plan.md에서 Sprint 1은 '기반 구축'으로 인증과 프로필 기능만 포함하며, 핵심 흐름(사진 업로드 → 피드 조회)의 end-to-end 최소 구현인 Walking Skeleton 개념이 명시적으로 식별되지 않았다. 게시물 작성과 피드 기능은 Sprint 2~3에 분산되어 있다."
+    },
+    {
+      "text": "spec.md 또는 story-map.md 파일이 생성됨",
+      "passed": false,
+      "evidence": "outputs 디렉토리에 spec.md 또는 story-map.md 파일이 존재하지 않는다. 유사한 내용은 03_feature_specs.md와 04_user_stories.md에 있으나 요구된 정확한 파일명으로는 생성되지 않았다."
+    },
+    {
+      "text": "constitution.md 파일이 생성됨",
+      "passed": false,
+      "evidence": "outputs 디렉토리에 constitution.md 파일이 존재하지 않는다. 생성된 12개 파일 중 어떤 것도 constitution.md라는 이름을 갖지 않으며, 팀 헌장이나 프로젝트 규약에 해당하는 별도 문서도 없다."
+    }
+  ],
+  "pass_rate": 0.17,
+  "total_passed": 1,
+  "total_assertions": 6
+}

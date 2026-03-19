@@ -1,0 +1,35 @@
+{
+  "eval_id": 3,
+  "eval_name": "ml-recommender",
+  "configuration": "with_skill",
+  "expectations": [
+    {
+      "text": "roster.json에 ML 팀이 활성화됨",
+      "passed": true,
+      "evidence": "roster.json의 teams.ml.active가 true이며, reason은 'Collaborative Filtering 추천 모델 설계 및 학습 파이프라인 필요'로 명시됨"
+    },
+    {
+      "text": "roster.json에 Backend, Frontend(대시보드), DBA 팀이 활성화됨",
+      "passed": true,
+      "evidence": "roster.json에서 backend(active: true, reason: 'REST API 구현 필요'), frontend(active: true, reason: '관리자 대시보드 웹 UI 구현 필요'), dba(active: true, reason: '사용자 행동 데이터, 상품 데이터, 추천 결과 저장 필요') 모두 활성화 확인"
+    },
+    {
+      "text": "ML 관련 User Story가 포함됨 (추천 모델, 학습 파이프라인, 피처 엔지니어링 등)",
+      "passed": true,
+      "evidence": "spec.md에 US-3 'Collaborative Filtering 추천 모델 학습'(모델 학습/아티팩트 저장/Cold Start 처리), US-4 '추천 결과 REST API 제공', US-8 '실시간 추천 갱신' 등 ML 관련 스토리가 포함됨. 피처 엔지니어링은 명시적 스토리가 없으나 행동 데이터 수집(US-1)과 모델 학습(US-3)에서 암묵적으로 다루어짐. 추천 모델과 학습 파이프라인은 명확히 포함"
+    },
+    {
+      "text": "Story Map이 생성됨 (Activity → Task → Story 계층 구조)",
+      "passed": true,
+      "evidence": "story-map.md에 3개의 Activity(데이터 수집/관리, 추천 엔진, 관리자 모니터링) → 각 Activity 하위에 Task(행동 이벤트 수집, 모델 학습, 성능 지표 대시보드 등) → 각 Task 하위에 Story(US-1~US-9)가 P1/P2/P3 우선순위로 구분된 계층 구조가 존재"
+    },
+    {
+      "text": "spec.md 파일이 생성됨",
+      "passed": true,
+      "evidence": "spec.md 파일이 outputs/ 디렉토리에 존재하며, User Stories(US-1~US-9), Functional Requirements(FR-001~FR-012), Edge Cases(EC-001~EC-007), Key Entities, Success Criteria 등 완전한 스펙 문서 구조를 갖추고 있음"
+    }
+  ],
+  "pass_rate": 1.0,
+  "total_passed": 5,
+  "total_assertions": 5
+}

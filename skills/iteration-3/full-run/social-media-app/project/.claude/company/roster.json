@@ -1,0 +1,14 @@
+{
+  "project_name": "Picstory - Social Media Web App",
+  "teams": {
+    "pm": { "active": true, "lead": "PM", "reason": "항상 활성" },
+    "cto": { "active": true, "lead": "CTO", "reason": "항상 활성" },
+    "design": { "active": true, "lead": "Design Lead", "reason": "소셜 미디어 웹앱 — 사진 피드, 프로필, 댓글 등 풍부한 UI 필요" },
+    "frontend": { "active": true, "lead": "Frontend Lead", "reason": "React 기반 웹 인터페이스 구현 필요" },
+    "backend": { "active": true, "lead": "Backend Lead", "reason": "인증, 피드, 팔로우, 좋아요, 댓글, 알림 API 필요" },
+    "qa": { "active": true, "lead": "QA Lead", "reason": "항상 활성" },
+    "dba": { "active": true, "lead": "DBA", "reason": "사용자, 게시물, 팔로우, 좋아요, 댓글, 알림 등 다수 테이블 필요" },
+    "devops": { "active": true, "lead": "DevOps Lead", "reason": "Docker + CI/CD 파이프라인 필요" },
+    "ml": { "active": false, "reason": "피드 알고리즘은 최신순으로 단순 구현 — ML 불필요" }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "eval_id": 3,
+  "eval_name": "prompt-engineering-guide",
+  "prompt": "이 프롬프트 엔지니어링 가이드 보고 simon-bot 프롬프트 품질 개선해줘: https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview",
+  "assertions": []
+}

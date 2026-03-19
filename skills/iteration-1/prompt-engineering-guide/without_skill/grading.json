@@ -1,0 +1,13 @@
+{
+  "eval_id": 3,
+  "eval_name": "prompt-engineering-guide",
+  "configuration": "without_skill",
+  "expectations": [
+    {"text": "Report follows boost template (P-XXX IDs, Executive Summary, Source section)", "passed": false, "evidence": "Uses numbered sections (1-16) with no P-XXX IDs, custom structure instead of boost template"},
+    {"text": "Source content accurately analyzed", "passed": true, "evidence": "Comprehensive coverage of guide principles with direct quotes from the source"},
+    {"text": "Proposals reference specific skills and file paths", "passed": true, "evidence": "References specific skills with per-skill improvement tables, but file paths less specific"},
+    {"text": "Proposals are actionable with concrete changes", "passed": true, "evidence": "Includes before/after examples, XML tag snippets, and directly usable prompt snippets from the guide"},
+    {"text": "Analysis covers 3+ expert perspectives", "passed": false, "evidence": "Single analysis voice, no expert panel or multi-perspective analysis"},
+    {"text": "Includes Not Recommended section with rejected ideas", "passed": false, "evidence": "No section for ideas considered but rejected"}
+  ]
+}

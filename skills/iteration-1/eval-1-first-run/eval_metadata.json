@@ -1,0 +1,42 @@
+{
+  "eval_id": 1,
+  "eval_name": "first-run-no-state",
+  "prompt": "auto boost 해줘",
+  "assertions": [
+    {
+      "id": "A1",
+      "text": "검색 결과가 마크다운 테이블 형태로 제시됨 (제목/출처/날짜/관련성 열 포함)",
+      "check": "search-results.md에 마크다운 테이블 존재 여부"
+    },
+    {
+      "id": "A2",
+      "text": "4개 카테고리(공식문서, 커뮤니티, 튜토리얼, AI에이전트 일반) 모두 검색됨",
+      "check": "search-results.md에 4개 카테고리 구분 존재"
+    },
+    {
+      "id": "A3",
+      "text": "각 콘텐츠에 대해 구조화된 소스 요약본 생성 (URL/출처/핵심내용/관련성)",
+      "check": "source-summaries.md에 구조화된 요약 존재"
+    },
+    {
+      "id": "A4",
+      "text": "6명 전문가(Workflow Architect, Prompt Engineer, Innovation Scout, Quality Guardian, DX Specialist, Skill Craft Specialist)의 개별 분석 존재",
+      "check": "expert-findings.md에 6개 전문가 역할 구분"
+    },
+    {
+      "id": "A5",
+      "text": "P-001 형식의 구조화된 개선 제안서 생성 (심각도/대상스킬/대상파일/현재상태/개선안/근거)",
+      "check": "improvement-proposals.md에 구조화된 제안 존재"
+    },
+    {
+      "id": "A6",
+      "text": "스킬 가이드라인 검증 보고서 생성 (6개 카테고리별 PASS/FAIL 테이블)",
+      "check": "verification-report.md에 검증 결과 테이블 존재"
+    },
+    {
+      "id": "A7",
+      "text": "상태 파일 JSON 내용 생성 (last_search_at, processed_urls, search_history)",
+      "check": "final-summary.md에 상태 파일 JSON 포함"
+    }
+  ]
+}

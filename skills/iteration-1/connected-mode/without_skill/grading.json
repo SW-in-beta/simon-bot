@@ -1,0 +1,45 @@
+{
+  "expectations": [
+    {
+      "text": "CONNECTED 모드를 올바르게 감지한다",
+      "passed": false,
+      "evidence": "실행 계획(execution-plan.md)이 생성되지 않음. outputs 디렉토리가 비어있음. 모드 감지 개념 자체가 없음"
+    },
+    {
+      "text": "Step 0을 건너뛴다",
+      "passed": false,
+      "evidence": "실행 계획이 없으므로 Step 0 스킵 여부를 판단할 수 없음. 스킬 없이는 STANDALONE/CONNECTED 구분 자체가 불가"
+    },
+    {
+      "text": "기존 report를 PR description에 활용한다",
+      "passed": false,
+      "evidence": "실행 계획이 없으므로 기존 report 활용 여부를 확인할 수 없음. 프롬프트에 report 경로가 언급되었으나 이를 활용하는 계획이 생성되지 않음"
+    },
+    {
+      "text": "CONNECTED 양식(계획 매핑)을 사용한다",
+      "passed": false,
+      "evidence": "실행 계획이 없으므로 양식 사용 여부를 확인할 수 없음"
+    },
+    {
+      "text": "inline-review-format.md를 읽는다",
+      "passed": false,
+      "evidence": "스킬이 없으므로 reference 파일 접근 자체가 불가"
+    }
+  ],
+  "summary": {
+    "passed": 0,
+    "failed": 5,
+    "total": 5,
+    "pass_rate": 0.0
+  },
+  "timing": {
+    "total_tokens": 14194,
+    "duration_ms": 72911,
+    "total_duration_seconds": 72.9
+  },
+  "claims": [],
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "without_skill 실행이 outputs를 생성하지 못함. 스킬 없이 CONNECTED 모드 프롬프트(기존 artifacts를 활용한 PR+리뷰)를 처리하는 것은 구조적으로 불가능함을 확인"
+  }
+}

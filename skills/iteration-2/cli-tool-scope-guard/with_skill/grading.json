@@ -1,0 +1,25 @@
+{
+  "eval_id": 2,
+  "eval_name": "cli-tool-scope-guard",
+  "configuration": "with_skill",
+  "expectations": [
+    {
+      "text": "프로젝트가 simon-company 규모가 아님을 감지함 (필요 팀 수, 인프라, 디자인, Feature 수 기준)",
+      "passed": true,
+      "evidence": "scope-guard-evaluation.md에서 4개 기준(필요 팀 수: 2개 vs 3개 이상, 인프라: 로컬 실행으로 충분, 디자인: CLI 위주 UI 없음, Feature 수: 3-4개 vs 5개 이상)을 모두 평가하고 전부 '리다이렉트'로 판정함. 판정 결과를 '리다이렉트 권장'으로 명시."
+    },
+    {
+      "text": "simon-bot-pm 또는 simon-bot 사용을 제안함",
+      "passed": true,
+      "evidence": "scope-guard-evaluation.md: '이 프로젝트는 simon-bot-pm 또는 simon-bot 사용을 권장합니다.' redirect-message.md 권장 대안 테이블에서 simon-bot-pm(가장 적합)과 simon-bot(적합)을 명시. state.json: recommended_skill이 'simon-bot-pm'으로 설정됨."
+    },
+    {
+      "text": "리다이렉트 제안 시 이유를 설명함 (UI 없음, 1-2팀 규모, 인프라 불필요 등)",
+      "passed": true,
+      "evidence": "scope-guard-evaluation.md 근거 섹션에서 4가지 이유 상세 설명: (1) 팀 규모 과잉 - Backend+QA 2개 팀이면 충분, (2) 인프라 불필요 - 로컬 CLI 도구로 CI/CD/Docker/모니터링 불필요, (3) UI 없음 - 터미널 CLI만 필요하므로 Design 불필요, (4) Feature 수 부족. redirect-message.md에서도 불필요한 팀 5개, 중량급 프로세스 과잉, Sprint 사이클 불필요 등 구체적 이유 제시."
+    }
+  ],
+  "pass_rate": 1.0,
+  "total_passed": 3,
+  "total_assertions": 3
+}

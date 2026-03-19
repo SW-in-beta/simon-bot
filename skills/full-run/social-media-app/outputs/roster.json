@@ -1,0 +1,14 @@
+{
+  "project_name": "InstaClone - Social Media Web App",
+  "teams": {
+    "pm": { "active": true, "lead": "PM", "reason": "항상 활성" },
+    "cto": { "active": true, "lead": "CTO", "reason": "항상 활성" },
+    "design": { "active": true, "lead": "Design Lead", "reason": "웹앱 UI/UX 필요 - 피드, 프로필, 사진 업로드 등" },
+    "frontend": { "active": true, "lead": "Frontend Lead", "reason": "Next.js + React + Tailwind 기반 웹 UI" },
+    "backend": { "active": true, "lead": "Backend Lead", "reason": "REST API - 인증, 게시물, 팔로우, 좋아요, 댓글, 알림" },
+    "qa": { "active": true, "lead": "QA Lead", "reason": "항상 활성" },
+    "dba": { "active": true, "lead": "DBA", "reason": "SQLite DB - 사용자, 게시물, 팔로우, 좋아요, 댓글, 알림 테이블" },
+    "devops": { "active": true, "lead": "DevOps Lead", "reason": "Docker + CI/CD 배포" },
+    "ml": { "active": false, "reason": "ML 기능 없음 - 피드는 최신순 정렬" }
+  }
+}

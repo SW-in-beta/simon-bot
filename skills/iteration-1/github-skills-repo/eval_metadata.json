@@ -1,0 +1,6 @@
+{
+  "eval_id": 2,
+  "eval_name": "github-skills-repo",
+  "prompt": "이 레포 참고해서 simon-bot 개선점 찾아줘: https://github.com/anthropics/claude-code-sdk-python",
+  "assertions": []
+}

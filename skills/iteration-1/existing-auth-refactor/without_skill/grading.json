@@ -1,0 +1,32 @@
+{
+  "eval_id": 2,
+  "eval_name": "existing-auth-refactor",
+  "config": "without_skill",
+  "expectations": [
+    {
+      "text": "Phase 0에서 프로젝트 유형을 existing으로 판별한다",
+      "passed": false,
+      "evidence": "Phase 개념 없이 바로 '현재 상황 파악' → '권장 접근 방향' 5단계를 제안"
+    },
+    {
+      "text": "simon-bot-report로 사전 분석 보고서 작성을 제안한다",
+      "passed": false,
+      "evidence": "simon-bot-report에 대한 언급 없음. '코드베이스 탐색'을 제안하지만 체계적 분석 도구 연계는 없음"
+    },
+    {
+      "text": "마이그레이션/호환성 관련 인터뷰 질문을 한다",
+      "passed": true,
+      "evidence": "'현재 상황 파악' 섹션에서 기존 인증 구현, 서비스 의존 구조, 클라이언트 현황 등을 확인해야 한다고 언급"
+    },
+    {
+      "text": "5개 서비스 연동에 대한 질문이나 고려를 포함한다",
+      "passed": true,
+      "evidence": "'5개 서비스를 한 번에 전환하면 위험합니다. 우선순위를 정해 하나씩 전환합니다'라고 언급"
+    },
+    {
+      "text": "자동 진행 vs 승인 후 진행 실행 모드 선택 질문을 한다",
+      "passed": false,
+      "evidence": "실행 모드 선택 개념 없음. 진행 방식에 대한 사용자 선택권을 제공하지 않음"
+    }
+  ]
+}

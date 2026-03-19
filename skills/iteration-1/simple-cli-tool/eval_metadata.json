@@ -1,0 +1,22 @@
+{
+  "eval_id": 3,
+  "eval_name": "simple-cli-tool",
+  "prompt": "간단한 CLI 도구 하나 만들어줘. 마크다운 파일을 읽어서 목차를 자동 생성하는 거야. Node.js로.",
+  "assertions": [
+    {
+      "id": "scope-recognition",
+      "text": "이 요청이 전체 프로젝트 관리가 아닌 단일 기능임을 인식한다",
+      "type": "content_check"
+    },
+    {
+      "id": "appropriate-redirect",
+      "text": "simon-bot 또는 더 간단한 접근을 제안하거나, PM 워크플로 전체를 적용하지 않는다",
+      "type": "content_check"
+    },
+    {
+      "id": "not-over-engineered",
+      "text": "단순한 요청에 대해 7-phase 파이프라인 전체를 강제하지 않는다",
+      "type": "content_check"
+    }
+  ]
+}

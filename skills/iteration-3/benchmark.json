@@ -1,0 +1,185 @@
+{
+  "metadata": {
+    "skill_name": "simon-bot-pm",
+    "skill_path": "/Users/simon.lee/.claude/skills/simon-bot-pm/SKILL.md",
+    "executor_model": "claude-opus-4-6",
+    "analyzer_model": "claude-opus-4-6",
+    "timestamp": "2026-03-05T07:00:00Z",
+    "evals_run": ["greenfield-go-api", "existing-auth-refactor", "simple-cli-tool", "social-media-no-stack"],
+    "runs_per_configuration": 4
+  },
+  "runs": [
+    {
+      "eval_id": "greenfield-go-api",
+      "eval_name": "greenfield-go-api",
+      "prompt": "Go로 REST API 서버를 만들고 싶어. 사용자 관리, 게시판, 알림 기능이 필요해. 기술 스택은 Go + Gin + PostgreSQL로 하고 싶어.",
+      "configurations": [
+        {
+          "name": "with_skill",
+          "pass_rate": 0.8,
+          "passed": 4,
+          "total": 5,
+          "time_seconds": 73.4,
+          "tokens": 39973,
+          "assertions": [
+            {"text": "Phase 0 greenfield 자동 판별", "passed": true},
+            {"text": "실행 모드 선택 질문", "passed": true},
+            {"text": "Spec(WHAT) 먼저, 기술 결정(HOW) 분리", "passed": true},
+            {"text": "User Story 우선순위 P1/P2/P3", "passed": true},
+            {"text": "CTO/Architect 스택 검증/보완 추천", "passed": false}
+          ]
+        },
+        {
+          "name": "without_skill",
+          "pass_rate": 0.0,
+          "passed": 0,
+          "total": 5,
+          "time_seconds": 78.6,
+          "tokens": 19196,
+          "assertions": [
+            {"text": "Phase 0 greenfield 자동 판별", "passed": false},
+            {"text": "실행 모드 선택 질문", "passed": false},
+            {"text": "Spec(WHAT) 먼저, 기술 결정(HOW) 분리", "passed": false},
+            {"text": "User Story 우선순위 P1/P2/P3", "passed": false},
+            {"text": "CTO/Architect 스택 검증/보완 추천", "passed": false}
+          ]
+        }
+      ]
+    },
+    {
+      "eval_id": "existing-auth-refactor",
+      "eval_name": "existing-auth-refactor",
+      "prompt": "우리 회사 모노레포에서 인증 시스템을 전면 리팩토링하고 싶어. 현재 세션 기반인데 JWT로 바꾸고, OAuth2도 추가하고, 기존 API 호환성도 유지해야 해. 관련 서비스가 5개 정도 있어.",
+      "configurations": [
+        {
+          "name": "with_skill",
+          "pass_rate": 0.8,
+          "passed": 4,
+          "total": 5,
+          "time_seconds": 90.9,
+          "tokens": 43299,
+          "assertions": [
+            {"text": "existing 자동 판별", "passed": true},
+            {"text": "simon-bot-report 제안", "passed": true},
+            {"text": "5개 서비스 연동 고려", "passed": true},
+            {"text": "CTO/Architect 패널 참여", "passed": true},
+            {"text": "Constitution/제약 조건 정의", "passed": false}
+          ]
+        },
+        {
+          "name": "without_skill",
+          "pass_rate": 0.2,
+          "passed": 1,
+          "total": 5,
+          "time_seconds": 50.7,
+          "tokens": 16127,
+          "assertions": [
+            {"text": "existing 자동 판별", "passed": false},
+            {"text": "simon-bot-report 제안", "passed": false},
+            {"text": "5개 서비스 연동 고려", "passed": true},
+            {"text": "CTO/Architect 패널 참여", "passed": false},
+            {"text": "Constitution/제약 조건 정의", "passed": false}
+          ]
+        }
+      ]
+    },
+    {
+      "eval_id": "simple-cli-tool",
+      "eval_name": "simple-cli-tool",
+      "prompt": "간단한 CLI 도구 하나 만들어줘. 마크다운 파일을 읽어서 목차를 자동 생성하는 거야. Node.js로.",
+      "configurations": [
+        {
+          "name": "with_skill",
+          "pass_rate": 1.0,
+          "passed": 3,
+          "total": 3,
+          "time_seconds": 55.2,
+          "tokens": 39759,
+          "assertions": [
+            {"text": "단일 기능임을 명시적으로 언급", "passed": true},
+            {"text": "simon-bot으로 리다이렉트", "passed": true},
+            {"text": "Scope Guard 기준으로 근거 제시", "passed": true}
+          ]
+        },
+        {
+          "name": "without_skill",
+          "pass_rate": 0.0,
+          "passed": 0,
+          "total": 3,
+          "time_seconds": 41.0,
+          "tokens": 12851,
+          "assertions": [
+            {"text": "단일 기능임을 명시적으로 언급", "passed": false},
+            {"text": "simon-bot으로 리다이렉트", "passed": false},
+            {"text": "Scope Guard 기준으로 근거 제시", "passed": false}
+          ]
+        }
+      ]
+    },
+    {
+      "eval_id": "social-media-no-stack",
+      "eval_name": "social-media-no-stack",
+      "prompt": "소셜 미디어 앱을 만들고 싶어. 피드, 팔로우, 좋아요, 댓글, DM 기능이 필요한데 어떤 기술 스택이 좋을지 모르겠어. 사용자는 초기에 1만명 정도 예상하고, 나중에 10만명까지 커질 수 있어.",
+      "configurations": [
+        {
+          "name": "with_skill",
+          "pass_rate": 0.2,
+          "passed": 1,
+          "total": 5,
+          "time_seconds": 93.3,
+          "tokens": 43401,
+          "assertions": [
+            {"text": "CTO 스택 추천 + 근거", "passed": false},
+            {"text": "규모 기반 아키텍처 제안", "passed": false},
+            {"text": "대안 비교표", "passed": false},
+            {"text": "사용자 최종 확인", "passed": false},
+            {"text": "WHAT before HOW", "passed": true}
+          ]
+        },
+        {
+          "name": "without_skill",
+          "pass_rate": 0.6,
+          "passed": 3,
+          "total": 5,
+          "time_seconds": 68.5,
+          "tokens": 17264,
+          "assertions": [
+            {"text": "CTO 스택 추천 + 근거", "passed": true},
+            {"text": "규모 기반 아키텍처 제안", "passed": true},
+            {"text": "대안 비교표", "passed": true},
+            {"text": "사용자 최종 확인", "passed": false},
+            {"text": "WHAT before HOW", "passed": false}
+          ]
+        }
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {"mean": 0.70, "stddev": 0.33},
+      "time_seconds": {"mean": 78.2, "stddev": 15.0},
+      "tokens": {"mean": 41608, "stddev": 1700}
+    },
+    "without_skill": {
+      "pass_rate": {"mean": 0.20, "stddev": 0.25},
+      "time_seconds": {"mean": 59.7, "stddev": 14.5},
+      "tokens": {"mean": 16360, "stddev": 2300}
+    },
+    "delta": {
+      "pass_rate": "+0.50",
+      "time_seconds": "+18.5",
+      "tokens": "+25248"
+    }
+  },
+  "notes": [
+    "Iteration 3: Added Spec-Driven Design (WHAT/HOW separation), Expert Panel (CTO+Dev Lead), Constitution, spec-kit patterns",
+    "with_skill: 12/18 assertions passed (66.7%)",
+    "without_skill: 4/18 assertions passed (22.2%)",
+    "CRITICAL EVAL DESIGN ISSUE: Eval 4 (social-media-no-stack) is INVERTED — baseline scores 3/5 vs with_skill 1/5",
+    "Root cause: PM correctly defers tech decisions to Phase 1-C (after interview), but assertions test for Phase 1-C outputs in what is only the first response (Phase 0 + Phase 1-A)",
+    "Same issue affects Eval 1 assertion 5 (CTO validation) and Eval 2 assertion 5 (Constitution) — both are Phase 1-C/1-D behaviors",
+    "If Phase 1-C assertions are adjusted to 'mentions/plans for' instead of 'performs', estimated with_skill score rises to ~89%",
+    "Evals 1-3 show strong discrimination: with_skill dominates on all PM-workflow assertions",
+    "Baseline Eval 4 scores well on tech recommendation (jumps straight to HOW) but fails on process assertions (WHAT before HOW, user confirmation)"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "eval_id": 1,
+  "eval_name": "blog-effective-agents",
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "Report follows boost template (P-XXX IDs, Executive Summary, Source section)", "passed": true, "evidence": "Report has '# simon-bot Boost Report', Source section with link/date, Executive Summary, and P-001 through P-011 proposal IDs"},
+    {"text": "Source content accurately analyzed", "passed": true, "evidence": "Correctly identifies Anthropic's 5 agent patterns (prompt chaining, routing, parallelization, orchestrator-workers, evaluator-optimizer) and key principles (simplicity first, ACI, transparency)"},
+    {"text": "Proposals reference specific skills and file paths", "passed": true, "evidence": "Every proposal specifies target skills and files, e.g. P-001: 'simon-bot, simon-bot-grind' + 'SKILL.md, references/phase-b-implementation.md'"},
+    {"text": "Proposals are actionable with concrete changes", "passed": true, "evidence": "P-001 describes Quick Triage scan mechanism, P-002 proposes structured scoring (completeness/feasibility/safety/clarity 1-5), P-007 has specific poka-yoke examples"},
+    {"text": "Analysis covers 3+ expert perspectives", "passed": true, "evidence": "All 5 experts present: Workflow Architect, Prompt Engineer, Innovation Scout, Quality & Safety Guardian, DX Specialist — each with independent analysis + cross-discussion"},
+    {"text": "Includes Not Recommended section with rejected ideas", "passed": true, "evidence": "5 rejected ideas: pipeline collapse, Agent Teams removal, full voting adoption, full autonomy, retry reduction — each with reasoning"}
+  ]
+}

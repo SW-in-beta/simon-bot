@@ -1,0 +1,10 @@
+{
+  "eval_id": 2,
+  "eval_name": "cli-tool-scope-guard",
+  "prompt": "CSV 파일을 읽어서 JSON으로 변환하는 CLI 도구를 만들어줘. 인코딩 자동 감지, 컬럼 필터링, 대용량 파일 스트리밍 지원이 필요해. Phase 0까지만 진행해줘.",
+  "assertions": [
+    {"text": "프로젝트가 simon-company 규모가 아님을 감지함 (필요 팀 수, 인프라, 디자인, Feature 수 기준)"},
+    {"text": "simon-bot-pm 또는 simon-bot 사용을 제안함"},
+    {"text": "리다이렉트 제안 시 이유를 설명함 (UI 없음, 1-2팀 규모, 인프라 불필요 등)"}
+  ]
+}

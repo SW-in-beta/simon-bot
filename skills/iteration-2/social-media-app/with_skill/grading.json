@@ -1,0 +1,40 @@
+{
+  "eval_id": 1,
+  "eval_name": "social-media-app",
+  "configuration": "with_skill",
+  "expectations": [
+    {
+      "text": "roster.json 파일이 생성되고 Design, Frontend, Backend, DBA 팀이 활성화됨",
+      "passed": true,
+      "evidence": "roster.json 파일이 존재하며, design(active: true, lead: 'Design Lead'), frontend(active: true, lead: 'Frontend Lead'), backend(active: true, lead: 'Backend Lead'), dba(active: true, lead: 'DBA') 모두 활성화 상태. ML팀만 비활성화."
+    },
+    {
+      "text": "User Story에 INVEST 기준이 적용됨 (Independent, Valuable, Small, Testable 등의 관점이 반영됨)",
+      "passed": true,
+      "evidence": "spec.md의 각 User Story에 'Independent Test' 항목이 명시되어 있고, 각 스토리가 독립적으로 테스트 가능하도록 설계됨. spec-review-scores.md에서 critic이 'INVEST 기준 충족: 모든 스토리가 Independent, Negotiable, Valuable, Estimable, Small, Testable'로 평가. phase-1-review.md Round 1에서도 '모든 User Story가 INVEST 기준을 충족하는가? - PASS'로 각 항목(I/N/V/E/S/T)별 근거가 기술됨."
+    },
+    {
+      "text": "Story Map이 Activity → Task → Story 계층 구조로 생성됨",
+      "passed": true,
+      "evidence": "story-map.md에 5개 Activity(가입/인증, 콘텐츠 생산, 콘텐츠 소비, 소셜 연결, 알림/관리)가 정의되고, 각 Activity 아래 Tasks(회원가입, 로그인, 사진 게시물 작성 등)가 배치되며, Tasks 아래 Stories(US-1~US-13)가 P1/P2/P3 우선순위별로 계층적으로 구조화됨. ASCII 다이어그램으로 Activity → Tasks → Stories 3단 계층이 명확히 표현됨."
+    },
+    {
+      "text": "Walking Skeleton이 식별됨 (핵심 흐름의 최소 구현이 Release 1 또는 Sprint 1으로 지정)",
+      "passed": true,
+      "evidence": "story-map.md에 'Walking Skeleton (Sprint 1 목표)' 섹션이 있으며, '핵심 흐름의 최소 구현 - 각 Activity에서 최소 필수 Task를 수평으로 연결'로 정의. 구체적 흐름: '가입(이메일) -> 로그인 -> 사진 업로드 -> 피드 조회 -> 팔로우 -> 좋아요/댓글 -> 알림 확인'. Release 계획에서 'Release 1 (Walking Skeleton - MVP)'로 P1 스토리 전체가 할당됨."
+    },
+    {
+      "text": "spec.md 또는 story-map.md 파일이 생성됨",
+      "passed": true,
+      "evidence": "spec.md(237줄, 13개 User Story, Functional Requirements, Edge Cases, Key Entities, Success Criteria 포함)와 story-map.md(83줄, Activity-Task-Story 구조, Walking Skeleton, Release 계획, 의존성 그래프 포함) 모두 생성됨."
+    },
+    {
+      "text": "constitution.md 파일이 생성됨",
+      "passed": true,
+      "evidence": "constitution.md 파일이 존재하며, Core Principles 5개(사용자 경험 최우선, 보안은 타협 불가, KISS, 점진적 가치 전달, TDD), Quality Gates(커버리지 80%, 응답시간 등), Constraints(기술적/비즈니스/비기능 요구사항)가 포함됨."
+    }
+  ],
+  "pass_rate": 1.0,
+  "total_passed": 6,
+  "total_assertions": 6
+}

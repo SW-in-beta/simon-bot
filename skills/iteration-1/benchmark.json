@@ -1,0 +1,140 @@
+{
+  "metadata": {
+    "skill_name": "simon-company",
+    "skill_path": "/Users/simon.lee/.claude/skills/simon-company",
+    "executor_model": "claude-opus-4-6",
+    "timestamp": "2026-03-07T06:40:00Z",
+    "evals_run": ["social-media-app", "cli-tool-scope-guard", "ml-recommender"],
+    "runs_per_configuration": 3
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "social-media-app",
+      "configuration": "with_skill",
+      "pass_rate": 1.0,
+      "passed": 6,
+      "total": 6,
+      "tokens": 62649,
+      "time_seconds": 351.2,
+      "assertions": [
+        {"text": "roster.json 파일이 생성되고 Design, Frontend, Backend, DBA 팀이 활성화됨", "passed": true},
+        {"text": "User Story에 INVEST 기준이 적용됨", "passed": true},
+        {"text": "Story Map이 Activity → Task → Story 계층 구조로 생성됨", "passed": true},
+        {"text": "Walking Skeleton이 식별됨", "passed": true},
+        {"text": "spec.md 또는 story-map.md 파일이 생성됨", "passed": true},
+        {"text": "constitution.md 파일이 생성됨", "passed": true}
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "social-media-app",
+      "configuration": "without_skill",
+      "pass_rate": 0.167,
+      "passed": 1,
+      "total": 6,
+      "tokens": 22777,
+      "time_seconds": 190.3,
+      "assertions": [
+        {"text": "roster.json 파일이 생성되고 Design, Frontend, Backend, DBA 팀이 활성화됨", "passed": false},
+        {"text": "User Story에 INVEST 기준이 적용됨", "passed": false},
+        {"text": "Story Map이 Activity → Task → Story 계층 구조로 생성됨", "passed": false},
+        {"text": "Walking Skeleton이 식별됨", "passed": false},
+        {"text": "spec.md 또는 story-map.md 파일이 생성됨", "passed": true},
+        {"text": "constitution.md 파일이 생성됨", "passed": false}
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "cli-tool-scope-guard",
+      "configuration": "with_skill",
+      "pass_rate": 1.0,
+      "passed": 3,
+      "total": 3,
+      "tokens": 26183,
+      "time_seconds": 110.8,
+      "assertions": [
+        {"text": "프로젝트가 simon-company 규모가 아님을 감지함", "passed": true},
+        {"text": "simon-bot-pm 또는 simon-bot 사용을 제안함", "passed": true},
+        {"text": "리다이렉트 제안 시 이유를 설명함", "passed": true}
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "cli-tool-scope-guard",
+      "configuration": "without_skill",
+      "pass_rate": 0.333,
+      "passed": 1,
+      "total": 3,
+      "tokens": 11711,
+      "time_seconds": 89.5,
+      "assertions": [
+        {"text": "프로젝트가 simon-company 규모가 아님을 감지함", "passed": true},
+        {"text": "simon-bot-pm 또는 simon-bot 사용을 제안함", "passed": false},
+        {"text": "리다이렉트 제안 시 이유를 설명함", "passed": false}
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "ml-recommender",
+      "configuration": "with_skill",
+      "pass_rate": 1.0,
+      "passed": 5,
+      "total": 5,
+      "tokens": 71579,
+      "time_seconds": 378.8,
+      "assertions": [
+        {"text": "roster.json에 ML 팀이 활성화됨", "passed": true},
+        {"text": "roster.json에 Backend, Frontend(대시보드), DBA 팀이 활성화됨", "passed": true},
+        {"text": "ML 관련 User Story가 포함됨", "passed": true},
+        {"text": "Story Map이 생성됨", "passed": true},
+        {"text": "spec.md 파일이 생성됨", "passed": true}
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "ml-recommender",
+      "configuration": "without_skill",
+      "pass_rate": 0.2,
+      "passed": 1,
+      "total": 5,
+      "tokens": 32666,
+      "time_seconds": 333.6,
+      "assertions": [
+        {"text": "roster.json에 ML 팀이 활성화됨", "passed": false},
+        {"text": "roster.json에 Backend, Frontend(대시보드), DBA 팀이 활성화됨", "passed": false},
+        {"text": "ML 관련 User Story가 포함됨", "passed": true},
+        {"text": "Story Map이 생성됨", "passed": false},
+        {"text": "spec.md 파일이 생성됨", "passed": false}
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "mean_pass_rate": 1.0,
+      "mean_tokens": 53470,
+      "mean_time_seconds": 280.3,
+      "total_passed": 14,
+      "total_assertions": 14
+    },
+    "without_skill": {
+      "mean_pass_rate": 0.214,
+      "mean_tokens": 22385,
+      "mean_time_seconds": 204.5,
+      "total_passed": 3,
+      "total_assertions": 14
+    },
+    "delta": {
+      "pass_rate": "+0.786",
+      "time_seconds": "+75.8",
+      "tokens": "+31085"
+    }
+  },
+  "notes": [
+    "with_skill은 모든 테스트 케이스에서 100% pass rate 달성",
+    "without_skill 대비 토큰 사용량이 약 2.4배이지만, 구조화된 산출물(roster.json, story-map.md, constitution.md 등)을 체계적으로 생성",
+    "Scope Guard(cli-tool-scope-guard)가 정확하게 작동하여 소규모 프로젝트를 감지하고 리다이렉트 제안",
+    "ML 팀 동적 활성화가 정상 작동 (ml-recommender에서 9개 팀 편성)",
+    "INVEST 기준, Story Mapping, Walking Skeleton 등 Agile 방법론이 with_skill에서만 체계적으로 적용됨"
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "expectations": [
+    {
+      "text": "PR 코멘트를 gh api로 수집한다",
+      "passed": true,
+      "evidence": "Step 1-2에서 'gh api repos/{owner}/{repo}/pulls/42/comments'를 사용하여 인라인 리뷰 코멘트를 수집. 다만 issues 코멘트(일반 PR 코멘트)는 'gh pr view 42 --comments'로 대체 수집"
+    },
+    {
+      "text": "코드 수정 후 커밋 + 푸시한다",
+      "passed": true,
+      "evidence": "Step 7에서 git add → git commit -m 'fix: 인증 미들웨어 에러 핸들링 개선' → git push 순서를 명시"
+    },
+    {
+      "text": "수정 반영 양식으로 인라인 리뷰를 재작성한다",
+      "passed": false,
+      "evidence": "수정 반영 양식이 없음. Step 8-3에서 'gh pr comment 42 --body'로 일반 코멘트만 남김. '[변경 단위 N: 제목] — 수정 반영', '피드백 요약', 'Before/After 코드 발췌', '영향 범위' 등의 구조화된 양식 부재"
+    },
+    {
+      "text": "CI Watch를 재시작한다",
+      "passed": false,
+      "evidence": "CI Watch 개념 자체가 없음. Step 6에서 로컬로 lint/build를 실행하지만, background agent를 통한 CI 모니터링이나 자동 수정 루프는 없음"
+    },
+    {
+      "text": "기존 코멘트를 resolve 처리한다",
+      "passed": false,
+      "evidence": "기존 코멘트 resolve 처리가 언급되지 않음. 수정 후 새 일반 코멘트만 남기고, 기존 인라인 코멘트에 대한 resolve는 수행하지 않음"
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 3,
+    "total": 5,
+    "pass_rate": 0.4
+  },
+  "timing": {
+    "total_tokens": 13014,
+    "duration_ms": 50833,
+    "total_duration_seconds": 50.8
+  },
+  "claims": [
+    {
+      "claim": "TDD를 준수하여 테스트를 작성한다",
+      "type": "process",
+      "verified": true,
+      "evidence": "Step 5에서 기존 테스트 실행 + 에러 핸들링 시나리오별 테스트 추가를 명시하고, '핵심 원칙' 표에서 TDD 준수를 강조"
+    },
+    {
+      "claim": "PR에 인라인 코드 리뷰를 다시 작성한다",
+      "type": "quality",
+      "verified": false,
+      "evidence": "GitHub API를 통한 인라인 리뷰 재작성이 없음. gh pr comment로 일반 코멘트만 남김"
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "PR 코멘트를 gh api로 수집한다",
+        "reason": "without_skill도 gh api를 사용하여 코멘트를 수집하므로 이 assertion은 스킬 유무를 구분하지 못함. 더 discriminating한 assertion(예: '인라인 리뷰 코멘트와 일반 코멘트를 모두 gh api로 수집한다')이 필요"
+      }
+    ],
+    "overall": "without_skill에서도 기본적인 피드백 수집과 코드 수정은 가능하지만, 구조화된 인라인 리뷰 재작성, CI Watch, 코멘트 resolve 등 스킬의 핵심 차별점은 나타나지 않음"
+  }
+}

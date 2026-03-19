@@ -1,0 +1,82 @@
+[
+  {
+    "query": "/simon-company 에어비앤비 같은 숙소 예약 플랫폼을 만들어줘. 호스트가 숙소를 등록하고 게스트가 예약/결제하는 풀스택 웹앱이 필요해.",
+    "should_trigger": true
+  },
+  {
+    "query": "simon-company 스킬 써서 사내 HR 시스템을 처음부터 만들어줘. 직원 관리, 근태/휴가, 급여 계산, 조직도, 채용 파이프라인이 필요합니다.",
+    "should_trigger": true
+  },
+  {
+    "query": "/simon-company 우리 회사 데이터를 좀 더 잘 활용하고 싶은데, 구체적으로 뭘 만들어야 할지 모르겠어요. 같이 정리해줄 수 있어요?",
+    "should_trigger": true
+  },
+  {
+    "query": "simon-company로 B2B SaaS 고객 지원 티켓 시스템 만들어줘. 멀티테넌트 아키텍처에 실시간 채팅, ML 자동 분류, 대시보드 분석 기능 필요해.",
+    "should_trigger": true
+  },
+  {
+    "query": "/simon-company 중고거래 앱 만들어줘. 당근마켓 스타일로 위치 기반 매칭, 채팅, 거래 후기, 매너 온도 시스템, 관리자 도구까지 풀스택으로.",
+    "should_trigger": true
+  },
+  {
+    "query": "simon-company 스킬로 온라인 교육 플랫폼 만들어줘. 강사가 강의 올리고 학생이 수강하는 형태로 결제, 진도 추적, 퀴즈, 수료증 발급 포함.",
+    "should_trigger": true
+  },
+  {
+    "query": "/simon-company IoT 센서 데이터 실시간 모니터링 시스템 구축해줘. MQTT, 시계열DB, React 대시보드, 알림, Docker, CI/CD 다 포함해서.",
+    "should_trigger": true
+  },
+  {
+    "query": "simon-company 써서 프로젝트 관리 도구 하나 만들어줘. 칸반보드, 타임라인, 팀원 관리, 알림, 리포팅. 회사처럼 팀 편성해서 진행해줘.",
+    "should_trigger": true
+  },
+  {
+    "query": "/simon-company 병원 예약 시스템 만들어줘. 환자 예약, 의사 일정 관리, 관리자 대시보드, 알림, 리뷰, 결제까지 전체 서비스를 완성해줘.",
+    "should_trigger": true
+  },
+  {
+    "query": "simon-company 스킬을 사용해서 사용자 행동 기반 추천 시스템을 만들고 싶어. REST API + 관리자 대시보드 + collaborative filtering 모델까지 전체 파이프라인으로.",
+    "should_trigger": true
+  },
+  {
+    "query": "에어비앤비 같은 숙소 예약 플랫폼을 만들어줘. 호스트가 숙소를 등록하고 게스트가 예약/결제하는 풀스택 웹앱이 필요해. 관리자 대시보드랑 검색, 리뷰도 있어야 해.",
+    "should_trigger": false
+  },
+  {
+    "query": "회사처럼 일해서 프로젝트 하나 완성해줘. 칸반보드, 타임라인, 팀원 관리, 알림, 리포팅 기능 있는 프로젝트 관리 도구 만들어줘.",
+    "should_trigger": false
+  },
+  {
+    "query": "전체 프로젝트를 맡기고 싶어요. 온라인 쇼핑몰인데, 상품 관리, 장바구니, 결제, 주문 추적, 리뷰까지 다 필요합니다.",
+    "should_trigger": false
+  },
+  {
+    "query": "서비스 하나 만들어줘. 사내 HR 시스템인데 직원 관리, 근태, 급여 계산이 필요해. Docker로 배포 가능하게.",
+    "should_trigger": false
+  },
+  {
+    "query": "users 테이블에 phone_number 컬럼 추가하고 관련 API 엔드포인트 수정해줘. 마이그레이션 파일도 생성해줘.",
+    "should_trigger": false
+  },
+  {
+    "query": "이 React 컴포넌트에서 버튼 클릭하면 모달이 안 닫히는 버그가 있어. src/components/UserModal.tsx 확인하고 고쳐줘.",
+    "should_trigger": false
+  },
+  {
+    "query": "CSV 파일을 파싱해서 PostgreSQL에 벌크 임포트하는 Python 스크립트 만들어줘. CLI로 실행 가능하게 argparse 사용.",
+    "should_trigger": false
+  },
+  {
+    "query": "우리 서비스 아키텍처를 분석해서 RFC 형태로 정리해줘. 모놀리식에서 마이크로서비스 전환 검토 중이야.",
+    "should_trigger": false
+  },
+  {
+    "query": "Next.js 대시보드 페이지 리디자인해줘. src/app/dashboard/page.tsx 차트가 너무 기본적이고 레이아웃이 답답해. UI만 개선.",
+    "should_trigger": false
+  },
+  {
+    "query": "GitHub Actions CI/CD 파이프라인 설정해줘. main 브랜치 push 시 테스트 → 빌드 → ECR 푸시 → ECS 배포. .github/workflows/ 밑에 yml 만들면 돼.",
+    "should_trigger": false
+  }
+]

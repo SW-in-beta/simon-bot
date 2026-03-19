@@ -1,0 +1,60 @@
+{
+  "project_name": "csv2json-cli",
+  "current_phase": 0,
+  "phase_status": "completed",
+  "execution_mode": "auto",
+  "project_type": "greenfield",
+  "scope_guard": {
+    "result": "redirect_recommended",
+    "recommended_skill": "simon-bot-pm",
+    "user_override": true
+  },
+  "phases": {
+    "0": {
+      "name": "Company Setup",
+      "status": "completed",
+      "substeps": {
+        "0-A": {
+          "name": "프로젝트 유형 판별",
+          "status": "completed",
+          "result": "greenfield"
+        },
+        "0-B": {
+          "name": "팀 편성 (Dynamic Roster)",
+          "status": "completed",
+          "active_teams": ["pm", "cto", "backend", "qa"],
+          "inactive_teams": ["design", "frontend", "dba", "devops", "ml"]
+        },
+        "0-C": {
+          "name": "실행 모드",
+          "status": "completed",
+          "result": "auto"
+        },
+        "0-D": {
+          "name": "초기 상태 저장",
+          "status": "completed"
+        }
+      }
+    },
+    "1": { "name": "Discovery & Spec", "status": "pending" },
+    "2": { "name": "Architecture & Design Sprint", "status": "pending" },
+    "3": { "name": "Sprint Planning & Backlog", "status": "pending" },
+    "4": { "name": "Sprint Execution", "status": "pending" },
+    "5": { "name": "QA & Integration", "status": "pending" },
+    "6": { "name": "Deployment & Operations", "status": "pending" },
+    "7": { "name": "Delivery & Handoff", "status": "pending" }
+  },
+  "decision_trail": [
+    "[Decision] Scope Guard — CLI 데이터 처리 도구로 simon-bot-pm 리다이렉트 권장. 사용자 오버라이드로 진행",
+    "[Decision] 프로젝트 유형: Greenfield — 새 프로젝트, 기존 코드베이스 없음",
+    "[Decision] Design팀 비활성화 — CLI 프로젝트로 UI 없음",
+    "[Decision] Frontend팀 비활성화 — CLI 도구로 사용자 인터페이스 구현 불필요",
+    "[Decision] Backend팀 활성화 — CSV 파싱, 인코딩 감지, 스트리밍 처리 등 핵심 로직 구현",
+    "[Decision] DBA팀 비활성화 — 데이터베이스 불필요, stateless 파일 변환 도구",
+    "[Decision] DevOps팀 비활성화 — 로컬 실행 CLI로 인프라 불필요",
+    "[Decision] ML팀 비활성화 — ML/AI 기능 없음",
+    "[Decision] 실행 모드: 자동 진행 — 각 단계 완료 즉시 다음 단계로"
+  ],
+  "created_at": "2026-03-07",
+  "last_updated": "2026-03-07"
+}

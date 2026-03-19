@@ -1,0 +1,23 @@
+{
+  "project_name": "사용자 행동 기반 상품 추천 시스템",
+  "project_type": "greenfield",
+  "current_phase": 1,
+  "phase_status": {
+    "phase_0": "completed",
+    "phase_1": "completed",
+    "phase_2": "pending",
+    "phase_3": "pending",
+    "phase_4": "pending",
+    "phase_5": "pending",
+    "phase_6": "pending",
+    "phase_7": "pending"
+  },
+  "execution_mode": "auto",
+  "active_teams": ["pm", "cto", "design", "frontend", "backend", "qa", "dba", "devops", "ml"],
+  "created_at": "2026-03-07",
+  "decisions": [
+    "[Decision] Greenfield 프로젝트 — 새로운 추천 시스템 구축",
+    "[Decision] 9개 전체 팀 활성화 — REST API + 대시보드 + ML + DB + DevOps 모두 필요",
+    "[Decision] 자동 진행 모드 — 사용자 자동 승인"
+  ]
+}

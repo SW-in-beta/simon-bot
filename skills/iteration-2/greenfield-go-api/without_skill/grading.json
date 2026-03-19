@@ -1,0 +1,32 @@
+{
+  "eval_id": 1,
+  "eval_name": "greenfield-go-api",
+  "config": "without_skill",
+  "expectations": [
+    {
+      "text": "Phase 0에서 프로젝트 유형을 greenfield로 자동 판별하고 확인만 한다",
+      "passed": false,
+      "evidence": "Phase 개념 없이 즉시 전체 코드 구현을 제시 (1137줄의 보일러플레이트 코드)"
+    },
+    {
+      "text": "자동 진행 vs 승인 후 진행 실행 모드 선택 질문을 한다",
+      "passed": false,
+      "evidence": "실행 모드 개념 없음"
+    },
+    {
+      "text": "인터뷰가 3-5 라운드, 총 8-12개 질문 이내로 진행된다",
+      "passed": false,
+      "evidence": "인터뷰 없이 바로 코드 제시"
+    },
+    {
+      "text": "코드를 바로 작성하지 않고 먼저 계획/인터뷰 단계를 진행한다",
+      "passed": false,
+      "evidence": "즉시 전체 프로젝트 코드(models, handlers, services, repos, migrations, router)를 제시"
+    },
+    {
+      "text": "Phase 번호나 단계를 언급하며 체계적 워크플로를 따른다",
+      "passed": false,
+      "evidence": "Phase 기반 워크플로 없음"
+    }
+  ]
+}

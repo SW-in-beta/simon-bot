@@ -1,0 +1,32 @@
+{
+  "eval_id": 2,
+  "eval_name": "realtime-focus",
+  "prompt": "cheer93 데모 보여줘. 특히 실시간 위치 추적이랑 응원 기능 위주로. 더미 데이터도 필요할 거야.",
+  "assertions": [
+    {
+      "id": "2a",
+      "text": "실시간 통신 메커니즘 식별: WebSocket, SSE, Supabase Realtime 등 구체적 기술이 파악되었는지",
+      "type": "structural"
+    },
+    {
+      "id": "2b",
+      "text": "GPS 스트리밍 데이터 계획: 위치 좌표 더미 데이터의 구체적 생성 방법이 있는지 (경로, 간격, 형식)",
+      "type": "structural"
+    },
+    {
+      "id": "2c",
+      "text": "모킹 전략 구체성: 어떤 엔드포인트를 어떤 방식으로 모킹할지 구체적으로 명시되었는지",
+      "type": "structural"
+    },
+    {
+      "id": "2d",
+      "text": "실시간 코드 플로우: GPS 데이터 수신 → 처리 → UI 반영까지의 코드 경로가 추적되었는지",
+      "type": "structural"
+    },
+    {
+      "id": "2e",
+      "text": "응원 기능 플로우: 응원 메시지 전송 → 수신 → 표시까지의 코드 경로가 추적되었는지",
+      "type": "structural"
+    }
+  ]
+}

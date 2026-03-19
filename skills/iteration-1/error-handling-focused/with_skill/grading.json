@@ -1,0 +1,39 @@
+{
+  "eval_id": 2,
+  "eval_name": "error-handling-focused",
+  "expectations": [
+    {
+      "text": "Step 4에서 제안을 하나씩 상세히 설명하고, 각 제안마다 개별적으로 판단을 요청한다",
+      "passed": true,
+      "evidence": "실행 로그 line 102-132: P-001, P-002, P-003 각각 '[P-00N] 상세 설명 후 판정 요청' 형태로 개별 제시. 일괄 판단 요청 없음."
+    },
+    {
+      "text": "각 제안 설명에 6개 필수 필드가 포함된다",
+      "passed": true,
+      "evidence": "실행 로그 line 106-132: 각 제안마다 현재 상태(파일:줄 수준), 문제 시나리오, 제안 내용, 변경 대상 파일, 기대 효과와 비용, 기존 메커니즘과의 관계 모두 포함."
+    },
+    {
+      "text": "Step 5-A-2에서 커버리지 체크를 수행한다",
+      "passed": true,
+      "evidence": "실행 로그 line 150-168: 정방향 제안-파일 매트릭스 + 역방향 파일-제안 확인표 이중 교차 대조. '모든 제안과 파일 누락 없이 배정 완료.'"
+    },
+    {
+      "text": "Step 6-A에서 파일별 검증 결과를 테이블 형식으로 출력한다",
+      "passed": true,
+      "evidence": "실행 로그 line 213-221: frontmatter/참조 경로/상호 참조/내용 반영/결과 5열 테이블. 3파일 모두 PASS. FAIL 항목 없음."
+    },
+    {
+      "text": "Step 6-B에서 6개 카테고리 체크리스트를 실행하고 결과 테이블을 출력한다",
+      "passed": true,
+      "evidence": "실행 로그 line 223-272: 파일별로 분리하여 (SKILL.md 22항목 + error-resilience.md 5항목 + grind-error-resilience.md 5항목) 6개 카테고리 전 항목 순회. 모든 항목 PASS."
+    },
+    {
+      "text": "Step 6에서 skill-best-practices.md를 Read 도구로 다시 읽는다",
+      "passed": true,
+      "evidence": "실행 로그 line 210-211: 'skill-best-practices.md를 Step 6 시점에서 다시 Read 완료 (Step 3에서 이미 읽었더라도 Step 6에서 반드시 다시 읽도록 스킬이 지시)'"
+    }
+  ],
+  "pass_rate": 1.0,
+  "total_passed": 6,
+  "total_assertions": 6
+}

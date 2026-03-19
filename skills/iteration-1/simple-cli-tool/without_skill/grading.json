@@ -1,0 +1,22 @@
+{
+  "eval_id": 3,
+  "eval_name": "simple-cli-tool",
+  "config": "without_skill",
+  "expectations": [
+    {
+      "text": "이 요청이 전체 프로젝트 관리가 아닌 단일 기능임을 인식한다",
+      "passed": true,
+      "evidence": "단일 CLI 도구로 적절한 규모의 응답을 제공 (과도한 프로젝트 관리 프로세스 없이 직접 구현 제안)"
+    },
+    {
+      "text": "simon-bot 또는 더 간단한 접근을 제안하거나, PM 워크플로 전체를 적용하지 않는다",
+      "passed": false,
+      "evidence": "simon-bot 개념 자체를 알지 못하므로 리다이렉트 불가. 직접 구현 제안으로 대응"
+    },
+    {
+      "text": "단순한 요청에 대해 7-phase 파이프라인 전체를 강제하지 않는다",
+      "passed": true,
+      "evidence": "PM 파이프라인 없이 단순한 구현 제안을 직접 제공. 요청 규모에 적절한 응답"
+    }
+  ]
+}

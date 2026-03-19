@@ -1,0 +1,58 @@
+{
+  "expectations": [
+    {
+      "text": "STANDALONE 모드를 올바르게 감지한다",
+      "passed": false,
+      "evidence": "모드 감지 개념 자체가 없음. review-sequence.md 존재 여부를 확인하지 않으며, STANDALONE/CONNECTED 분기가 없음. 단순히 git diff/log로 변경사항을 파악하는 일반적 접근"
+    },
+    {
+      "text": "architect와 writer agent를 spawn한다",
+      "passed": false,
+      "evidence": "agent spawn이 전혀 없음. 모든 작업을 단일 에이전트가 순차적으로 수행. Step 2에서 파일을 직접 Read하고, Step 3에서 직접 Grep 검색"
+    },
+    {
+      "text": "review-sequence.md를 생성한다",
+      "passed": false,
+      "evidence": "review-sequence.md를 생성하지 않음. 구조화된 변경 단위 분석 없이 Step 7에서 직접 리뷰 요약을 텍스트로 출력"
+    },
+    {
+      "text": "STANDALONE 양식(변경 동기)을 사용한다",
+      "passed": false,
+      "evidence": "구조화된 인라인 리뷰 양식이 없음. Step 7의 출력은 일반적인 Critical/Major/Minor 분류의 리뷰 텍스트. '변경 동기', '전문가 우려사항', '트레이드오프' 등의 필드가 없음"
+    },
+    {
+      "text": "standalone-analysis.md를 읽는다",
+      "passed": false,
+      "evidence": "스킬이 없으므로 standalone-analysis.md 참조 자체가 불가능. 어떤 reference 파일도 읽지 않음"
+    }
+  ],
+  "summary": {
+    "passed": 0,
+    "failed": 5,
+    "total": 5,
+    "pass_rate": 0.0
+  },
+  "timing": {
+    "total_tokens": 14028,
+    "duration_ms": 72137,
+    "total_duration_seconds": 72.1
+  },
+  "claims": [
+    {
+      "claim": "보안 관점 집중 검토를 수행한다 (Step 5)",
+      "type": "quality",
+      "verified": true,
+      "evidence": "JWT 구현, 인증 미들웨어, 로그인/로그아웃 API, 일반 보안에 대한 상세 체크리스트가 포함됨"
+    },
+    {
+      "claim": "Draft PR이나 인라인 코멘트를 생성한다",
+      "type": "process",
+      "verified": false,
+      "evidence": "PR 생성이나 GitHub API를 통한 인라인 코멘트 작성이 전혀 없음. 세션 내 텍스트 출력만 수행"
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "without_skill 베이스라인으로서 적절한 대조군 역할. 스킬 없이는 모드 감지, agent 분석, 구조화된 양식, PR/인라인 리뷰 워크플로가 전혀 나타나지 않음을 확인"
+  }
+}

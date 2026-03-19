@@ -1,0 +1,50 @@
+{
+  "project_name": "Picstory - 소셜 미디어 웹앱",
+  "project_type": "greenfield",
+  "teams": {
+    "pm": {
+      "active": true,
+      "lead": "PM",
+      "reason": "항상 활성 - 요구사항 정의, PRD 관리"
+    },
+    "cto": {
+      "active": true,
+      "lead": "CTO",
+      "reason": "항상 활성 - 기술 아키텍처 결정, 품질 기준"
+    },
+    "design": {
+      "active": true,
+      "lead": "Design Lead",
+      "reason": "웹앱 UI/UX 필요 - 피드, 프로필, 업로드 등 핵심 화면 설계"
+    },
+    "frontend": {
+      "active": true,
+      "lead": "Frontend Lead",
+      "reason": "웹앱 사용자 인터페이스 구현 필요"
+    },
+    "backend": {
+      "active": true,
+      "lead": "Backend Lead",
+      "reason": "REST API, 인증, 파일 업로드, 피드 등 서버 로직 필요"
+    },
+    "qa": {
+      "active": true,
+      "lead": "QA Lead",
+      "reason": "항상 활성 - E2E, 보안 검증"
+    },
+    "dba": {
+      "active": true,
+      "lead": "DBA",
+      "reason": "사용자, 게시물, 팔로우, 좋아요, 댓글, 알림 등 관계형 데이터 모델 필요"
+    },
+    "devops": {
+      "active": true,
+      "lead": "DevOps Lead",
+      "reason": "Docker 컨테이너화, CI/CD 파이프라인, 이미지 스토리지 필요"
+    },
+    "ml": {
+      "active": false,
+      "reason": "피드 알고리즘이 단순 최신순이므로 ML 불필요"
+    }
+  }
+}

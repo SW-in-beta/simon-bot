@@ -1,0 +1,32 @@
+## Source Summary
+- **제목**: Prompting best practices (Anthropic Official Prompt Engineering Guide)
+- **유형**: 공식 기술 문서 (Anthropic Docs)
+- **핵심 주제**: Claude 최신 모델(Opus 4.6, Sonnet 4.6, Haiku 4.5)을 위한 프롬프트 엔지니어링 종합 가이드
+- **주요 아이디어**:
+  - **명확성과 구체성**: Claude를 "맥락이 없는 신입 직원"으로 생각하고, 원하는 바를 정확히 설명할수록 결과가 좋다. "Golden Rule" -- 동료에게 보여줬을 때 혼란스러우면 Claude도 혼란스러워한다.
+  - **맥락과 동기 제공**: 지시 뒤에 왜 그런 행동이 중요한지 설명하면, Claude가 목표를 더 잘 이해하고 맥락에 맞게 일반화한다.
+  - **Few-shot 예시 활용**: 3-5개의 관련성 높고, 다양하며, 구조화된(`<example>` 태그) 예시가 출력 형식/톤/구조를 안정적으로 유도한다.
+  - **XML 태그로 프롬프트 구조화**: `<instructions>`, `<context>`, `<input>` 등으로 복합 프롬프트의 각 부분을 태깅하여 오해석을 방지한다.
+  - **역할 부여 (Role Prompting)**: 시스템 프롬프트에 역할을 설정하면 Claude의 행동과 톤이 집중된다.
+  - **긴 컨텍스트 처리**: (1) 긴 데이터를 상단에 배치, (2) 여러 문서를 XML `<document>` 태그로 구조화, (3) 인용 기반 응답으로 노이즈 제거
+  - **출력 형식 제어**: (1) "하지 마"보다 "대신 이렇게 해"가 효과적, (2) XML 형식 지시자 활용, (3) 프롬프트 스타일과 원하는 출력 스타일 일치, (4) 마크다운 최소화를 위한 산문 지시
+  - **도구 사용 최적화**: (1) "suggest" 대신 "change"/"make" 등 행동 지향 동사 사용, (2) 병렬 도구 호출 극대화를 위한 명시적 지시, (3) 과도한 도구 사용 방지를 위한 가이드
+  - **Thinking/Reasoning 활용**: (1) Adaptive thinking이 extended thinking보다 일반적으로 우수, (2) 과도한 분석 방지를 위한 "commit and course-correct" 지시, (3) 자기 검증("verify your answer against...") 추가, (4) `<thinking>` 태그를 few-shot 예시에 포함 가능
+  - **Agentic 시스템 설계**: (1) 상태 관리에 구조화(JSON) + 비구조화(텍스트) 혼합 사용, (2) git 기반 상태 추적, (3) 컨텍스트 윈도우 인식 + 멀티 윈도우 워크플로, (4) 자율성과 안전성의 균형 -- 파괴적 행동 전 확인 요청, (5) subagent 오케스트레이션 -- 과도한 위임 방지, (6) self-correction 패턴 (생성 -> 검토 -> 개선)
+  - **과잉 엔지니어링 방지**: 요청된 것만 구현, 불필요한 추상화/문서/방어적 코딩 회피, "현재 작업에 필요한 최소 복잡도"를 목표로
+  - **환각 최소화**: 코드를 열기 전에 추측하지 않기, 관련 파일을 먼저 조사 후 답변
+  - **테스트 통과에 집착하지 않기**: 특정 테스트 케이스만을 위한 하드코딩 방지, 일반적 해결책 구현
+  - **연구/검색**: 경쟁 가설 개발 + 신뢰도 추적 + 자기 비판 접근
+- **관련 기법/패턴/도구**:
+  - Few-shot/Multishot Prompting
+  - XML Tag Structuring
+  - Role Prompting (System Prompt)
+  - Chain-of-Thought (CoT) / Extended Thinking / Adaptive Thinking
+  - Structured Outputs (JSON schema)
+  - Prompt Chaining (Self-correction pattern)
+  - Parallel Tool Calling
+  - Subagent Orchestration
+  - Context Window Awareness / Multi-window Workflows
+  - Memory Tool for context transitions
+  - Effort Parameter (low/medium/high/max)
+  - Prompt Generator / Prompt Improver (Console tools)

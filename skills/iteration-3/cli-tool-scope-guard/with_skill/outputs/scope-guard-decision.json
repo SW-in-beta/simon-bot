@@ -1,0 +1,39 @@
+{
+  "decision": "REDIRECT",
+  "target_skill": "simon-bot-pm",
+  "project": "CSV to JSON CLI 변환 도구",
+  "requested_features": [
+    "인코딩 자동 감지",
+    "컬럼 필터링",
+    "대용량 파일 스트리밍"
+  ],
+  "scope_guard_evaluation": {
+    "required_teams": {
+      "value": 2,
+      "threshold": "3개 이상",
+      "result": "BELOW_THRESHOLD",
+      "detail": "Backend(CLI 구현) + QA(테스트)만 필요. Design, Frontend, DevOps, DBA, ML 불필요."
+    },
+    "infrastructure_needed": {
+      "value": false,
+      "threshold": "CI/CD, 배포, 모니터링 필요",
+      "result": "BELOW_THRESHOLD",
+      "detail": "CLI 도구로 로컬 실행만으로 충분. 서버 배포, 컨테이너화, 모니터링 불필요."
+    },
+    "design_needed": {
+      "value": false,
+      "threshold": "UI/UX 설계 필요",
+      "result": "BELOW_THRESHOLD",
+      "detail": "CLI 기반 도구로 UI/UX 설계 불필요. 명령줄 인터페이스만 존재."
+    },
+    "estimated_features": {
+      "value": 3,
+      "threshold": "5개 이상",
+      "result": "BELOW_THRESHOLD",
+      "detail": "핵심 Feature 3개: (1) CSV 파싱 및 JSON 변환, (2) 인코딩 자동 감지, (3) 컬럼 필터링 + 스트리밍. simon-company 기준 5개 미만."
+    }
+  },
+  "all_criteria_below_threshold": true,
+  "redirect_reason": "4개 평가 기준(필요 팀 수, 인프라 필요성, 디자인 필요성, Feature 수) 모두에서 simon-company 임계값 미달. CLI 데이터 처리 도구는 단일 팀(Backend)이 구현 가능한 소규모 프로젝트로, simon-company의 다중 팀 협업 오버헤드(TRP 3라운드, Agent Team, 팀간 Contract 등)가 과도함. simon-bot-pm 또는 simon-bot으로 충분히 높은 품질로 구현 가능.",
+  "recommendation": "simon-bot-pm 스킬을 사용하여 PM이 Feature를 분해하고 simon-bot/simon-bot-grind가 TDD로 구현하는 것을 권장합니다. 사용자가 그래도 simon-company를 원하면 진행 가능합니다."
+}

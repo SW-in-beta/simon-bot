@@ -1,0 +1,6 @@
+{
+  "eval_id": 1,
+  "eval_name": "blog-effective-agents",
+  "prompt": "이 글 보고 simon-bot 스킬 개선해줘: https://www.anthropic.com/engineering/building-effective-agents",
+  "assertions": []
+}

@@ -1,0 +1,32 @@
+{
+  "eval_id": 2,
+  "eval_name": "existing-auth-refactor",
+  "config": "with_skill",
+  "expectations": [
+    {
+      "text": "Phase 0에서 프로젝트 유형을 existing으로 자동 판별한다",
+      "passed": true,
+      "evidence": "'리팩토링', '현재~바꾸고', '기존 API' 키워드로 Existing 자동 판별. 확인만 요청"
+    },
+    {
+      "text": "simon-bot-report로 사전 분석 보고서 작성을 제안한다",
+      "passed": true,
+      "evidence": "'simon-bot-report로 사전 분석 보고서를 먼저 작성할까요?' 제안 + 분석 항목 4가지 나열"
+    },
+    {
+      "text": "인터뷰가 3-4 라운드, 총 8-12개 질문 이내로 진행된다",
+      "passed": true,
+      "evidence": "4 라운드, 10개 질문 (가이드 범위: 3-4 라운드, 8-12개 질문)"
+    },
+    {
+      "text": "5개 서비스 연동에 대한 질문이나 고려를 포함한다",
+      "passed": true,
+      "evidence": "Q2에서 5개 서비스 구성 질문, Q5에서 마이그레이션 순서 질문, PRD에 서비스별 마이그레이션 포함"
+    },
+    {
+      "text": "자동 진행 vs 승인 후 진행 실행 모드 선택 질문을 한다",
+      "passed": true,
+      "evidence": "Phase 0-B에서 선택지 제시 + 보안 민감 프로젝트이므로 승인 후 진행 추천"
+    }
+  ]
+}

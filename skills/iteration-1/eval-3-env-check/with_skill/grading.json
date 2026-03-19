@@ -1,0 +1,31 @@
+{
+  "eval_id": 3,
+  "config": "with_skill",
+  "expectations": [
+    {
+      "text": "환경 변수 점검: .env 파일의 필수 변수 존재 여부와 placeholder 탐지가 되었는지",
+      "passed": true,
+      "evidence": "env-check-report.md '## 1. 환경 변수 검증' 섹션에서 12개 변수를 '설정 완료 (9/12)'와 '미설정 (3/12)'로 분류. 각 변수별 상태(✅/❌)와 검증 방법 명시: NEXT_PUBLIC_SUPABASE_URL — '.env.local 확인 — https://uzfgjfvtabtvgmeshlhm.supabase.co', NEXT_PUBLIC_SUPABASE_ANON_KEY — 'JWT 형식 확인, REST API 200 응답', NEXT_PUBLIC_KAKAO_MAP_KEY — 'JavaScript SDK 앱키 형식(1383447e...)', ENCRYPTION_KEY — '64자 hex 문자열 확인'. 미설정 변수(COOLSMS 3개)도 '❌ 빈 값'으로 정확히 탐지"
+    },
+    {
+      "text": "Supabase 상태 확인: Supabase 접속 가능 여부 또는 설정 필요 사항이 보고되었는지",
+      "passed": true,
+      "evidence": "env-check-report.md '## 2. 인프라 상태 확인' → '### Supabase (클라우드)' 섹션에서 4가지 항목을 실제 HTTP 요청으로 검증: REST API → HTTP 200 정상, Auth → /auth/v1/health HTTP 200 정상, Realtime → /realtime/v1/websocket HTTP 401(인증 필요=서비스 동작), Storage → /storage/v1/ HTTP 404(루트 경로 미존재=서비스 동작). 로컬 Supabase는 '❌ 미실행(No such container)'이지만 '클라우드 사용하므로 필수 아님'으로 평가"
+    },
+    {
+      "text": "카카오 OAuth 키 확인: KAKAO 관련 환경 변수의 설정 여부가 점검되었는지",
+      "passed": true,
+      "evidence": "env-check-report.md에서 NEXT_PUBLIC_KAKAO_MAP_KEY를 '✅ 설정됨 — JavaScript SDK 앱키 형식(1383447e...) — JS SDK용 키는 REST API 인증과 다르므로 브라우저 렌더링 시 확인 필요'로 점검. 카카오 OAuth는 discovery.md에서 '시연용: 카카오 OAuth 실제 로그인 필요'로 언급되어 있으나, env-check-report.md에서 카카오 OAuth Provider 활성화 여부에 대한 별도 점검은 없음. 다만 KAKAO_MAP_KEY 환경 변수의 설정 여부는 확인됨"
+    },
+    {
+      "text": "조치 방안 제시: 누락 항목별로 구체적 선택지(키 설정/모킹/제외)가 제안되었는지",
+      "passed": true,
+      "evidence": "env-check-report.md '## 종합 점검 결과'에서 CoolSMS 미설정에 대해 3가지 선택지 제시: '선택 1: API 키를 지금 설정', '선택 2: SMS 알림 엔드포인트를 모킹하여 시연', '선택 3: SMS 알림 관련 시나리오를 시연에서 제외(인앱+Web Push만 시연)'. Worker 의존성 미설치에 대해 'pnpm --filter cheer93-worker install 실행 필요' 또는 '시뮬레이션 스크립트 사용 시 불필요'. 포트 3000 점유에 대해 '선택 1: kill 7270', '선택 2: PORT=3001 pnpm dev' + Playwright config 주의사항"
+    },
+    {
+      "text": "심각도 분류: 필수(❌) vs 선택(⚠️) 항목이 구분되어 있는지",
+      "passed": true,
+      "evidence": "env-check-report.md '## 종합 점검 결과'에서 ✅/⚠️/❌ 3단계 아이콘으로 심각도 분류. ❌ 항목: 포트 3000 점유(필수 해결), CoolSMS 키 3개(미설정). ⚠️ 항목: Worker 의존성 미설치, Worker 환경 변수 미존재, seed.sql 비어있음, Node.js 버전 불일치. '## 필수 조치 사항 (시연 전 반드시 해결)' 섹션과 '## 선택 조치 사항 (사용자 결정 필요)' 섹션으로 분리. 요약 표에서 '| 카테고리 | 총 항목 | ✅ | ⚠️ | ❌ |' 형식으로 정량적 분류"
+    }
+  ]
+}

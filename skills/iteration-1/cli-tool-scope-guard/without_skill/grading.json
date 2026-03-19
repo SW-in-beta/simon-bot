@@ -1,0 +1,25 @@
+{
+  "eval_id": 2,
+  "eval_name": "cli-tool-scope-guard",
+  "configuration": "without_skill",
+  "expectations": [
+    {
+      "text": "프로젝트가 simon-company 규모가 아님을 감지함",
+      "passed": true,
+      "evidence": "scope-assessment.md에서 '소규모 단일 개발자 프로젝트'로 분류. 기술적 복잡도 '낮음~중간', 외부 의존성 '없음'으로 분석. 하지만 simon-company의 Scope Guard 프레임워크(4가지 기준)를 사용하지 않고, 일반적인 프로젝트 규모 판별."
+    },
+    {
+      "text": "simon-bot-pm 또는 simon-bot 사용을 제안함",
+      "passed": false,
+      "evidence": "simon-bot-pm이나 simon-bot에 대한 언급이 전혀 없음. 단순히 '개발자 1명이 2~3일 내에 완료할 수 있는 프로젝트'로 평가하고 바로 프로젝트 계획을 수립."
+    },
+    {
+      "text": "리다이렉트 제안 시 이유를 설명함",
+      "passed": false,
+      "evidence": "리다이렉트 개념 자체가 없음. 스킬 없이는 Scope Guard → 리다이렉트 제안 워크플로가 작동하지 않음."
+    }
+  ],
+  "pass_rate": 0.333,
+  "total_passed": 1,
+  "total_assertions": 3
+}

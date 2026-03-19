@@ -1,0 +1,22 @@
+{
+  "eval_id": 3,
+  "eval_name": "simple-cli-tool",
+  "config": "without_skill",
+  "expectations": [
+    {
+      "text": "이 요청이 전체 프로젝트 관리가 아닌 단일 기능임을 명시적으로 언급한다",
+      "passed": false,
+      "evidence": "스코프에 대한 명시적 판단 없이 바로 구현 코드를 제시"
+    },
+    {
+      "text": "simon-bot을 명시적으로 언급하며 리다이렉트를 제안한다",
+      "passed": false,
+      "evidence": "simon-bot 개념 자체를 알지 못함"
+    },
+    {
+      "text": "Scope Guard 기준 (기능 수, 파일 수, 의존성 등)을 근거로 들어 왜 PM이 과한지 설명한다",
+      "passed": false,
+      "evidence": "Scope Guard 개념 없음. PM 워크플로 자체가 적용되지 않았으므로 해당 없음"
+    }
+  ]
+}

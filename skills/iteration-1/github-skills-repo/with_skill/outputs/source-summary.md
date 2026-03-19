@@ -1,0 +1,27 @@
+## Source Summary
+- **제목**: Claude Agent SDK for Python (claude-code-sdk-python)
+- **유형**: GitHub / 오픈소스 SDK 라이브러리
+- **핵심 주제**: Claude Code 에이전트를 프로그래밍 방식으로 구축/제어하기 위한 Python SDK
+- **주요 아이디어**:
+  - **이중 API 설계**: 단순 작업용 `query()` (stateless) + 복잡한 대화용 `ClaudeSDKClient` (stateful, bidirectional) — 복잡도에 따라 인터페이스를 분리
+  - **In-Process MCP Server**: `@tool` 데코레이터 + `create_sdk_mcp_server()`로 서브프로세스 없이 MCP 도구를 Python 함수로 직접 정의 — IPC 오버헤드 제거, 디버깅 용이
+  - **Hook 시스템**: `PreToolUse`, `PostToolUse`, `UserPromptSubmit`, `Stop` 등 생명주기 이벤트에 deterministic 콜백 — 도구 실행 전 검증, 위험 명령 차단, 감사 로깅
+  - **`can_use_tool` 콜백**: 도구별 세밀한 권한 제어 — 자동 허용, 거부, 입력 수정(리다이렉트), 위험 패턴 감지, 대화형 승인까지 가능
+  - **AgentDefinition**: 이름, 설명, 프롬프트, 도구 목록, 모델을 지정하여 역할 특화 에이전트 정의 — 다중 에이전트 오케스트레이션
+  - **Plugin 시스템**: `type: "local"` + `path`로 로컬 플러그인 로드 — 확장 기능을 선언적으로 구성
+  - **구조화된 에러 계층**: `ClaudeSDKError` → `CLINotFoundError` / `CLIConnectionError` / `ProcessError` / `CLIJSONDecodeError` — 에러 유형별 다른 복구 전략
+  - **Permission Modes**: `default`, `acceptEdits`, `plan`, `bypassPermissions` — 상황별 권한 수준 조절
+  - **세션 관리 API**: `list_sessions()`, `get_session_messages()`, `SDKSessionInfo` — 프로그래밍 방식으로 세션 조회/복원
+  - **max_turns 제어**: 에이전트 루프의 최대 턴 수 제한 — 무한 루프 방지
+  - **SandboxSettings**: Bash 실행의 격리 설정 — 안전한 코드 실행 환경
+  - **ThinkingConfig**: Extended thinking 활성화/비활성화 — 추론 품질 vs 속도 조절
+  - **비동기 우선 설계**: `anyio` 기반 전면 비동기 — 병렬 에이전트 실행에 최적
+- **관련 기법/패턴/도구**:
+  - Async Iterator 패턴 (스트리밍 응답)
+  - Decorator 기반 도구 등록 (@tool)
+  - Context Manager 패턴 (async with)
+  - Discriminated Union (메시지 타입 판별)
+  - Hook/Middleware 패턴 (생명주기 개입)
+  - Builder 패턴 (ClaudeAgentOptions)
+  - Multi-server MCP 구성 (외부 stdio + 내부 in-process 공존)
+  - 세밀한 도구 권한 콜백 (allow/deny/modify)

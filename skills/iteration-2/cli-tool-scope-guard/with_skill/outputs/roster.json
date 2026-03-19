@@ -1,0 +1,54 @@
+{
+  "project_name": "csv2json-cli",
+  "project_type": "greenfield",
+  "description": "CSV 파일을 읽어서 JSON으로 변환하는 CLI 도구. 인코딩 자동 감지, 컬럼 필터링, 대용량 파일 스트리밍 지원.",
+  "teams": {
+    "pm": {
+      "active": true,
+      "lead": "PM",
+      "reason": "항상 활성 — 요구사항 정의 및 Feature 우선순위 관리"
+    },
+    "cto": {
+      "active": true,
+      "lead": "CTO",
+      "reason": "항상 활성 — 기술 스택 결정(언어, 인코딩 라이브러리), 스트리밍 아키텍처 설계"
+    },
+    "design": {
+      "active": false,
+      "reason": "[Decision] Design팀 비활성화 — CLI 프로젝트로 UI 없음. 터미널 출력만 필요하므로 와이어프레임, 디자인 토큰 등 불필요"
+    },
+    "frontend": {
+      "active": false,
+      "reason": "[Decision] Frontend팀 비활성화 — CLI 도구로 사용자 인터페이스 구현 불필요. TUI도 요구사항에 없음"
+    },
+    "backend": {
+      "active": true,
+      "lead": "Backend Lead",
+      "reason": "[Decision] Backend팀 활성화 — CSV 파싱, 인코딩 감지, 스트리밍 처리 등 핵심 데이터 처리 로직 구현 담당"
+    },
+    "qa": {
+      "active": true,
+      "lead": "QA Lead",
+      "reason": "항상 활성 — 다양한 인코딩/대용량 파일/엣지 케이스 테스트. 규모: Small(핵심 E2E + 보안 기본 검증)"
+    },
+    "dba": {
+      "active": false,
+      "reason": "[Decision] DBA팀 비활성화 — 데이터베이스 불필요. 파일 입출력(CSV→JSON)만 수행하는 stateless 도구"
+    },
+    "devops": {
+      "active": false,
+      "reason": "[Decision] DevOps팀 비활성화 — 로컬 실행 CLI 도구로 CI/CD, Docker, 모니터링 불필요"
+    },
+    "ml": {
+      "active": false,
+      "reason": "[Decision] ML팀 비활성화 — 머신러닝/AI 기능 없음. 인코딩 감지는 규칙 기반 라이브러리 사용"
+    }
+  },
+  "active_team_count": 4,
+  "scope_guard": {
+    "evaluation": "리다이렉트 권장",
+    "recommendation": "simon-bot-pm 또는 simon-bot 사용 권장",
+    "user_override": true,
+    "override_reason": "사용자가 simon-company 진행을 원함. 축소된 팀(4개)으로 진행"
+  }
+}

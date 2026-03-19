@@ -1,0 +1,36 @@
+{
+  "eval_id": 1,
+  "config": "with_skill",
+  "expectations": [
+    {
+      "text": "CONNECTED 모드 감지: .claude/company/spec.md를 발견하고 simon-company 산출물을 활용했는지",
+      "passed": true,
+      "evidence": "discovery.md 첫 줄에 '**모드**: CONNECTED (`.claude/company/` 산출물 활용)'이 명시되어 있으며, 유저스토리 번호(US-1.1, US-2.1 등)와 DB 스키마, 코드 플로우 등이 spec/prd/architecture 산출물 기반으로 작성됨"
+    },
+    {
+      "text": "라우트 맵 포함: 실제 코드 기반 URL → 페이지 매핑 테이블이 있는지",
+      "passed": true,
+      "evidence": "discovery.md에 '## 라우트 맵' 섹션이 있고, URL(/,/login,/auth/callback,/admin,/admin/races/new,/admin/races/[raceId],/admin/races/[raceId]/dashboard,/race/[smartchipId],/race/[smartchipId]/join,/race/[smartchipId]/readyshot) → 페이지 매핑 테이블이 인증 필요 여부와 비고 컬럼까지 포함하여 작성됨"
+    },
+    {
+      "text": "셀렉터 목록 포함: Playwright에서 사용할 실제 CSS/data-testid 셀렉터가 있는지",
+      "passed": true,
+      "evidence": "discovery.md에 '## 핵심 셀렉터' 섹션이 있고, button[aria-label=\"카카오 계정으로 로그인\"], #race-name, #race-date, #smartchip-id, [data-testid=\"kakao-map\"], [data-testid=\"bottom-sheet\"], [data-testid=\"runner-marker-{id}\"], [data-testid=\"alert-banner\"], [data-testid=\"approach-alert-container\"], #bib-number, #garmin-url, #location-consent, #km-input, #nickname-input 등 구체적 CSS/data-testid 셀렉터가 페이지별로 테이블 형태로 나열됨"
+    },
+    {
+      "text": "코드 플로우 추적: 최소 2개 유저스토리에 대해 UI → API → DB 흐름이 추적되었는지",
+      "passed": true,
+      "evidence": "discovery.md에 8개 유저스토리 플로우가 추적됨: 플로우 1(US-1.1 카카오 OAuth: LoginButton→signInWithOAuth→/auth/callback→exchangeCodeForSession→auth.users), 플로우 2(US-2.1+2.3 대회 생성+GPX: RaceForm→createRaceAction→races INSERT→GPX 업로드→course_points INSERT), 플로우 3(US-2.4 상태 변경), 플로우 4(US-3.1 주자 등록), 플로우 5(US-5.1+5.2 응원자 지도), 플로우 6(US-5.3+5.4 알림), 플로우 7(US-4.4 Split), 플로우 8(US-6.2 대시보드). 모두 UI→API→DB 코드 경로가 파일명과 라인 번호까지 포함"
+    },
+    {
+      "text": "시나리오 순서 전략: 임팩트 퍼스트 또는 스토리 아크 등 의도적 순서 배치가 있는지",
+      "passed": true,
+      "evidence": "demo-plan.md에 '## 시나리오 순서 전략' 섹션에서 '투자자 시연이므로 **임팩트 퍼스트** + **클라이맥스 배치**를 따른다'고 명시. 1)오프닝(응원자 관점 완성된 제품 먼저), 2)관리자 흐름(운영 편의성), 3)실시간 추적(기술 하이라이트), 4)알림 시스템(핵심 가치 제안), 5)관리자 대시보드(클로징) 순서로 의도적 배치"
+    },
+    {
+      "text": "나레이션 톤: 투자자 대상 영업/홍보 관점의 가치 중심 설명이 포함되어 있는지",
+      "passed": true,
+      "evidence": "demo-plan.md 상단에 '**톤**: 영업/홍보 — 가치 중심, 인상적인 첫인상, 기술보다 사용자 경험'이 명시. 각 시나리오에 나레이션 포인트가 포함되어 투자자 관점의 가치 설명: '응원자는 카카오톡으로 받은 링크를 탭하기만 하면 됩니다', '동시 접속 100~200명 규모', 'Supabase Free 플랜만으로도 대회 운영 가능', 비용 구조($0 개발/$25 대회당일), 기술 Q&A 예상 표까지 포함"
+    }
+  ]
+}

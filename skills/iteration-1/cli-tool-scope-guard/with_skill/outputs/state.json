@@ -1,0 +1,36 @@
+{
+  "project": "csv-to-json-cli",
+  "current_phase": "Phase 0 — Company Setup",
+  "phase_status": "HALTED — Scope Guard Redirect",
+  "scope_guard": {
+    "decision": "REDIRECT",
+    "redirect_to": "simon-bot-pm",
+    "alternative": "simon-bot",
+    "criteria_evaluation": {
+      "required_teams": {
+        "count": 2,
+        "threshold": "3+",
+        "result": "BELOW_THRESHOLD"
+      },
+      "infrastructure_needed": {
+        "value": false,
+        "threshold": true,
+        "result": "BELOW_THRESHOLD"
+      },
+      "design_needed": {
+        "value": false,
+        "threshold": true,
+        "result": "BELOW_THRESHOLD"
+      },
+      "estimated_features": {
+        "count": 4,
+        "threshold": "5+",
+        "result": "BELOW_THRESHOLD"
+      }
+    },
+    "all_criteria_below_threshold": true
+  },
+  "project_type": "greenfield",
+  "execution_mode": null,
+  "timestamp": "2026-03-07"
+}

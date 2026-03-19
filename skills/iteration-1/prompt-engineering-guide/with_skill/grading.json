@@ -1,0 +1,13 @@
+{
+  "eval_id": 3,
+  "eval_name": "prompt-engineering-guide",
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "Report follows boost template (P-XXX IDs, Executive Summary, Source section)", "passed": true, "evidence": "Full boost report with Source, Executive Summary, P-001 through P-012, Cross-Cutting Observations, Not Recommended"},
+    {"text": "Source content accurately analyzed", "passed": true, "evidence": "Covers key guide principles: context/motivation, XML tags, few-shot examples, tool usage, Claude 4.6 characteristics, subagent management"},
+    {"text": "Proposals reference specific skills and file paths", "passed": true, "evidence": "Each proposal specifies target skills and files (e.g. P-003: 'references/phase-a-planning.md, references/phase-b-implementation.md, references/integration-and-review.md')"},
+    {"text": "Proposals are actionable with concrete changes", "passed": true, "evidence": "Before/after prompt examples for P-001, specific Step references for P-003 (Step 1-B, Step 5, Step 18-B), XML tag structure examples in P-010"},
+    {"text": "Analysis covers 3+ expert perspectives", "passed": true, "evidence": "All 5 experts with consensus per proposal (e.g. 'Prompt Engineer(주도), Quality & Safety Guardian(강력 동의)')"},
+    {"text": "Includes Not Recommended section with rejected ideas", "passed": true, "evidence": "5 rejected ideas: prefill migration, adaptive thinking, frontend design, structured outputs, thinking tag examples — each with reasoning"}
+  ]
+}

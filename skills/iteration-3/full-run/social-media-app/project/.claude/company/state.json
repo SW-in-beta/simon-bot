@@ -1,0 +1,23 @@
+{
+  "project_name": "Picstory - Social Media Web App",
+  "project_type": "greenfield",
+  "execution_mode": "auto",
+  "current_phase": 7,
+  "phase_status": {
+    "0": "completed",
+    "1": "completed",
+    "2": "completed",
+    "3": "completed",
+    "4": "completed",
+    "5": "completed",
+    "6": "completed",
+    "7": "completed"
+  },
+  "decisions": [
+    "[Decision] ML팀 비활성화 — 피드 알고리즘이 최신순으로 단순하여 ML 불필요",
+    "[Decision] 실행 모드: 자동 진행 — 사용자 요청이 구체적이고 명확",
+    "[Decision] 기술 스택: Next.js 16 + TypeScript + Prisma 6 + SQLite + Tailwind CSS",
+    "[Decision] Prisma 7→6 다운그레이드 — Next.js 16 Turbopack 호환성 문제",
+    "[Decision] 이미지 저장: 로컬 파일시스템 — MVP 규모에 적합, 향후 S3 전환 가능"
+  ]
+}

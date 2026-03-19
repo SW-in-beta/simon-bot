@@ -1,0 +1,22 @@
+{
+  "eval_id": 2,
+  "eval_name": "cli-tool-scope-guard",
+  "configuration": "with_skill",
+  "expectations": [
+    {
+      "text": "프로젝트가 simon-company 규모가 아님을 감지함 (필요 팀 수, 인프라, 디자인, Feature 수 기준)",
+      "passed": true,
+      "evidence": "scope-guard-decision.json에서 4개 기준(required_teams=2, infrastructure_needed=false, design_needed=false, estimated_features=3) 모두 BELOW_THRESHOLD로 평가하고 all_criteria_below_threshold=true로 판정함"
+    },
+    {
+      "text": "simon-bot-pm 또는 simon-bot 사용을 제안함",
+      "passed": true,
+      "evidence": "scope-guard-decision.json의 target_skill이 'simon-bot-pm'이며, recommendation에서도 'simon-bot-pm 스킬을 사용하여 PM이 Feature를 분해하고 simon-bot/simon-bot-grind가 TDD로 구현하는 것을 권장'이라고 명시함"
+    },
+    {
+      "text": "리다이렉트 제안 시 이유를 설명함 (UI 없음, 1-2팀 규모, 인프라 불필요 등)",
+      "passed": true,
+      "evidence": "redirect_reason에서 '4개 평가 기준 모두 simon-company 임계값 미달, CLI 데이터 처리 도구는 단일 팀이 구현 가능한 소규모 프로젝트, 다중 팀 협업 오버헤드 과도'라고 구체적 이유를 설명. 각 기준별 detail에서도 UI 불필요, 서버 배포 불필요, 2팀만 필요 등 상세 설명 포함"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "eval_id": 1,
+  "eval_name": "greenfield-go-api",
+  "config": "with_skill",
+  "expectations": [
+    {
+      "text": "Phase 0에서 프로젝트 유형을 greenfield로 자동 판별하고 확인만 한다",
+      "passed": true,
+      "evidence": "'만들고 싶어'라는 표현으로 Greenfield 자동 판별. '이 판단이 맞는지 확인 부탁드립니다'로 확인만 요청"
+    },
+    {
+      "text": "자동 진행 vs 승인 후 진행 실행 모드 선택 질문을 한다",
+      "passed": true,
+      "evidence": "Phase 0-B에서 '1. 자동 진행 2. 승인 후 진행' 선택지 제시"
+    },
+    {
+      "text": "인터뷰가 3-5 라운드, 총 8-12개 질문 이내로 진행된다",
+      "passed": true,
+      "evidence": "5 라운드, 12개 질문 (가이드 범위: 3-5 라운드, 8-12개 질문)"
+    },
+    {
+      "text": "코드를 바로 작성하지 않고 먼저 계획/인터뷰 단계를 진행한다",
+      "passed": true,
+      "evidence": "코드 없이 Scope Guard → Phase 0 → Phase 1 인터뷰 → PRD 순서로 진행"
+    },
+    {
+      "text": "Phase 번호나 단계를 언급하며 체계적 워크플로를 따른다",
+      "passed": true,
+      "evidence": "Phase 0-A/0-B/0-C, Phase 1-A/1-B/1-C, Scope Guard 등 명시적 단계 표시"
+    }
+  ]
+}

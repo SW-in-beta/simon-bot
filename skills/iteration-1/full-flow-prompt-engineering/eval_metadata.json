@@ -1,0 +1,37 @@
+{
+  "eval_id": 1,
+  "eval_name": "full-flow-prompt-engineering",
+  "prompt": "이 글 보고 simon-bot 스킬 개선해줘: https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview",
+  "assertions": [
+    {
+      "id": "interactive-review",
+      "text": "Step 4에서 제안을 하나씩 상세히 설명하고, 각 제안마다 개별적으로 판단을 요청한다 (한 번에 모든 제안 목록을 보여주고 선택하라고 하지 않는다)",
+      "type": "behavioral"
+    },
+    {
+      "id": "proposal-detail-fields",
+      "text": "각 제안 설명에 현재 상태, 문제 시나리오, 제안 내용(before/after), 변경 대상 파일, 기대 효과와 비용, 기존 메커니즘과의 관계가 포함된다",
+      "type": "behavioral"
+    },
+    {
+      "id": "coverage-check",
+      "text": "Step 5-A-2에서 제안 목록과 Agent 배정 내역을 교차 대조하는 커버리지 체크를 수행한다",
+      "type": "behavioral"
+    },
+    {
+      "id": "verification-table-6a",
+      "text": "Step 6-A에서 파일별 검증 결과를 테이블 형식(frontmatter, 참조 경로, 상호 참조, 내용 반영, 결과)으로 출력한다",
+      "type": "behavioral"
+    },
+    {
+      "id": "checklist-table-6b",
+      "text": "Step 6-B에서 6개 카테고리(Progressive Disclosure, Skill Decomposition, Description 트리거링, Writing Patterns, Frontmatter 유효성, Reference 구조) 전 항목을 순회하고 카테고리별 결과 테이블을 출력한다",
+      "type": "behavioral"
+    },
+    {
+      "id": "reference-reread",
+      "text": "Step 6에서 skill-best-practices.md를 Read 도구로 다시 읽는다 (Step 3에서 이미 읽었더라도)",
+      "type": "behavioral"
+    }
+  ]
+}

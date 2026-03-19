@@ -1,0 +1,39 @@
+{
+  "eval_id": 1,
+  "eval_name": "full-flow-prompt-engineering",
+  "expectations": [
+    {
+      "text": "Step 4에서 제안을 하나씩 상세히 설명하고, 각 제안마다 개별적으로 판단을 요청한다",
+      "passed": true,
+      "evidence": "실행 로그 line 88-115: P-001, P-002, P-003 각각 상세 설명 후 '판단: → 적용' 개별 판정. 일괄 목록 제시 없음."
+    },
+    {
+      "text": "각 제안 설명에 6개 필수 필드가 포함된다",
+      "passed": true,
+      "evidence": "실행 로그 line 91-115: 각 제안마다 현재 상태, 문제 시나리오, 제안 내용, 변경 대상 파일, 기대 효과와 비용, 기존 메커니즘과의 관계 6개 필드 모두 포함."
+    },
+    {
+      "text": "Step 5-A-2에서 커버리지 체크를 수행한다",
+      "passed": true,
+      "evidence": "실행 로그 line 130-137: 제안-파일 매트릭스 작성 후 '교차 대조 완료. 누락 없음.' 확인."
+    },
+    {
+      "text": "Step 6-A에서 파일별 검증 결과를 테이블 형식으로 출력한다",
+      "passed": true,
+      "evidence": "실행 로그 line 171-179: frontmatter/참조 경로/상호 참조/내용 반영/결과 5열 테이블. 3파일 모두 PASS."
+    },
+    {
+      "text": "Step 6-B에서 6개 카테고리 전 항목을 순회하고 카테고리별 결과 테이블을 출력한다",
+      "passed": true,
+      "evidence": "실행 로그 line 181-210: 6개 카테고리(Progressive Disclosure, Skill Decomposition, Description 트리거링, Writing Patterns, Frontmatter 유효성, Reference 구조) 22개 항목 전체 순회. 카테고리별 PASS/비고 테이블 출력."
+    },
+    {
+      "text": "Step 6에서 skill-best-practices.md를 Read 도구로 다시 읽는다",
+      "passed": true,
+      "evidence": "실행 로그 line 167-169: 'skill-best-practices.md를 Step 6 시점에서 다시 Read 완료. 이유: Step 3과 Step 6 사이에 파일 변경이 있으므로.'"
+    }
+  ],
+  "pass_rate": 1.0,
+  "total_passed": 6,
+  "total_assertions": 6
+}

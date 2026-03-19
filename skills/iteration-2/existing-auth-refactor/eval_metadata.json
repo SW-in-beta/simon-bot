@@ -1,0 +1,32 @@
+{
+  "eval_id": 2,
+  "eval_name": "existing-auth-refactor",
+  "prompt": "우리 회사 모노레포에서 인증 시스템을 전면 리팩토링하고 싶어. 현재 세션 기반인데 JWT로 바꾸고, OAuth2도 추가하고, 기존 API 호환성도 유지해야 해. 관련 서비스가 5개 정도 있어.",
+  "assertions": [
+    {
+      "id": "phase0-existing-autodetect",
+      "text": "Phase 0에서 프로젝트 유형을 existing으로 자동 판별한다 (AskUserQuestion으로 묻지 않는다)",
+      "type": "content_check"
+    },
+    {
+      "id": "report-suggestion",
+      "text": "simon-bot-report로 사전 분석 보고서 작성을 제안한다",
+      "type": "content_check"
+    },
+    {
+      "id": "interview-length",
+      "text": "인터뷰가 3-4 라운드, 총 8-12개 질문 이내로 진행된다",
+      "type": "content_check"
+    },
+    {
+      "id": "multi-service-awareness",
+      "text": "5개 서비스 연동에 대한 질문이나 고려를 포함한다",
+      "type": "content_check"
+    },
+    {
+      "id": "execution-mode-question",
+      "text": "자동 진행 vs 승인 후 진행 실행 모드 선택 질문을 한다",
+      "type": "content_check"
+    }
+  ]
+}

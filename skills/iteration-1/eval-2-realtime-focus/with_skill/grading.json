@@ -1,0 +1,31 @@
+{
+  "eval_id": 2,
+  "config": "with_skill",
+  "expectations": [
+    {
+      "text": "실시간 통신 메커니즘 식별: WebSocket, SSE, Supabase Realtime 등 구체적 기술이 파악되었는지",
+      "passed": true,
+      "evidence": "discovery.md '## 실시간 위치 추적 시스템' 섹션에서 Supabase Realtime Broadcast를 명시적으로 식별. '### 2. 실시간 브로드캐스트'에서 'Supabase Realtime의 **Broadcast** 기능 사용 (DB 변경 감지가 아닌 직접 channel send)'으로 정확히 기술. 채널명 race:{raceId}, 이벤트 3종(position_update, split_update, race_status_change) 구분. '## 핵심 기술적 특징'에서 'Supabase Broadcast (WebSocket 아닌 Realtime Channel)'으로 Broadcast vs Postgres Changes 차이까지 설명"
+    },
+    {
+      "text": "GPS 스트리밍 데이터 계획: 위치 좌표 더미 데이터의 구체적 생성 방법이 있는지 (경로, 간격, 형식)",
+      "passed": true,
+      "evidence": "demo-plan.md '## 더미 데이터 계획' 섹션에 상세 계획 존재. 정적 데이터: generate.ts로 GPX 파싱 결과 course_points N건, 주자 5명(배번 101~105, 4분~6분/km, SmartChip/Garmin 혼합). 스트리밍 패턴: '간격: 30초 실시간 → --speed 10으로 3초 간격 재생', 'currentKm: 매 스텝 +0.125km ~ +0.25km', 'lat/lng: 코스 좌표 위를 따라 점진적 이동', 'confidence: high'. split_update 스트리밍 패턴도 포함. 시뮬레이션 속도 옵션 표(1x/10x/30x/60x)로 데모 상황별 추천"
+    },
+    {
+      "text": "모킹 전략 구체성: 어떤 엔드포인트를 어떤 방식으로 모킹할지 구체적으로 명시되었는지",
+      "passed": true,
+      "evidence": "demo-plan.md '## 모킹 필요 항목 및 대응' 섹션에 4개 항목이 구체적으로 명시: 1) 카카오 맵 API — 키 필요, 없으면 스켈레톤 표시, 대응: 키 설정 필수; 2) 카카오 OAuth — 시뮬레이션 데이터로 관리자 시나리오 스킵 가능; 3) Web Push — VAPID 키 필요, 대응: 인앱 배너로 대체; 4) CoolSMS — API 키 필요, 대응: SMS 시나리오 제외. discovery.md에도 API 엔드포인트 테이블에 모킹 필요 여부 컬럼이 있음(GET /api/positions: 아니오, POST /api/notifications/sms: 예)"
+    },
+    {
+      "text": "실시간 코드 플로우: GPS 데이터 수신 → 처리 → UI 반영까지의 코드 경로가 추적되었는지",
+      "passed": true,
+      "evidence": "discovery.md '## 실시간 위치 추적 시스템' 에서 4단계로 코드 플로우가 추적됨: 1) Worker의 Poller.pollOnce() → GarminAdapter/SmartChipAdapter → tracking_positions INSERT + runner_current_positions UPSERT; 2) Broadcaster.broadcastPositionUpdate() → Supabase Realtime channel send; 3) useRealtimePositions.ts에서 position_update 이벤트 수신 → positions Map 갱신; 4) useMarkerInterpolation.ts → requestAnimationFrame + lerp(INTERPOLATION_DURATION_MS=2000) → RunnerMarker → Kakao CustomOverlay position 업데이트. 시뮬레이션 경로도 별도로 추적됨(runner.ts → DB INSERT → Broadcast)"
+    },
+    {
+      "text": "응원 기능 플로우: 응원 메시지 전송 → 수신 → 표시까지의 코드 경로가 추적되었는지",
+      "passed": true,
+      "evidence": "discovery.md '## 응원 기능 시스템' 섹션에 5단계로 추적됨: 1) CheerLocationForm.tsx — GPS 자동감지(navigator.geolocation→snapToCourse) 또는 km 수동입력(findClosestByKm); 2) spectators 테이블 UPDATE; 3) useEtaCalculation.ts — ETA(초) = (cheerKm - currentKm) * currentPace, status: approaching/passed/waiting; 4) useNotificationTrigger.ts — ETA_TRIGGER_SECONDS=180, THROTTLE_SECONDS=30, activeAlerts 갱신; 5) ApproachAlert.tsx + AlertBanner.tsx — 최대 3개 배너, 5초 자동 최소화, MiniBadge, 주자 위치 포커스. 알림 발송 API(Web Push, SMS)도 엔드포인트와 구현 방식까지 테이블로 정리"
+    }
+  ]
+}

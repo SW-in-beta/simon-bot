@@ -1,0 +1,25 @@
+{
+  "eval_id": 2,
+  "eval_name": "cli-tool-scope-guard",
+  "configuration": "without_skill",
+  "expectations": [
+    {
+      "text": "프로젝트가 simon-company 규모가 아님을 감지함 (필요 팀 수, 인프라, 디자인, Feature 수 기준)",
+      "passed": false,
+      "evidence": "에이전트는 프로젝트 규모가 작다는 점을 인지했지만(04_team_composition.md에서 '1인 개발 권장', '8일' 공수로 평가), simon-company 규모가 아니라는 감지 또는 경고 없이 Phase 0 전체 산출물(7개 문서)을 정상적으로 생성했다. Scope Guard 로직이 없으므로 규모 부적합을 감지하지 못함."
+    },
+    {
+      "text": "simon-bot-pm 또는 simon-bot 사용을 제안함",
+      "passed": false,
+      "evidence": "전체 출력 파일(01~07 + summary.md) 어디에도 'simon-bot-pm', 'simon-bot' 키워드가 존재하지 않는다. 대안 도구 제안이 전혀 없음."
+    },
+    {
+      "text": "리다이렉트 제안 시 이유를 설명함 (UI 없음, 1-2팀 규모, 인프라 불필요 등)",
+      "passed": false,
+      "evidence": "리다이렉트 제안 자체가 없으므로 이유 설명도 존재하지 않는다. 오히려 에이전트는 해당 프로젝트를 그대로 수용하여 전체 기획 문서를 작성 완료했다."
+    }
+  ],
+  "pass_rate": 0.0,
+  "total_passed": 0,
+  "total_assertions": 3
+}

@@ -1,0 +1,35 @@
+{
+  "eval_id": 3,
+  "eval_name": "ml-recommender",
+  "configuration": "without_skill",
+  "expectations": [
+    {
+      "text": "roster.json에 ML 팀이 활성화됨",
+      "passed": false,
+      "evidence": "roster.json 파일이 존재하지 않음. 팀 구성 정보는 02-team-composition.md에 마크다운 형식으로 기술되어 있으나, 요구된 roster.json 아티팩트는 생성되지 않았음."
+    },
+    {
+      "text": "roster.json에 Backend, Frontend(대시보드), DBA 팀이 활성화됨",
+      "passed": false,
+      "evidence": "roster.json 파일이 존재하지 않음. 02-team-composition.md에 Backend Squad(2명), Frontend Squad(1명) 정보가 있으나 DBA 팀은 언급되지 않았고, roster.json이라는 특정 아티팩트 형식 자체가 생성되지 않았음."
+    },
+    {
+      "text": "ML 관련 User Story가 포함됨 (추천 모델, 학습 파이프라인, 피처 엔지니어링 등)",
+      "passed": true,
+      "evidence": "04-user-stories.md에 ML 관련 User Story가 다수 포함됨: US-101(개인 맞춤 추천), US-102(유사 상품 추천), US-103(신규 사용자 추천/콜드스타트), US-303(모델 버전 관리), US-304(A/B 테스트). 03-feature-specs.md의 F-002에 협업 필터링 모델 학습 파이프라인(전처리→상호작용 행렬 생성→모델 학습→오프라인 평가→모델 저장), 하이퍼파라미터 튜닝, 오프라인 평가 지표 등이 상세히 기술됨. 08-ml-model-design.md에 ML 모델 설계가 별도 문서로 존재."
+    },
+    {
+      "text": "Story Map이 생성됨 (Activity → Task → Story 계층 구조)",
+      "passed": false,
+      "evidence": "Story Map 형식의 문서(Activity → Task → Story 계층 구조)는 존재하지 않음. 04-user-stories.md에 Epic → User Story 구조는 있으나, 이는 Story Map의 Activity → Task → Story 3계층 구조와 다름. 별도의 story map 파일도 없음."
+    },
+    {
+      "text": "spec.md 파일이 생성됨",
+      "passed": false,
+      "evidence": "spec.md 파일이 존재하지 않음. 기능 명세 정보는 03-feature-specs.md, 07-api-specification.md 등에 분산되어 있으나, spec.md라는 특정 파일명의 아티팩트는 생성되지 않았음."
+    }
+  ],
+  "pass_rate": 0.2,
+  "total_passed": 1,
+  "total_assertions": 5
+}

@@ -1,0 +1,29 @@
+{
+  "project_name": "InstaClone - 소셜 미디어 웹앱",
+  "project_type": "Greenfield",
+  "current_phase": 1,
+  "execution_mode": "auto",
+  "active_teams": ["pm", "cto", "design", "frontend", "backend", "qa", "dba", "devops"],
+  "inactive_teams": ["ml"],
+  "phase_status": {
+    "phase_0": {
+      "status": "completed",
+      "completed_at": "2026-03-07",
+      "artifacts": ["roster.json", "state.json"]
+    },
+    "phase_1": {
+      "status": "completed",
+      "started_at": "2026-03-07",
+      "completed_at": "2026-03-07",
+      "artifacts": ["spec.md", "story-map.md", "constitution.md", "quality/spec-review-scores.md", "quality/phase-1-review.md"],
+      "sub_phases": {
+        "1-A": "completed",
+        "1-B": "completed",
+        "1-C": "completed",
+        "1-D": "completed",
+        "1-plan-review": "completed",
+        "1-trp": "completed"
+      }
+    }
+  }
+}

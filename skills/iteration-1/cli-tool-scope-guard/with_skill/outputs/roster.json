@@ -1,0 +1,48 @@
+{
+  "project": "csv-to-json-cli",
+  "scope_guard": {
+    "decision": "REDIRECT",
+    "redirect_to": "simon-bot-pm",
+    "reason": "CLI 데이터 처리 도구 — 필요 팀 2개, 인프라 불필요, UI 없음, Feature 3-4개. simon-company의 다중 팀 파이프라인은 과도함."
+  },
+  "evaluated_teams": {
+    "PM": {
+      "needed": false,
+      "reason": "요구사항이 이미 명확하게 정의됨. simon-bot-pm이 PM 역할을 내장 수행."
+    },
+    "CTO": {
+      "needed": false,
+      "reason": "단일 언어 CLI 프로젝트로 복잡한 기술 의사결정 불필요."
+    },
+    "Design": {
+      "needed": false,
+      "reason": "CLI 프로젝트 — UI/UX 없음."
+    },
+    "Frontend": {
+      "needed": false,
+      "reason": "CLI 프로젝트 — 사용자 인터페이스 없음."
+    },
+    "Backend": {
+      "needed": true,
+      "reason": "CLI 핵심 로직 구현 (CSV 파싱, 인코딩 감지, 스트리밍, JSON 출력)."
+    },
+    "QA": {
+      "needed": true,
+      "reason": "다양한 인코딩, 대용량 파일, 엣지 케이스 테스트 필요."
+    },
+    "DBA": {
+      "needed": false,
+      "reason": "DB 사용 없음."
+    },
+    "DevOps": {
+      "needed": false,
+      "reason": "로컬 실행 CLI 도구 — 배포/인프라/모니터링 불필요."
+    },
+    "ML": {
+      "needed": false,
+      "reason": "ML/AI 기능 없음."
+    }
+  },
+  "active_teams": ["Backend", "QA"],
+  "active_team_count": 2
+}

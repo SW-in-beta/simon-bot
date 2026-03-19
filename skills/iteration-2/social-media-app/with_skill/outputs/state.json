@@ -1,0 +1,28 @@
+{
+  "project_name": "Picstory - 소셜 미디어 웹앱",
+  "current_phase": 1,
+  "phase_name": "Discovery & Spec (Completed)",
+  "execution_mode": "auto",
+  "project_type": "greenfield",
+  "active_teams": ["pm", "cto", "design", "frontend", "backend", "qa", "dba", "devops"],
+  "phase_history": [
+    {
+      "phase": 0,
+      "status": "completed",
+      "timestamp": "2026-03-07",
+      "notes": "팀 편성 완료. 8개 팀 활성화, ML팀 비활성화"
+    },
+    {
+      "phase": 1,
+      "status": "completed",
+      "timestamp": "2026-03-07",
+      "notes": "Spec(13 US), Story Map(5 Activity), Constitution 작성 완료. planner-critic-architect 검증 통과(19/20). TRP 3라운드 모두 PASS/APPROVED."
+    }
+  ],
+  "decisions": [
+    "[Decision] ML팀 비활성화 - 피드 알고리즘이 단순 최신순으로 ML 불필요",
+    "[Decision] 8개 팀 활성화 - 소셜 미디어 웹앱으로 전체 스택 필요",
+    "[Decision] 프로젝트 유형: Greenfield - 신규 프로젝트",
+    "[Decision] 실행 모드: 자동 진행"
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "project_name": "ml-recommender",
+  "project_type": "greenfield",
+  "current_phase": 2,
+  "phase_status": {
+    "phase_0": "completed",
+    "phase_1": "completed",
+    "phase_2": "pending",
+    "phase_3": "pending",
+    "phase_4": "pending",
+    "phase_5": "pending",
+    "phase_6": "pending",
+    "phase_7": "pending"
+  },
+  "execution_mode": "auto",
+  "active_teams": ["pm", "cto", "design", "frontend", "backend", "qa", "dba", "devops", "ml"],
+  "created_at": "2026-03-07",
+  "decisions": [
+    {
+      "phase": 0,
+      "type": "project_type",
+      "decision": "Greenfield — 새 프로젝트로 판별",
+      "reason": "기존 코드베이스 없음, 사용자가 새로 만들어달라고 요청"
+    },
+    {
+      "phase": 0,
+      "type": "team_activation",
+      "decision": "9개 팀 전원 활성화",
+      "reason": "REST API(BE) + 관리자 대시보드(Design+FE) + collaborative filtering(ML) + 데이터 저장(DBA) + 배포/모니터링(DevOps) 모두 필요"
+    },
+    {
+      "phase": 0,
+      "type": "execution_mode",
+      "decision": "자동 진행 모드",
+      "reason": "사용자가 별도 지정하지 않아 효율적 진행을 위해 자동 모드 선택"
+    },
+    {
+      "phase": 1,
+      "type": "spec_approved",
+      "decision": "11개 User Story (P1:6, P2:3, P3:2) INVEST 검증 완료",
+      "reason": "모든 User Story가 INVEST 기준 충족, Given/When/Then Acceptance Scenarios 포함"
+    },
+    {
+      "phase": 1,
+      "type": "story_map_approved",
+      "decision": "4개 Activity, Walking Skeleton 6개 Story (US-1~6) 식별",
+      "reason": "상품등록->행동수집->모델학습->추천서빙->인증->대시보드 end-to-end 흐름 확인"
+    },
+    {
+      "phase": 1,
+      "type": "constitution_approved",
+      "decision": "5개 Core Principles, Quality Gates, DoR/DoD 확정",
+      "reason": "추천 품질 최우선, 서비스 무중단, 데이터 기반 의사결정, 보안 타협 불가, ML 재현성"
+    },
+    {
+      "phase": 1,
+      "type": "plan_review_passed",
+      "decision": "planner-critic-architect 3인 검증 통과",
+      "reason": "Completeness 5, Feasibility 4, Safety 5, Clarity 5 — 모든 축 4점 이상. Architect YAGNI/KISS 통과"
+    },
+    {
+      "phase": 1,
+      "type": "trp_passed",
+      "decision": "TRP 3라운드 모두 통과",
+      "reason": "R1(PM Self): PASS, R2(Design Cross): PASS, R3(CTO Lead): APPROVED (Excellent)"
+    }
+  ]
+}

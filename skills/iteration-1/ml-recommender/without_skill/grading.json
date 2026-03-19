@@ -1,0 +1,35 @@
+{
+  "eval_id": 3,
+  "eval_name": "ml-recommender",
+  "configuration": "without_skill",
+  "expectations": [
+    {
+      "text": "roster.json에 ML 팀이 활성화됨",
+      "passed": false,
+      "evidence": "roster.json 파일이 없음. 01-team-composition.md에 'ML 엔지니어 2명'이 기술되어 있지만, JSON 형식의 구조화된 팀 편성이 아님."
+    },
+    {
+      "text": "roster.json에 Backend, Frontend(대시보드), DBA 팀이 활성화됨",
+      "passed": false,
+      "evidence": "roster.json 파일이 없음. 01-team-composition.md에 역할은 기술되어 있으나 구조화된 활성화 상태가 없음."
+    },
+    {
+      "text": "ML 관련 User Story가 포함됨",
+      "passed": true,
+      "evidence": "03-user-stories.md에 에픽 E2 '추천 모델'이 있고, ML 관련 User Story (US-2.1 학습 데이터셋 구성, US-2.2 Implicit ALS 모델 학습, US-2.3 오프라인 평가 등) 포함. 단, INVEST 기준은 명시적으로 적용되지 않음."
+    },
+    {
+      "text": "Story Map이 생성됨",
+      "passed": false,
+      "evidence": "Story Map이 없음. 에픽 기반으로 User Story가 나열되어 있지만 Activity→Task→Story 계층 구조가 아님. Walking Skeleton도 식별되지 않음."
+    },
+    {
+      "text": "spec.md 파일이 생성됨",
+      "passed": false,
+      "evidence": "spec.md 파일이 없음. 02-feature-specifications.md, 03-user-stories.md, 04-project-plan.md로 분산되어 있음."
+    }
+  ],
+  "pass_rate": 0.2,
+  "total_passed": 1,
+  "total_assertions": 5
+}

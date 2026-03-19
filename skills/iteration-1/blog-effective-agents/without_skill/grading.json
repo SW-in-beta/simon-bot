@@ -1,0 +1,13 @@
+{
+  "eval_id": 1,
+  "eval_name": "blog-effective-agents",
+  "configuration": "without_skill",
+  "expectations": [
+    {"text": "Report follows boost template (P-XXX IDs, Executive Summary, Source section)", "passed": false, "evidence": "Uses custom structure with sections 1-7 and S1/W1/T1 IDs, no P-XXX format, no 'Source' section"},
+    {"text": "Source content accurately analyzed", "passed": true, "evidence": "Good coverage of blog's 5 workflow patterns, correctly maps them to simon-bot skills"},
+    {"text": "Proposals reference specific skills and file paths", "passed": true, "evidence": "References specific skills in each table row, but file paths are less specific than with-skill version"},
+    {"text": "Proposals are actionable with concrete changes", "passed": true, "evidence": "Proposals like MICRO path, routing layer, and grind budget cap are concrete and actionable"},
+    {"text": "Analysis covers 3+ expert perspectives", "passed": false, "evidence": "Single analysis voice throughout, no expert perspectives or multi-angle analysis"},
+    {"text": "Includes Not Recommended section with rejected ideas", "passed": false, "evidence": "Has 'Anti-Patterns to Watch' section but no explicit rejected ideas with reasoning"}
+  ]
+}

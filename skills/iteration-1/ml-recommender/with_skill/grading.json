@@ -1,0 +1,35 @@
+{
+  "eval_id": 3,
+  "eval_name": "ml-recommender",
+  "configuration": "with_skill",
+  "expectations": [
+    {
+      "text": "roster.json에 ML 팀이 활성화됨",
+      "passed": true,
+      "evidence": "roster.json에 ml: {active: true, lead: 'ML Lead', reason: '[Decision] ML팀 활성화 — Collaborative Filtering 기반 추천 모델 설계, 학습 파이프라인, 피처 엔지니어링, 모델 서빙 필요'}."
+    },
+    {
+      "text": "roster.json에 Backend, Frontend(대시보드), DBA 팀이 활성화됨",
+      "passed": true,
+      "evidence": "backend: {active: true, reason: 'REST API 추천 엔드포인트 + 관리자 API + 사용자 행동 수집 API 필요'}, frontend: {active: true, reason: '관리자 대시보드 웹 인터페이스 구현 필요'}, dba: {active: true, reason: '사용자 행동 로그, 상품 메타데이터, 추천 결과, 성능 지표 등 대량 데이터 저장/조회 필요'}."
+    },
+    {
+      "text": "ML 관련 User Story가 포함됨",
+      "passed": true,
+      "evidence": "US-4: CF 모델 학습(P1) — 'ALS 기반 Collaborative Filtering 모델 학습 파이프라인', US-7: 학습 스케줄링(P2), US-8: A/B 테스트(P2), US-10: 추천 설명(P3). 각 Story에 INVEST 검증 항목 포함."
+    },
+    {
+      "text": "Story Map이 생성됨",
+      "passed": true,
+      "evidence": "story-map.md에 4개 Activity(데이터 수집, 추천 생성, 관리자 모니터링, 모델 관리) → Tasks → Stories(P1/P2/P3) 계층 구조가 ASCII 다이어그램으로 표현됨. Walking Skeleton: '상품 등록→행동 이벤트 수집→CF 모델 학습→추천 API→관리자 인증→성능 지표 확인'."
+    },
+    {
+      "text": "spec.md 파일이 생성됨",
+      "passed": true,
+      "evidence": "spec.md(15376 bytes) 생성됨. 11개 User Story(P1:6, P2:3, P3:2), 각 Story에 INVEST 검증, Given/When/Then Acceptance Scenarios, ML-specific 피처 포함."
+    }
+  ],
+  "pass_rate": 1.0,
+  "total_passed": 5,
+  "total_assertions": 5
+}

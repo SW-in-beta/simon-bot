@@ -1,0 +1,69 @@
+{
+  "expectations": [
+    {
+      "text": "CONNECTED 모드를 올바르게 감지한다",
+      "passed": true,
+      "evidence": "Mode Detection 섹션에서 '.claude/memory/review-sequence.md 존재함 → CONNECTED 모드 확정'을 명시"
+    },
+    {
+      "text": "Step 0을 건너뛴다",
+      "passed": true,
+      "evidence": "'Step 0 (Standalone 분석)은 SKIP — CONNECTED 모드이므로 review-sequence가 이미 준비되어 있다.' 명시적으로 기술"
+    },
+    {
+      "text": "기존 report를 PR description에 활용한다",
+      "passed": true,
+      "evidence": "Step 1-3에서 '.claude/reports/add-auth-report.md의 내용을 PR body의 기본 내용으로 사용한다'를 명시. Step 1-4에서 '--body-file .claude/reports/add-auth-report.md' 사용"
+    },
+    {
+      "text": "CONNECTED 양식(계획 매핑)을 사용한다",
+      "passed": true,
+      "evidence": "Step 2-3에서 'CONNECTED 모드 양식으로 코멘트를 작성한다'를 명시하고, 코멘트 형식에 '**계획 매핑**: {plan-summary.md의 어떤 Unit/목표를 구현한 것인지}' 필드를 포함"
+    },
+    {
+      "text": "inline-review-format.md를 읽는다",
+      "passed": true,
+      "evidence": "실행 계획이 inline-review-format.md의 CONNECTED 모드 양식 구조(계획 매핑, 변경 전 상태, 변경 내용, 관련 변경 단위, 리뷰 포인트, 전문가 우려사항, 트레이드오프)를 정확히 따름"
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_tokens": 26012,
+    "duration_ms": 114746,
+    "total_duration_seconds": 114.7
+  },
+  "claims": [
+    {
+      "claim": "plan-summary.md를 인라인 코멘트의 계획 매핑에 활용한다",
+      "type": "process",
+      "verified": true,
+      "evidence": "Step 1-1에서 plan-summary.md를 병렬로 읽고, Step 2-3 코멘트 양식에서 '계획 매핑: plan-summary.md의 어떤 Unit/목표를 구현한 것인지' 활용"
+    },
+    {
+      "claim": "Review Guide 섹션을 PR body에 추가한다",
+      "type": "process",
+      "verified": true,
+      "evidence": "Step 1-6에서 gh pr edit로 Review Guide 섹션(논리적 변경 단위 표, 리뷰 순서 안내, 추가 맥락)을 추가하는 명령을 명시"
+    },
+    {
+      "claim": "review-payload.json을 구성하여 GitHub API로 제출한다",
+      "type": "process",
+      "verified": true,
+      "evidence": "Step 2-4에서 .claude/memory/review-payload.json 파일 구성, Step 2-5에서 'gh api repos/{owner}/{repo}/pulls/{pr_number}/reviews --method POST --input' 명령을 기술"
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "inline-review-format.md를 읽는다",
+        "reason": "standalone-mode와 동일하게, 파일을 명시적으로 Read하는 단계가 기술되어 있지 않고 구조적 일치로 추론. 트랜스크립트 레벨 검증이 더 정확"
+      }
+    ],
+    "overall": "CONNECTED 모드의 핵심 차별점(Step 0 스킵, 기존 artifacts 활용, 계획 매핑 양식)이 모두 정확히 반영됨"
+  }
+}

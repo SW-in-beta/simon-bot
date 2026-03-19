@@ -1,0 +1,37 @@
+{
+  "eval_id": 1,
+  "eval_name": "full-demo-prep",
+  "prompt": "cheer93 프로젝트를 시연해줘. 이 앱은 마라톤 실시간 응원 플랫폼이야. 투자자한테 보여줄 거라서 최대한 인상적으로 부탁해.",
+  "assertions": [
+    {
+      "id": "1a",
+      "text": "CONNECTED 모드 감지: .claude/company/spec.md를 발견하고 simon-company 산출물을 활용했는지",
+      "type": "structural"
+    },
+    {
+      "id": "1b",
+      "text": "라우트 맵 포함: 실제 코드 기반 URL → 페이지 매핑 테이블이 있는지",
+      "type": "structural"
+    },
+    {
+      "id": "1c",
+      "text": "셀렉터 목록 포함: Playwright에서 사용할 실제 CSS/data-testid 셀렉터가 있는지",
+      "type": "structural"
+    },
+    {
+      "id": "1d",
+      "text": "코드 플로우 추적: 최소 2개 유저스토리에 대해 UI → API → DB 흐름이 추적되었는지",
+      "type": "structural"
+    },
+    {
+      "id": "1e",
+      "text": "시나리오 순서 전략: 임팩트 퍼스트 또는 스토리 아크 등 의도적 순서 배치가 있는지",
+      "type": "qualitative"
+    },
+    {
+      "id": "1f",
+      "text": "나레이션 톤: 투자자 대상 영업/홍보 관점의 가치 중심 설명이 포함되어 있는지",
+      "type": "qualitative"
+    }
+  ]
+}

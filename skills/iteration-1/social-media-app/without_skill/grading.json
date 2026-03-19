@@ -1,0 +1,40 @@
+{
+  "eval_id": 1,
+  "eval_name": "social-media-app",
+  "configuration": "without_skill",
+  "expectations": [
+    {
+      "text": "roster.json 파일이 생성되고 Design, Frontend, Backend, DBA 팀이 활성화됨",
+      "passed": false,
+      "evidence": "roster.json 파일이 없음. 01-team-composition.md에 팀 역할이 자유 형식으로 기술되어 있지만, JSON 형식의 구조화된 팀 편성(active 플래그, Decision Trail)이 없음."
+    },
+    {
+      "text": "User Story에 INVEST 기준이 적용됨",
+      "passed": false,
+      "evidence": "02-feature-specification.md에 User Story가 있지만, INVEST 기준을 명시적으로 적용하지 않음. 'Independent', 'Testable' 등의 검증 항목 없음. Acceptance Criteria는 체크리스트 형태로 있지만 Given/When/Then 구조가 아님."
+    },
+    {
+      "text": "Story Map이 Activity → Task → Story 계층 구조로 생성됨",
+      "passed": false,
+      "evidence": "Story Map이 생성되지 않음. Feature를 도메인별(인증, 게시, 피드, 팔로우 등)로 나열했으나 사용자 여정 기반의 Activity→Task→Story 계층 구조가 없음."
+    },
+    {
+      "text": "Walking Skeleton이 식별됨",
+      "passed": false,
+      "evidence": "Walking Skeleton 개념이 전혀 언급되지 않음. 핵심 흐름의 최소 구현이 식별되지 않음."
+    },
+    {
+      "text": "spec.md 또는 story-map.md 파일이 생성됨",
+      "passed": true,
+      "evidence": "02-feature-specification.md가 spec.md와 유사한 역할을 하는 파일로 생성됨. 8개 도메인, 20+ User Story, 비기능 요구사항 포함."
+    },
+    {
+      "text": "constitution.md 파일이 생성됨",
+      "passed": false,
+      "evidence": "constitution.md가 생성되지 않음. 프로젝트 원칙, 품질 게이트, 제약 조건을 정의한 별도 파일이 없음."
+    }
+  ],
+  "pass_rate": 0.167,
+  "total_passed": 1,
+  "total_assertions": 6
+}

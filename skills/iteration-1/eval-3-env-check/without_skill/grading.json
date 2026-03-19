@@ -1,0 +1,31 @@
+{
+  "eval_id": 3,
+  "config": "without_skill",
+  "expectations": [
+    {
+      "text": "환경 변수 점검: .env 파일의 필수 변수 존재 여부와 placeholder 탐지가 되었는지",
+      "passed": true,
+      "evidence": "env-check-report.md '## 3. 환경변수 점검' 섹션에서 '### 3.1 설정 완료 (OK)' 10개 변수와 '### 3.2 미설정 (주의)' 3개 변수(COOLSMS_API_KEY, COOLSMS_API_SECRET, COOLSMS_SENDER_NUMBER)로 분류. 각 변수별 상태와 비고가 테이블로 정리됨. '### 3.3 Worker 전용 변수'에서 SUPABASE_URL vs NEXT_PUBLIC_SUPABASE_URL 접두사 불일치 이슈까지 발견. '### 3.4 시뮬레이션 스크립트 전용 변수'에서 NEXT_PUBLIC_ 접두사 없이 참조하는 문제도 탐지"
+    },
+    {
+      "text": "Supabase 상태 확인: Supabase 접속 가능 여부 또는 설정 필요 사항이 보고되었는지",
+      "passed": true,
+      "evidence": "env-check-report.md '## 4. 외부 서비스 연결 점검' → '### 4.1 Supabase API' 에서 실제 HTTP 요청으로 검증: REST API 접속(anon key) → HTTP 200 정상, races 테이블 조회 → 빈 배열(테이블 존재, 데이터 없음), runners 테이블 → 빈 배열, course_points → 빈 배열. '결론: Supabase 연결 정상. 마이그레이션은 적용된 상태이지만 시연 데이터가 없다. 시뮬레이션 스크립트로 데이터 생성 필요.'"
+    },
+    {
+      "text": "카카오 OAuth 키 확인: KAKAO 관련 환경 변수의 설정 여부가 점검되었는지",
+      "passed": true,
+      "evidence": "env-check-report.md '### 3.1 설정 완료 (OK)'에서 NEXT_PUBLIC_KAKAO_MAP_KEY — 'OK, JavaScript SDK 앱키 설정됨'으로 확인. '### 4.2 Kakao Maps API'에서 REST API 테스트 → HTTP 401 결과를 보고하면서 'JavaScript SDK 앱키이며 REST API 키와 다름. 지도 렌더링은 프론트에서 SDK를 통해 동작하므로 별도 검증은 브라우저에서 필요'로 정확히 분석. '## 7. 시연 준비 체크리스트'에서 '카카오맵 동작 확인: 브라우저에서 지도 렌더링 되는지 확인' 및 '카카오 OAuth 설정 확인: Supabase Auth에서 카카오 OAuth Provider가 활성화되어 있는지 Supabase Dashboard에서 확인 필요'까지 추가 조치 사항 제시"
+    },
+    {
+      "text": "조치 방안 제시: 누락 항목별로 구체적 선택지(키 설정/모킹/제외)가 제안되었는지",
+      "passed": true,
+      "evidence": "env-check-report.md '## 7. 시연 준비 체크리스트'에서 필수 조치 5가지를 구체적 bash 명령어와 함께 제시. CoolSMS 미설정은 '### 8.4 CoolSMS 미설정'에서 'SMS 알림 기능(P3)이 동작하지 않는다'로 보고하고 P3(낮은 우선순위)라 시연 무관으로 분류. Worker 환경변수 불일치(### 8.1)에서 'Worker를 로컬에서 실행하려면 별도로 SUPABASE_URL 환경변수를 설정해야 한다'로 조치 제시. 포트 3000 충돌은 'kill 7270' 또는 'next dev -p 3001'으로 두 가지 선택지 제시. 다만 CoolSMS에 대해 '키 설정/모킹/제외' 3가지 선택지가 명시적으로 제시되지는 않고 '시연 무관'으로만 처리됨"
+    },
+    {
+      "text": "심각도 분류: 필수(❌) vs 선택(⚠️) 항목이 구분되어 있는지",
+      "passed": true,
+      "evidence": "env-check-report.md '## 9. 요약' 테이블에서 '판정' 컬럼으로 심각도 분류: 런타임 환경 → 정상, 의존성 → 정상, 환경변수(핵심) → 정상, 환경변수(부가) → 부분 미설정, Supabase → 정상, 시연 데이터 → 없음, 테스트 → 정상, 린트 → 정상, 포트 → 충돌. '## 3. 환경변수 점검'에서 OK vs 미설정으로 구분. 다만 with_skill의 ❌/⚠️ 아이콘 기반 3단계 분류보다는 덜 명시적이지만, '## 7. 시연 준비 체크리스트'에서 '### 필수'와 '### 선택 (시연 품질 향상)' 섹션으로 심각도를 2단계로 분류하고 있음"
+    }
+  ]
+}

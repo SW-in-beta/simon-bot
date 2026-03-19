@@ -1,0 +1,32 @@
+{
+  "eval_id": 1,
+  "eval_name": "greenfield-go-api",
+  "config": "with_skill",
+  "expectations": [
+    {
+      "text": "Phase 0에서 프로젝트 유형을 greenfield로 판별하거나 확인 질문을 한다",
+      "passed": true,
+      "evidence": "응답에 '이 프로젝트는 **Greenfield** (새 프로젝트를 처음부터 생성)로 진행하겠습니다'라고 명시"
+    },
+    {
+      "text": "자동 진행 vs 승인 후 진행 실행 모드 선택 질문을 한다",
+      "passed": true,
+      "evidence": "Phase 0-B에서 '1. **자동 진행** 2. **승인 후 진행**' 선택지를 명확히 제시"
+    },
+    {
+      "text": "Phase 1 인터뷰를 시작하며 비전/기능/기술 관련 질문을 한다",
+      "passed": true,
+      "evidence": "6라운드 인터뷰 수행: 비전/대상(R1), 사용자관리(R2), 게시판(R3), 알림(R4), 기술제약(R5), 우선순위(R6)"
+    },
+    {
+      "text": "코드를 바로 작성하지 않고 먼저 계획/인터뷰 단계를 진행한다",
+      "passed": true,
+      "evidence": "코드 작성 없이 Phase 0 → Phase 1 인터뷰 → PRD 생성 → 리뷰 순서로 진행"
+    },
+    {
+      "text": "Phase 번호나 단계를 언급하며 체계적 워크플로를 따른다",
+      "passed": true,
+      "evidence": "Phase 0(Project Setup), Phase 1(PRD Creation), Phase 2~6 요약 등 명시적 Phase 번호 사용"
+    }
+  ]
+}

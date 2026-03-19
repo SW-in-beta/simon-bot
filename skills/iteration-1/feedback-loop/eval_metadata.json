@@ -1,0 +1,12 @@
+{
+  "eval_id": 3,
+  "eval_name": "feedback-loop-re-review-ci-watch",
+  "prompt": "PR #42에 리뷰 피드백을 남겼어. 인증 미들웨어의 에러 핸들링을 개선해달라는 코멘트가 있어. 수정 반영하고 다시 리뷰해줘.",
+  "assertions": [
+    {"text": "PR 코멘트를 gh api로 수집한다", "type": "workflow"},
+    {"text": "코드 수정 후 커밋 + 푸시한다", "type": "workflow"},
+    {"text": "수정 반영 양식으로 인라인 리뷰를 재작성한다", "type": "format"},
+    {"text": "CI Watch를 재시작한다", "type": "workflow"},
+    {"text": "기존 코멘트를 resolve 처리한다", "type": "workflow"}
+  ]
+}

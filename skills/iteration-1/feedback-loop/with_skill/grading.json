@@ -1,0 +1,64 @@
+{
+  "expectations": [
+    {
+      "text": "PR 코멘트를 gh api로 수집한다",
+      "passed": true,
+      "evidence": "Step 4-A에서 'gh api repos/Buzzvil/example-repo/pulls/42/comments' (인라인 리뷰 코멘트)와 'gh api repos/Buzzvil/example-repo/issues/42/comments' (일반 PR 코멘트) 두 API를 병렬 호출"
+    },
+    {
+      "text": "코드 수정 후 커밋 + 푸시한다",
+      "passed": true,
+      "evidence": "Step 4-B에서 코드 수정 → git add → git commit -m 'fix: 인증 미들웨어 에러 핸들링 개선' → git push 순차 실행을 명시"
+    },
+    {
+      "text": "수정 반영 양식으로 인라인 리뷰를 재작성한다",
+      "passed": true,
+      "evidence": "Step 4-C에서 수정 반영 양식('[변경 단위 N: {제목}] — 수정 반영')을 사용하며, '피드백 요약', '수정 내용(Before/After 코드 발췌)', '영향 범위' 필드를 포함. review-payload.json 재구성 후 gh api로 제출"
+    },
+    {
+      "text": "CI Watch를 재시작한다",
+      "passed": true,
+      "evidence": "Step 4-D에서 'Background agent 시작 (Agent tool, run_in_background: true)'으로 CI Watch를 재시작하며, max 3 cycles 로직과 실패 시 자동 수정 플로우를 명시"
+    },
+    {
+      "text": "기존 코멘트를 resolve 처리한다",
+      "passed": true,
+      "evidence": "Step 4-C에서 '기존 인라인 코멘트 중 수정된 변경 단위의 코멘트를 resolve 처리'를 명시하고, '변경되지 않은 부분의 기존 코멘트는 건드리지 않음'도 기술"
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_tokens": 24490,
+    "duration_ms": 101434,
+    "total_duration_seconds": 101.4
+  },
+  "claims": [
+    {
+      "claim": "피드백을 질문/수정 요청/승인으로 분류 처리한다",
+      "type": "process",
+      "verified": true,
+      "evidence": "Step 4-B에서 피드백 분류(질문→답변, 수정 요청→수정+커밋+push+답변, 승인/OK→resolve)를 명시"
+    },
+    {
+      "claim": "원본 코멘트에 reply한다",
+      "type": "process",
+      "verified": true,
+      "evidence": "'gh api repos/Buzzvil/example-repo/pulls/42/comments/{comment_id}/replies --method POST'로 원본 코멘트에 답변"
+    },
+    {
+      "claim": "종료 조건이 정의되어 있다",
+      "type": "quality",
+      "verified": true,
+      "evidence": "'사용자의 다음 응답을 대기: LGTM/approve/승인/PR ready 전환 요청 → Step 5, 추가 피드백 → Step 4-A로 복귀'"
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "피드백 루프의 모든 하위 단계(4-A~4-E)가 정확히 구현되었으며, 특히 인라인 리뷰 재작성과 CI Watch 재시작이 매 사이클마다 실행됨을 확인"
+  }
+}

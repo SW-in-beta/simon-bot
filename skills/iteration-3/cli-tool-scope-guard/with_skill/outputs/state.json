@@ -1,0 +1,30 @@
+{
+  "project": "CSV to JSON CLI 변환 도구",
+  "current_phase": 0,
+  "phase_name": "Company Setup",
+  "status": "REDIRECTED",
+  "scope_guard": {
+    "triggered": true,
+    "decision": "REDIRECT",
+    "target": "simon-bot-pm",
+    "reason": "모든 Scope Guard 기준(필요 팀 수, 인프라, 디자인, Feature 수)에서 simon-company 임계값 미달. CLI 데이터 처리 도구는 simon-bot-pm으로 충분."
+  },
+  "execution_mode": null,
+  "project_type": "greenfield",
+  "phase_history": [
+    {
+      "phase": 0,
+      "step": "0-A",
+      "action": "프로젝트 유형 판별",
+      "result": "Greenfield 프로젝트로 판별"
+    },
+    {
+      "phase": 0,
+      "step": "0-B",
+      "action": "Scope Guard 평가",
+      "result": "4개 기준 모두 BELOW_THRESHOLD → REDIRECT 결정"
+    }
+  ],
+  "next_action": "사용자에게 simon-bot-pm 리다이렉트를 제안. 사용자가 거부 시 simon-company로 계속 진행.",
+  "timestamp": "2026-03-07"
+}
