@@ -8,7 +8,11 @@
 
 모든 실패를 먼저 분류한다. 분류 없이 재시도하면 동일한 실패를 반복하게 된다.
 
-에러 분류 트리의 키워드 매칭(`connection refused`, `assert`, `expected.*but got` 등)은 본질적으로 결정론적 작업이다. CLI 스크립트(`classify-error.sh` 등)가 있으면 키워드 기반 자동 분류를 먼저 수행하고, LLM은 분류 결과만 받아 복구 전략을 선택한다. 결정론적으로 분류할 수 없는 복합 에러만 LLM이 직접 분석한다.
+에러 분류 트리의 키워드 매칭(`connection refused`, `assert`, `expected.*but got` 등)은 본질적으로 결정론적 작업이다. CLI 스크립트(`classify-error.sh`)로 키워드 기반 자동 분류를 먼저 수행하고, LLM은 분류 결과만 받아 복구 전략을 선택한다. 결정론적으로 분류할 수 없는 복합 에러만 LLM이 직접 분석한다.
+
+> **Script Spec**: `classify-error.sh` — stdin으로 에러 출력을 받아 JSON으로 분류 결과 반환.
+> 입력: stderr 파이프. 출력: `{"type": "CODE_LOGIC|ENV_INFRA", "subtype": "...", "next_action": "..."}`.
+> exit 0=분류 성공, 1=분류 불가(LLM 판단 필요). install.sh로 자동 생성됨.
 
 ### 에러 분류 트리
 

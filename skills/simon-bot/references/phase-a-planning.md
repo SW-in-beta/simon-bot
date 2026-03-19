@@ -204,6 +204,20 @@ explore-medium과 analyst에게 다음 리서치 프레임워크를 적용한다
 - Build dependency graph: parallel vs sequential groups
 - Use Context7 for SDK documentation needed for implementation
 
+### Step 1-B Interview Gating (Inversion Pattern)
+
+인터뷰를 3-Phase 구조로 진행한다. 각 Phase에 gate를 두어 불완전한 상태에서 다음으로 넘어가지 않는다.
+
+| Phase | 목적 | 완료 조건 (Gate) | AI-First Draft 적용 |
+|-------|------|-----------------|-------------------|
+| 1. AI-First Draft | plan-summary.md 초안 생성 | 6개 필수 섹션(Situation/Task/Intent/Concerns/AC/End State) 존재 | AI가 초안 생성 |
+| 2. User Correction | 사용자 교정 | 사용자 응답 수신 (ship 모드: auto-skip) | 사용자가 교정 |
+| 3. Residual Interview | 미해결 비즈니스 결정 해소 | 미해결 항목 == 0 OR 사용자가 "진행" 선택 | 미해결 항목 기반 질문만 |
+
+각 Phase 시작 시: `[Interview Phase {N}/3] {Phase명}`
+각 Phase 완료 시: `[Interview Phase {N}/3 완료] {Gate 충족 요약}`
+**EXPLICIT GATE: 미해결 비즈니스 결정이 존재하면 Step 2(Plan Review)로 진행하지 않는다.**
+
 ### AI-First Draft Protocol (P-005)
 
 사용자가 처음부터 답하는 것보다, AI가 초안을 제시하고 사용자가 교정하는 것이 더 빠르고 정확하다.
@@ -221,6 +235,14 @@ explore-medium과 analyst에게 다음 리서치 프레임워크를 적용한다
 - 코드를 먼저 충분히 탐색한 뒤, 코드에서 답할 수 있는 질문은 하지 않는다
 - Step 0 scope + Step 1-A 분석 결과에서 이미 파악된 정보를 다시 묻지 않는다
 - 사용자에게는 비즈니스 결정, 엣지케이스, 스코프 경계, 트레이드오프만 질문한다
+
+### Interview Anti-patterns (금지)
+
+- BAD: "이 프로젝트는 어떤 프레임워크를 사용하나요?" → code-design-analysis.md에서 확인 가능
+- BAD: "테스트는 어떤 구조로 작성하나요?" → 기존 테스트 파일에서 확인 가능
+- BAD: (교정 완료 후) "혹시 다른 요구사항이 있나요?" → 열린 질문 금지, 미해결 항목 기반으로만 질문
+- OK: "로그인 실패 시 5회 제한은 연속 실패인가요, 누적 실패인가요?" → 비즈니스 결정
+- OK: "결제 실패 시 사용자에게 즉시 알림을 보내야 하나요, 재시도 후 알림인가요?" → 비즈니스 결정
 
 #### 질문 vs 진행 판단 기준표 (P-006)
 

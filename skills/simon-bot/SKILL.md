@@ -51,14 +51,6 @@ workflow-state.json이 없으면 Startup부터 시작한다.
 
 ## Cross-Cutting Protocols
 
-이 섹션의 프로토콜은 두 종류로 나뉜다:
-- **Instruction** (행동 지시): 특정 상황에서 반드시 수행해야 할 구체적 행동. 무시하면 워크플로가 깨진다.
-  - Auto-Verification Hook, Stop-and-Fix Gate, Deterministic Gate Principle, Step Transition Gate
-- **Guidance** (행동 규범): 전반적으로 따라야 할 원칙이지만 상황에 따라 유연하게 적용 가능. 무시하면 품질이 저하된다.
-  - Over-engineering 방지, Parallel Tool Invocation, Prompt Altitude Calibration, Docs-First Protocol
-
-LLM은 두 종류를 구분하지 못하면 모든 것을 Guidance로 취급하여 중요한 게이트를 건너뛸 수 있다. Instruction을 명시적으로 식별하여 준수율을 높인다.
-
 > **Shared Protocols**: `~/.claude/skills/_shared/preamble.md` 읽기 — Session Isolation, Error Resilience, Forbidden Rules, Agent Teams, Cognitive Independence 공통 프로토콜 포함.
 
 ### Session Isolation Protocol (확장)
@@ -143,6 +135,10 @@ Tests: {pass}/{total} | Build: {status}
 
 ship 모드: Phase 전환 시에만. guided 모드: AskUserQuestion 응답 시에도. interactive 모드: 매 Step 완료 시.
 
+**Step 완료 경량 출력** (ship/guided 모드): Phase 전환 외에도 각 Step 완료 시 1줄 non-blocking 출력을 추가한다. AskUserQuestion이 아니므로 워크플로를 중단하지 않는다 — 장시간 자동 실행 중 "살아 있다"는 신호가 없으면 사용자가 불필요하게 개입할 수 있다.
+
+형식: `[Progress] Step {N}/{total} 완료 — {Step명}`
+
 ### Stop-and-Fix Gate
 
 빌드, 린트, 타입체크, 테스트 중 하나라도 실패하면 **반드시 수정한 후에만** 다음 파일 수정, 다음 Step 진입, 사용자 보고 등 어떤 작업도 하지 않는다. "나중에 고치겠다"는 허용되지 않는다 — 미수정 실패는 누적되어 디버깅 비용이 기하급수적으로 증가하기 때문이다.
@@ -169,6 +165,9 @@ ENV_INFRA로 테스트 실행 자체가 불가능한 경우, 사용자 명시적
 | Forbidden Rules 참조 필요 시 | `forbidden-rules.md` |
 | 외부 라이브러리/서비스 사용 시 | `docs-first-protocol.md` |
 | Startup 또는 세션 복원 시 | `cross-cutting-protocols.md` |
+| Step 6/7/17 검증 진입 시 | `review-rubric.md` |
+| Gate 조건 참조 필요 시 | `gate-definitions.md` |
+| 산출물 생성 시 (Step 1-B, 18) | `generation-style-guide.md` |
 
 이전에 로딩한 레퍼런스 내용은 컨텍스트 압축을 통해 유지된다. 압축이 심하게 이루어지지 않은 한 재읽기는 불필요하다.
 

@@ -2,6 +2,9 @@
 *-workspace/
 evals/
 
+# Runtime data
+.data/
+
 # Meta skill (not part of the repo)
 skills/simon-bot-sync/
 

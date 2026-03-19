@@ -54,6 +54,20 @@ Phase 4에서 각 Feature를 실행하는 상세 프로토콜.
 - ...
 ```
 
+### PM 컨텍스트 패킹 (Bot 위임 전)
+
+각 Feature의 simon-bot 위임 전에, PM이 수집한 컨텍스트를 Handoff Manifest에 패킹한다 — PM Phase 1에서 이미 조사한 기술적 제약을 simon-bot이 다시 조사하는 중복을 방지하기 위함이다:
+
+| PM 산출물 | simon-bot 대응 파일 | 전달 목적 |
+|----------|-------------------|----------|
+| tasks/{task-id}/spec.md | requirements.md | 요구사항 (Phase A 대체) |
+| plan.md "기술 제약" 섹션 | expert-plan-concerns.md 초기값 | 사전 우려사항 |
+| research.md (관련 항목) | Docs-First 조회 skip 근거 | 중복 조회 방지 |
+| constitution.md | 프로젝트 원칙 | 코드 품질 기준 |
+| gotchas.jsonl (있으면) | Phase A 자동 로딩 | 프로젝트 고유 함정 |
+
+이 목록은 Handoff Manifest의 `transfer_files`에 포함되어 결정론적으로 전달된다.
+
 ## Agent Spawn Protocol
 
 ### Bot 선택에 따른 실행

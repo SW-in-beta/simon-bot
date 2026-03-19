@@ -98,6 +98,12 @@ ls -1d "${SESSIONS_DIR}"/*/ 2>/dev/null
 변경하려면 알려주세요.
 ```
 
+### 방향 확인 생략 조건
+
+Resume Default 자동 진행 조건 충족 시, 방향 확인(Step 3: "구체적으로 어떤 부분을 이어가면 될까요?")도 생략한다 — "이어서 해줘"라는 사용자의 의도는 중단된 지점부터 계속 진행하는 것이며, 자동 진행 조건이 충족된 상황에서 추가 확인은 이미 명백한 정보를 묻는 것이기 때문이다. workflow-state.json의 next_step을 읽어 자동으로 해당 Step부터 진행한다.
+
+예외: `blocked: true` 상태이거나 에러 중단(`status: failed`)인 경우에는 방향 확인을 유지한다.
+
 **AskUserQuestion 유지 조건** (하나라도 해당 시):
 - 탐지된 세션이 2개 이상
 - 세션 상태가 blocked
@@ -144,16 +150,18 @@ ls -1d "${SESSIONS_DIR}"/*/ 2>/dev/null
 **워크트리가 있는 경우:**
 1. 워크트리 디렉토리로 이동
 2. 세션 데이터 읽기: `{SESSIONS_DIR}/{branch-name}/memory/` 파일들 읽기. fallback: `.claude/memory/`
-3. State Integrity Check 실행 (아래 참조)
-4. Context Dashboard 제시
+3. Gotchas 자동 로딩 (아래 참조)
+4. State Integrity Check 실행 (아래 참조)
+5. Context Dashboard 제시
 
 **워크트리가 없는 경우 (현재 브랜치에서 이어가기):**
 1. git log에서 작업 흐름 재구성 (Step 2에서 이미 수집)
 2. 세션 데이터 읽기: `{SESSIONS_DIR}/{branch-name}/memory/` 파일이 있으면 읽기. fallback: `.claude/memory/`
-3. PM/Company 세션: `{SESSIONS_DIR}/pm-*/pm/state.json` 또는 `{SESSIONS_DIR}/company-*/company/state.json` 스캔. fallback: `.claude/company/state.json`
-4. 배포 체크리스트: company 세션 디렉토리의 `deployment-checklist.md` 확인. fallback: `.claude/company/deployment-checklist.md`
-5. `git diff --stat`으로 미커밋 변경사항 확인
-6. 종합하여 Context Dashboard 제시
+3. Gotchas 자동 로딩 (아래 참조)
+4. PM/Company 세션: `{SESSIONS_DIR}/pm-*/pm/state.json` 또는 `{SESSIONS_DIR}/company-*/company/state.json` 스캔. fallback: `.claude/company/state.json`
+5. 배포 체크리스트: company 세션 디렉토리의 `deployment-checklist.md` 확인. fallback: `.claude/company/deployment-checklist.md`
+6. `git diff --stat`으로 미커밋 변경사항 확인
+7. 종합하여 Context Dashboard 제시
 
 **Context Dashboard (워크트리 세션용):**
 ```
@@ -179,6 +187,18 @@ Next Step: Step {N+1} — {description}
 사용자의 요청에 따라 작업을 실행한다:
 1. 수정사항은 `executor` 에이전트에게 위임
 2. 작업 후 `session-meta.json` 업데이트 (있는 경우)
+
+---
+
+### Gotchas 자동 로딩 (맥락 복원 시)
+
+`~/.claude/projects/{slug}/state/gotchas.jsonl`이 존재하면 로딩한다 — 이전 세션에서 학습된 프로젝트 고유 함정을 재개 시 자동으로 인지한다.
+
+```bash
+jq -r '.gotcha' gotchas.jsonl 2>/dev/null | head -20
+```
+
+Context Dashboard에 `Known Gotchas: {N}건` 항목을 추가한다.
 
 ---
 
