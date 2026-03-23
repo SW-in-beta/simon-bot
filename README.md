@@ -165,7 +165,7 @@ Phase 4 진입 시 PM은 Phase 1-3의 과정을 컨텍스트에서 제거하고 
 - **영향 분석 Pass** — 변경되지 않았지만 영향받을 수 있는 코드를 1-depth 탐색하여 인라인 코멘트 작성
 - **Architecture Impact** — Review Summary에 의존성 방향, 모듈 경계, 확장성, 데이터 흐름 관점의 아키텍처 영향 분석 포함 (STANDARD+ 경로)
 - **대규모 PR 처리** — 100+ 파일 PR은 Core/Support/Generated로 분류, 핵심 파일에 80% 집중
-- **CI Watch** — CI 파이프라인 모니터링 및 실패 자동 수정 (max 3 cycles)
+- **CI Watch** — CI 모니터링 + 실패 자동 수정을 simon-bot-ci-fix에 위임 (에러 분류→진단→수정→푸시, 최대 5 cycles)
 - **Comment Auto-Watch** — 1분 간격 PR 댓글 자동 감지, 새 피드백 즉시 반영
 - **전문가 검증 피드백 루프** — 사용자 코멘트에 대해 도메인 전문가 Agent를 호출하여 검증 후 처리 (AGREE/PARTIAL/COUNTER verdict, Self-Agreement Bias 견제 포함)
 - **중단 복구 프로토콜** — push 실패, API 오류 등으로 중단 시 잔여 워크플로를 자동 재개. 인라인 리뷰 누락 방지

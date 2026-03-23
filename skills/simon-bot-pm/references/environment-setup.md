@@ -28,6 +28,11 @@ PRD의 기술 스택에 따라:
 ## 3-C: Git Setup
 
 - Git 초기화 (greenfield) 또는 브랜치 생성 (existing)
+  - **Existing 프로젝트 브랜치 생성 시 필수 패턴**:
+    ```bash
+    git fetch origin {base_branch} && git checkout -b {branch-name} origin/{base_branch}
+    ```
+    로컬 `{base_branch}`에서 브랜치를 생성하면 원격에 이미 머지된 커밋을 놓칠 수 있다.
 - 초기 커밋
 - `.claude/workflow/` 설정 (simon-bot 인프라)
 

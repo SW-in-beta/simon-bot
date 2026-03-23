@@ -22,10 +22,23 @@ Each Unit runs in an **isolated git worktree**. Independent Units run in **paral
 
 ## Pre-Phase: Base Branch Sync & Worktree 생성
 
+> **[GATE — Remote Sync]** 브랜치 생성 전 원격 동기화는 **필수**다. `git fetch` 없이 브랜치를 생성하면 stale한 로컬 main을 기반으로 작업하게 되어, 원격에 이미 머지된 커밋(다른 팀원의 변경, 버그 수정 등)을 놓치고 conflict가 발생할 수 있다.
+
 1. default branch 감지 (`auto`이면 main/master 자동 감지)
-2. `git fetch {remote} {base_branch}` 실행 (원격 최신 동기화)
+2. **[필수] 원격 최신 동기화**:
+   ```bash
+   git fetch origin {base_branch}
+   ```
+   실패 시 네트워크 에러로 분류하고 Error Resilience 적용. fetch 없이 다음 단계로 진행하는 것은 **금지**.
 3. `.claude/memory/branch-name.md`에서 사용자가 입력한 브랜치명 읽기
-4. worktree 생성: `git worktree add .claude/worktrees/{branch-name} -b {branch-name} origin/{base_branch}`
+4. **[필수] `origin/{base_branch}` 기반 브랜치 생성** — 로컬 `{base_branch}`가 아닌 반드시 `origin/{base_branch}`를 사용:
+   ```bash
+   git worktree add .claude/worktrees/{branch-name} -b {branch-name} origin/{base_branch}
+   ```
+   worktree 미사용 시:
+   ```bash
+   git checkout -b {branch-name} origin/{base_branch}
+   ```
 5. 해당 worktree로 작업 디렉토리 이동
 6. base commit SHA를 `.claude/memory/base-commit.md`에 기록
 7. **[GATE — Base Stability]** worktree에서 빌드+기존 테스트를 실행하여 base branch가 안정적인지 검증한다. 깨진 base 위에 구현하면 Phase B 전체가 낭비되기 때문이다.

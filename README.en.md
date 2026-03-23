@@ -159,7 +159,7 @@ Handles PR creation and code review after work is complete:
 - **Impact analysis pass** — identifies unchanged code that may be affected by changes (1-depth caller/consumer search)
 - **Architecture Impact** — Review Summary includes architecture impact analysis covering dependency direction, module boundaries, extensibility, and data flow (STANDARD+ path)
 - **Large PR handling** — 100+ file PRs classified as Core/Support/Generated, 80% focus on core files
-- **CI Watch** — monitors CI pipeline and auto-fixes failures (max 3 cycles)
+- **CI Watch** — delegates CI monitoring + auto-fix to simon-bot-ci-fix (error classification, diagnosis, fix, push — up to 5 cycles)
 - **Comment Auto-Watch** — polls PR comments every minute, auto-applies new feedback
 - **Expert-verified feedback loop** — spawns domain expert Agents to verify user comments before acting (AGREE/PARTIAL/COUNTER verdict with Self-Agreement Bias mitigation)
 - **Interruption recovery protocol** — auto-resumes remaining workflow after push failures, API errors, etc. Prevents inline review omission

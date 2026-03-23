@@ -149,39 +149,25 @@ CONNECTED 모드에서는 **Blind-First 2-Pass**를 적용한다:
 
 ## Step 3: CI Watch + 리뷰 안내
 
-### CI Watch (Background Agent)
+### CI Watch (simon-bot-ci-fix 위임)
 
-Step 2 완료 직후, background agent를 시작한다:
+Step 2 완료 직후, CI 모니터링 + 자동 수정을 **simon-bot-ci-fix** 스킬에 위임한다. Background agent가 스킬 파일을 직접 읽고 실행하므로, CI 수정이 fresh context에서 전용 로직으로 수행된다.
+
 ```
-Agent(run_in_background=true)
+Agent(run_in_background=true):
+  "다음 파일을 Read하고 그 지시를 따라 CI 수정을 실행하라:
+   ~/.claude/skills/simon-bot-ci-fix/SKILL.md
+
+   컨텍스트:
+   - PR 번호: {pr_number}
+   - 브랜치: {branch}
+   - SESSION_DIR: {SESSION_DIR}
+   - 모드: DELEGATED
+   - 결과 저장: {SESSION_DIR}/memory/ci-watch-result.md"
 ```
 
-Agent에 전달할 컨텍스트:
-- PR 번호 (`.claude/memory/pr-info.md`)
-- 브랜치명 (`.claude/memory/branch-name.md`)
-- 프로젝트 빌드/테스트 명령 (`.claude/workflow/config.yaml`, 있으면)
-- 현재 worktree 경로
-
-**CI 모니터링 루프 (max 3 cycles):**
-
-1. CI 상태 확인:
-   ```bash
-   gh pr checks {pr_number} --watch --fail-fast
-   ```
-   `--watch`가 지원되지 않으면 30초 간격 polling:
-   ```bash
-   gh pr checks {pr_number}
-   ```
-2. 모든 체크 통과 → CI Watch 종료, 결과 기록
-3. CI 실패 시:
-   a. 실패한 run의 로그 확인: `gh run view {run_id} --log-failed`
-   b. 실패 유형 분류: BUILD / TEST / LINT / ENV
-   c. **ENV 유형은 수정하지 않는다** — 코드 변경으로 해결 불가, 결과에 기록만
-   d. 진단 → 수정 → 커밋 (`fix(ci): {수정 내용}`) → 푸시
-   e. PR에 코멘트로 수정 내용 요약
-   f. CI 재실행 대기 → 1번으로 복귀
-
-**결과 저장:** `.claude/memory/ci-watch-result.md`
+**결과 저장:** `{SESSION_DIR}/memory/ci-watch-result.md` (simon-bot-ci-fix가 자동 생성)
+**진행 상태:** `{SESSION_DIR}/memory/ci-fix-status.md` (polling 가능)
 
 ### 사용자 리뷰 안내
 
@@ -244,7 +230,7 @@ Agent에 전달할 컨텍스트:
       **[GATE]** 전문가 Agent 호출 없이 직접 수정하거나 답변하는 것은 금지.
    e. 수정된 부분에 `[R{N}]` 접두사로 인라인 리뷰 재작성
       (양식: `~/.claude/skills/simon-bot-review/references/inline-review-format.md`)
-   f. **[코드 변경 시] CI Watch 재시작** — AGREE/PARTIAL로 코드를 수정 + push한 경우, background agent로 CI Watch를 재시작한다 (Step 4-D 절차 참조). COUNTER의 경우 생략.
+   f. **[코드 변경 시] CI Watch 재시작** — AGREE/PARTIAL로 코드를 수정 + push한 경우, simon-bot-ci-fix를 background agent로 위임하여 CI Watch를 재시작한다 (Step 4-D 절차 참조). COUNTER의 경우 생략.
    g. 사용자에게 수정 완료 안내
    g. `last-comment-check.md`를 현재 시점으로 갱신
 5. **종료 조건 확인**: 새 댓글 중 "LGTM" / "approve" / "승인" 패턴이 있으면 → 폴링 종료, Step 5로 진행 안내
@@ -325,19 +311,28 @@ ASK 항목만 Step 4-B의 전문가 검증 파이프라인으로 전달.
 - 수정된 코드 위치에 **수정 반영 양식**으로 새 코멘트 작성 (양식은 `references/inline-review-format.md` 참조)
 - 변경 없는 부분은 건드리지 않음
 
-### 4-D: CI Watch 재시작
+### 4-D: CI Watch 재시작 (simon-bot-ci-fix 위임)
 
 > **[GATE — CI Watch 필수]** 4-B/4-C에서 코드가 변경되어 push한 경우, CI Watch 재시작을 **생략해서는 안 된다**. 코드 변경 없이 댓글만 남긴 COUNTER verdict의 경우에만 이 단계를 건너뛸 수 있다.
 
-코드가 변경되었으므로 CI Watch를 background agent로 재시작한다:
+코드가 변경되었으므로 CI Watch를 simon-bot-ci-fix에 위임한다:
 
 1. **코드 변경 여부 확인**: 4-B에서 AGREE 또는 PARTIAL verdict로 코드를 수정 + push했는지 확인
    - 수정 + push 있음 → CI Watch 시작 (아래 2번으로)
    - 수정 없음 (COUNTER만) → 4-E로 진행
-2. **Background Agent 시작**: Step 3의 CI Watch와 동일한 로직을 적용한다 (run_in_background=true)
-   - `gh pr checks {pr_number} --watch --fail-fast` 또는 30초 간격 polling
-   - CI 실패 시: 로그 확인 → 진단 → 수정 → 커밋 → 푸시 (max 3 cycles)
-   - 결과를 `{SESSION_DIR}/memory/ci-watch-result.md`에 갱신
+2. **simon-bot-ci-fix 위임**: Step 3과 동일한 패턴으로 background agent를 시작한다:
+   ```
+   Agent(run_in_background=true):
+     "다음 파일을 Read하고 그 지시를 따라 CI 수정을 실행하라:
+      ~/.claude/skills/simon-bot-ci-fix/SKILL.md
+
+      컨텍스트:
+      - PR 번호: {pr_number}
+      - 브랜치: {branch}
+      - SESSION_DIR: {SESSION_DIR}
+      - 모드: DELEGATED
+      - 결과 저장: {SESSION_DIR}/memory/ci-watch-result.md"
+   ```
 3. **4-E로 진행**: CI Watch는 background에서 실행하므로 4-E(수정 완료 안내)로 즉시 진행한다
 
 ### 4-E: 수정 완료 안내
