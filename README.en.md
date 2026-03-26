@@ -71,8 +71,10 @@ Then in Claude Code:
 | `/simon-bot-boost-capture` | Background capture of skill improvements — record insights without interrupting workflow |
 | `/simon-bot-boost-review` | Review & apply accumulated improvement insights from boost-capture |
 | `/simon-bot-ci-fix` | Auto-fix CI failures — log analysis, error classification, code fix, push (up to 5 cycles) |
+| `/simon-bot-healthcheck` | Skill health dashboard — validate structural quality across the entire family |
 | `/simon-company` | Full-stack software company — multi-team collaboration from planning to deployment & ops |
 | `/simon-presenter` | Live demo presenter — run apps with Playwright for interactive demonstrations |
+| `/simon-study` | Problem-based deep learning — from a concrete problem to concept understanding, code analysis, design trade-offs, and improvement directions in one flow |
 
 ### Pick the Right Skill
 
@@ -90,7 +92,9 @@ Then in Claude Code:
 | Note a skill improvement without stopping work | `/simon-bot-boost-capture` |
 | Batch-review and apply accumulated improvements | `/simon-bot-boost-review` |
 | Auto-fix CI failures (PR checks failing) | `/simon-bot-ci-fix` |
+| Validate skill quality (after boost, integrity check) | `/simon-bot-healthcheck` |
 | Demo a finished app with live browser interaction | `/simon-presenter` |
+| Problem-based deep learning (concepts + code integrated) | `/simon-study` |
 
 <details>
 <summary><strong>Expert Teams (5 domains, 22 specialists)</strong></summary>
