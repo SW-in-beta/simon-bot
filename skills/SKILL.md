@@ -45,6 +45,7 @@ simon-* 스킬 패밀리의 변경사항을 `~/simon-bot` 오픈소스 레포에
 - `simon-bot-boost`
 - `simon-bot-boost-capture`
 - `simon-bot-boost-review`
+- `simon-bot-ci-fix`
 - `simon-bot-grind`
 - `simon-bot-pm`
 - `simon-bot-report`
