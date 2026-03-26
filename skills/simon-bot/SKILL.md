@@ -188,19 +188,22 @@ subagent는 다음 경우에 사용한다:
 
 단일 파일 수정, 간단한 검색, 단순 명령 실행은 직접 수행한다. 불필요한 subagent 생성은 컨텍스트를 낭비한다.
 
-**역할별 maxTurns 가이드라인:**
+**역할별 도구 범위, maxTurns, 반환 규약:**
+Agent spawn 시 [agent-capability-matrix.md](references/agent-capability-matrix.md) 참조. Spawn Prompt Template과 Status Prefix 규약을 포함한다.
 
-| 용도 | maxTurns | 예시 |
-|------|----------|------|
-| 코드 탐색 | 20 | explore-medium, explore-quick |
-| 구현 (TDD) — SMALL | 50 | executor (단일 Unit) |
-| 구현 (TDD) — STANDARD | 100 | executor (복합 Unit) |
-| 구현 (TDD) — LARGE | 200 | executor (대규모 Unit) |
-| 검증/리뷰 | 30 | reviewer, verifier (.claude/agents/) |
-| 전략 판단 | 30 | architect, security-reviewer |
-| expert team member | 20 | Agent Team 내 전문가 |
+### Multi-Agent Saturation Guard
 
-maxTurns 초과 시 에이전트가 자동 종료된다. 오케스트레이터는 종료 사유를 사용자에게 보고하고, 필요 시 더 높은 maxTurns로 재시도할지 결정한다.
+multi-agent 구조(Agent Team, Devil's Advocate, Verification Layer)는 단일 에이전트로 달성 불가능한 품질을 제공하지만 overhead도 동반한다. 다음 조건에서 multi-agent를 축소하여 비용 대비 효과를 최적화한다:
+
+**축소 조건** (하나라도 해당 시):
+- Step 7에서 CRITICAL/HIGH 0건 + MEDIUM 3건 이하 → Devil's Advocate skip
+- Step 4-B findings 5건 이하 + CRITICAL 0건 → Verification Layer를 single verifier로 축소 (Blind-First는 유지)
+- 이전 5세션 Harness Stress Test에서 특정 multi-agent Step의 추가 발견율 10% 미만 → optional 전환, Decision Journal에 근거 기록
+
+**축소 불가** (multi-agent 필수):
+- config.yaml의 high_impact_paths 매칭 파일 포함
+- STANDARD+ 경로의 Step 7 Verification Layer
+- LARGE 경로의 모든 multi-agent Step
 
 ### Over-engineering 방지
 
