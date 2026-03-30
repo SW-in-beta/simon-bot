@@ -42,6 +42,23 @@ graph LR
     style F fill:#f3e5f5,stroke:#9C27B0
 ```
 
+## Agent Strategy
+
+Reliability is the top priority -- token usage and cost are irrelevant compared to result accuracy.
+
+| Pattern | When to use | Core principle |
+|---------|------------|----------------|
+| **Agent Team** (shared context) | Agents with different perspectives discuss toward a shared goal | Six Thinking Hats -- each agent argues from a distinct viewpoint to reach better conclusions |
+| **SubAgent** (isolated context) | Independent analyses converge to increase confidence | Monte Carlo -- convergence of independent trials provides higher confidence than any single analysis |
+
+**Decision rule**: "Would agents produce better results by seeing each other's output?"
+- **YES** -- Agent Team (discussion value > independence loss) -- best for planning, design debates
+- **NO** -- SubAgent (independence value > discussion absence) -- best for verification, audits, parallel execution
+
+> In verification/audit steps, opinion exchange via Agent Team's messaging becomes a pathway for confirmation bias. Steps where verification is the goal use SubAgents to structurally guarantee independence.
+
+---
+
 ## Quick Start
 
 ```bash
