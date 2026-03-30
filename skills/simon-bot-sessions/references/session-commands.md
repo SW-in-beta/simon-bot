@@ -221,11 +221,25 @@ Context Dashboard에 `Known Gotchas: {N}건` 항목을 추가한다.
 
 ---
 
-## 스킬 자동 판별 (resume 시)
+## 스킬 자동 판별 (priority order)
 
-`session-meta.json`의 `skill` 필드로 판별:
+resume 시 아래 우선순위로 스킬을 판별한다. 단순 디렉토리 구조 추론만으로는 bot→grind 전환이나 company→pm 하위 세션을 오판별할 수 있으므로, 교차 검증을 수행한다.
+
+### 판별 우선순위
+1. **handoff-manifest.json의 to_skill** (최우선) — 스킬 전환이 진행 중이면 전환 대상 스킬을 사용. handoff가 완료되지 않은 상태에서 resume되었을 수 있기 때문이다.
+2. **session-meta.json의 skill** — 명시적 기록
+3. **디렉토리 구조 추론** — `pm/` → PM, `company/` → company, `memory/failure-log.md` → grind, 그 외 → simon-bot
+
+### 판별 후 동작
 - `simon-bot` → simon-bot Step 재개 프로토콜
 - `simon-bot-grind` → grind failure-log, checkpoint, retry budget 복원
 - `simon-company` → company state.json 기반 Phase 재개
-- 필드가 없으면: 세션 디렉토리 구조로 추론 — `pm/` 하위 존재 시 simon-bot-pm, `company/` 하위 존재 시 simon-company, `memory/failure-log.md` 존재 시 grind, 그 외 simon-bot. fallback: `.claude/company/state.json` 등 프로젝트 디렉토리 확인
+- `simon-bot-pm` → PM state.json 기반 재개
 - **배포 진행 중 감지**: company 세션 디렉토리의 `deployment-checklist.md` 또는 `.claude/company/deployment-checklist.md`에 미완료 항목이 있으면, "simon-company 배포 단계"로 판별
+
+### 교차 검증 (gotcha 방지)
+
+판별된 스킬과 디렉토리 상태가 불일치하면 사용자에게 확인한다:
+- skill="simon-bot"이지만 `failure-log.md` + `checkpoints.md` 존재 → "grind로 전환된 세션일 수 있습니다. grind로 재개할까요?"
+- skill="simon-bot-pm"이지만 `company/` 디렉토리 존재 → "company 프로젝트의 PM 하위 세션일 수 있습니다. company로 재개할까요?"
+- skill="simon-bot-grind"이지만 `failure-log.md` 없음 → "grind 세션이지만 실패 기록이 없습니다. simon-bot으로 재개할까요?"

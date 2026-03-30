@@ -9,6 +9,7 @@
   - [Search Strategy for Code Exploration (P-013)](#search-strategy-for-code-exploration-p-013)
   - [Agent Team: Code Design Team](#agent-team-code-design-team-explore-medium-완료-후)
   - [통합 검증 명령 탐지 (Feedback Loop 기반)](#통합-검증-명령-탐지-feedback-loop-기반)
+  - [사내 자료 맥락 연구 (Design Intent Research)](#사내-자료-맥락-연구-design-intent-research)
 - [Step 1-B: Plan Creation](#step-1-b-plan-creation)
   - [AI-First Draft Protocol (P-005)](#ai-first-draft-protocol-p-005)
   - [Interview Guard](#interview-guard)
@@ -195,6 +196,47 @@ explore-medium과 analyst에게 다음 리서치 프레임워크를 적용한다
 
 | 가설 | 초기 신뢰도 | 지지 증거 | 반박 증거 | 최종 신뢰도 |
 |------|-----------|----------|----------|-----------|
+
+### 사내 자료 맥락 연구 (Design Intent Research)
+
+코드 탐색과 가설 수립 이후, 코드만으로 설계 의도를 파악하기 어려운 경우에 사내 자료를 추가 탐색한다. 코드는 "무엇을 하는지"를 보여주지만, "왜 이렇게 만들었는지"는 RFC, Slack 논의, 커밋 히스토리에 있다. 이 맥락 없이 구현하면 원래 설계 의도에 반하는 코드를 작성하거나, 이미 검토·폐기된 대안을 다시 시도하는 낭비가 발생한다.
+
+**트리거 조건** — 다음 중 하나에 해당하면 수행:
+- 코드에 비직관적인 패턴이 있고 그 이유를 코드만으로 추론할 수 없을 때
+- 변경 대상이 여러 서비스/모듈에 걸치는 cross-cutting concern일 때
+- 기존 코드에 주석·TODO로 설계 결정이 언급되지만 맥락이 불충분할 때
+- Structured Research Protocol에서 가설 간 신뢰도 차이가 좁아 판별이 어려울 때
+
+**리서치 수단:**
+
+Confluence — RFC, 설계 문서, 기술 결정 기록:
+```bash
+~/.claude/skills/buzzvil-confluence/scripts/search.sh -q "검색어" -s DEM -f
+~/.claude/skills/buzzvil-confluence/scripts/search.sh -q "검색어" -s DEM -l rfc -f
+```
+
+Slack — 당시 논의, 의사결정 맥락:
+```bash
+~/.claude/skills/buzzvil-slack/scripts/search.sh -q "검색어" -c dev-demand
+~/.claude/skills/buzzvil-slack/scripts/fetch_thread.sh "https://buzzvil.slack.com/archives/..."
+```
+
+Git history — 관련 코드의 변경 이력과 커밋 메시지:
+```bash
+git log --oneline --all --grep="키워드" | head -10
+git blame -L start,end file_path
+```
+
+**검색 키워드 선정:**
+- 코드에서 발견된 핵심 키워드 (기능명, 모듈명, 패턴명)
+- Structured Research Protocol에서 수립한 가설의 핵심 개념
+- git blame으로 발견된 관련 커밋 메시지의 키워드
+
+**결과 통합:**
+- 발견한 설계 의도/맥락을 `code-design-analysis.md`의 "Design Context" 섹션에 추가
+- 반드시 출처 링크 포함 (Confluence URL, Slack permalink, 커밋 해시)
+- 발견한 맥락이 구현 계획과 충돌하면 plan-summary.md의 Concerns에 "설계 충돌" 항목으로 반영
+- 이미 검토·폐기된 대안이 발견되면 plan-summary.md의 "NOT in scope"에 근거와 함께 기록
 
 ## Step 1-B: Plan Creation
 

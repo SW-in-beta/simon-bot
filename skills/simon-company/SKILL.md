@@ -1,6 +1,6 @@
 ---
 name: simon-company
-description: "풀스택 소프트웨어 회사 — 다중 전문 팀(PM, Design, FE, BE, QA, DBA, DevOps, ML)이 기획→배포→운영까지 협업합니다. 이 스킬은 명시적 호출 전용입니다. '/simon-company' 직접 호출 시에만 사용하세요. 암묵적으로 추론하여 자동 호출하지 마세요. Do NOT use when: 팀 2개 이하로 충분한 프로젝트 — simon-bot-pm을 사용하세요."
+description: "풀스택 소프트웨어 회사 — 다중 전문 팀(PM, Design, FE, BE, QA, DBA, DevOps, ML)이 기획부터 배포/운영까지 협업합니다. 이 스킬은 명시적 호출 전용입니다. '/simon-company' 직접 호출 시에만 사용하세요. 암묵적으로 추론하여 자동 호출하지 마세요. Use when: (1) 3개 이상 팀이 필요한 대규모 프로젝트 ('회사 차원에서 만들어줘', '풀스택 팀으로'), (2) CI/CD, 배포, 모니터링을 포함한 프로덕션 서비스 구축, (3) UI/UX 디자인부터 백엔드까지 전 영역 협업이 필요할 때. Do NOT use when: 팀 2개 이하로 충분한 프로젝트 — simon-bot-pm을 사용하세요."
 compatibility:
   tools: [Agent, AskUserQuestion, TeamCreate, SendMessage]
   skills: [simon-bot-pm, simon-bot, simon-bot-grind, simon-bot-report, git-push-pr]
@@ -320,7 +320,10 @@ For Checklist Protocol details (SSoT 역할 분리, 형식 표준, 적용 범위
 
 각 Phase 진입 시 해당 Phase의 레퍼런스 파일만 읽는다:
 - **Phase 0-2** → `planning-design.md` + `team-roster.md`
+- **Phase 1 의뢰 모드** → `discovery-interview.md` (planning-design.md에서 참조)
 - **Phase 3-4** → `contracts-execution.md`
+- **Phase 3 계약 정의** → `contract-templates.md` (contracts-execution.md에서 참조)
+- **Phase 4 Sprint 위임/리뷰** → `sprint-execution-templates.md` (contracts-execution.md에서 참조)
 - **Phase 5** → `phase-5-qa.md`
 - **Phase 6** → `phase-6-deployment.md`
 - **Phase 7** → `phase-7-delivery.md`

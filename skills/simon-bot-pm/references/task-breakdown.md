@@ -27,14 +27,35 @@ architect:
 
 ## 2-C: Complexity Assessment & Bot Assignment
 
-각 Feature별 복잡도 평가 -> simon-bot vs simon-bot-grind 자동 할당:
+각 Feature별 복잡도 평가 -> simon-bot vs simon-bot-grind 자동 할당.
+
+### Bot Assignment Criteria
+
+Feature별 담당 봇(simon-bot vs simon-bot-grind)을 판정하는 기준. 잘못된 할당은 과도한 오버헤드(단순 Feature에 grind) 또는 이중 작업(복잡한 Feature에 bot → 3회 실패 → grind 전환)을 유발한다.
 
 | 기준 | simon-bot | simon-bot-grind |
 |------|-----------|-----------------|
-| 변경 파일 수 | <=10 | >10 |
-| 외부 연동 | 없거나 단순 | 복잡한 다중 연동 |
-| 기존 코드 영향 | 제한적 | 광범위 |
-| 빌드/테스트 난이도 | 안정적 | 실패 가능성 높음 |
+| 외부 API 연동 | 0-1개 | 2개 이상 |
+| 변경 파일 수 | 5-15개 | 15개 이상 또는 5개 미만이지만 핵심 모듈 |
+| 기존 테스트 커버리지 | 해당 모듈 테스트 존재 | 테스트 없는 레거시 코드 |
+| 이전 실패 이력 | gotchas.jsonl에 관련 패턴 없음 | gotchas.jsonl에 관련 실패 패턴 존재 |
+| 기술 스택 | 코드베이스에 유사 구현 존재 | 새 기술/패턴 첫 도입 |
+
+### Assignment Examples
+
+**Example 1: simon-bot 할당**
+Feature: "사용자 프로필에 아바타 업로드 기능 추가"
+- 외부 연동: S3 (1개, 기존 upload 유틸 존재)
+- 변경 파일: 8개 (handler, service, model, test, migration 등)
+- 기존 테스트: user 모듈 80% 커버리지
+- 판정: **simon-bot** (STANDARD path)
+
+**Example 2: simon-bot-grind 할당**
+Feature: "결제 시스템을 Stripe에서 자체 PG로 마이그레이션"
+- 외부 연동: 3개 (기존 Stripe, 새 PG, 결제 알림 webhook)
+- 변경 파일: 22개 (payment 전체 모듈 + 관련 handler)
+- 기존 테스트: payment 모듈 20% (레거시)
+- 판정: **simon-bot-grind** (환경 변수 의존 실패 빈번 예상)
 
 ## 2-D: Execution Plan 생성
 

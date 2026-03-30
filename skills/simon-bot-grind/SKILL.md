@@ -28,6 +28,14 @@ compatibility:
 
 grind 전용 파일(`failure-log.md`, `checkpoints.md`, `assumptions-registry.md`, `escalation-report.md`)도 동일하게 `{SESSION_DIR}/memory/`에 저장한다.
 
+### Grind Scripts
+
+`scripts/` 디렉토리의 결정론적 스크립트로 grind 핵심 메커니즘을 강제한다. LLM 기억에 의존하면 compaction 후 상태를 잃을 수 있으므로, 스크립트 출력에 기반하여 판단한다.
+
+- `progress-detect.sh <failure-log>` — 최근 2건 재시도 비교 → `PROGRESS`/`STALL`/`REGRESS` JSON 출력. Stall detection의 판정 근거로 사용.
+- `budget-tracker.sh <failure-log> [budget]` — 잔여 예산 JSON 출력. 70%+ 소비 시 `warning: true`. 매 재시도 시작 전에 실행하여 예산 상태를 확인한다.
+- `checkpoint.sh <step> <attempt> <checkpoints-md>` — `git tag checkpoint-step{N}-attempt{M}` + checkpoints.md 원자적 갱신. 전략 전환 전에 반드시 실행한다.
+
 ## Grind Config Overrides
 
 ```yaml

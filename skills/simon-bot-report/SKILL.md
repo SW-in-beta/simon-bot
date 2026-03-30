@@ -29,6 +29,24 @@ SESSION_DIR="${HOME}/.claude/projects/${PROJECT_SLUG}/sessions/${SESSION_ID}"
 mkdir -p "${SESSION_DIR}/reports"
 ```
 
+### Read-Only Guard Hook
+
+Report 스킬의 "코드 수정 금지" ABSOLUTE 규칙을 결정론적으로 강제한다. 산문 지시는 compaction 후 소실될 수 있지만, hook은 세션 동안 100% 작동한다.
+
+`report-readonly-guard.sh` (PreToolUse):
+- `$TOOL_NAME`이 Edit 또는 Write일 때 활성화
+- `$FILE_PATH`가 `{SESSION_DIR}/reports/`나 `~/.claude/` 하위이면 → 허용 (exit 0)
+- 그 외 경로 → 차단 (exit 2), 메시지: "simon-bot-report는 분석 전용입니다. 프로젝트 소스 코드 수정은 차단됩니다."
+
+settings.json에 등록하여 report 세션 동안만 활성화한다. simon-bot의 `forbidden-guard.sh`와 독립 동작한다.
+
+### Reference Loading Policy
+
+| 트리거 | 읽을 파일 |
+|--------|----------|
+| Step 3 Domain Expert 진입 | `references/domain-teams.md` |
+| Step 4-B Document Generation 진입 | `references/examples.md` |
+
 ### Step 0: Input Collection (P-001 AI-First Draft)
 
 **0-A: 워크플로 설정 확인**
