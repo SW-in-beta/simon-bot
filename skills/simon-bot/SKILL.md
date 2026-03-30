@@ -20,7 +20,7 @@ You are executing the **simon-bot** deep workflow. This is a 19-step quality pip
 
 1. `{SESSION_DIR}/memory/workflow-state.json` 읽기
 2. `current_step`에 해당하는 Phase의 reference 목록 확인 (Reference Loading Policy 테이블)
-3. `references_loaded` 필드에 해당 reference가 없으면 → 재로딩. 있으면 → 스킵. Compaction 감지 시 `references_loaded`를 초기화하여 강제 재로딩 — "이전에 읽었으니 알고 있다"가 LLM 기억이 아닌 JSON 기록에 기반해야 핵심 규칙 소실을 방지한다.
+3. `references_loaded` 필드에 해당 reference가 없으면 → 재로딩. 있으면 → 스킵. Compaction 감지 시 **Tier별 선택적 초기화** — Tier 1은 강제 재로딩, Tier 2는 현재 Phase에 해당하는 것만 재로딩, Tier 3는 초기화하지 않음 (on-demand 트리거로 자연스럽게 재로딩). "이전에 읽었으니 알고 있다"가 LLM 기억이 아닌 JSON 기록에 기반해야 핵심 규칙 소실을 방지한다.
 4. 해당 Step 실행
 5. **Step 완료 즉시** workflow-state.json 갱신 (`references_loaded` 포함)
 
@@ -134,26 +134,29 @@ ENV_INFRA로 테스트 실행 자체가 불가능한 경우, 사용자 명시적
 
 ### Reference Loading Policy (컨텍스트 효율)
 
-각 Phase 진입 시 해당 Phase의 레퍼런스 파일만 읽는다. 모든 레퍼런스를 사전 로딩하지 않는다.
+각 Phase 진입 시 해당 Phase의 레퍼런스 파일만 읽는다. **Tier 1 파일은 256K 토큰 이내에 로딩되어야 한다** — Opus 4.6의 정확도가 256K 이후 ~70%로 하락하므로, 핵심 규칙은 초기에 로딩하여 높은 정확도 영역에 배치한다.
 
-| 트리거 | 읽을 파일 |
-|--------|----------|
-| Phase A 진입 | `phase-a-planning.md` |
-| Phase B-E 구현 진입 | `phase-b-implementation.md` |
-| Phase B-E 검증 진입 (Step 6+) | `phase-b-verification.md` |
-| Integration/Review 진입 | `integration-and-review.md` |
-| Agent Team 생성 시 | `agent-teams.md` |
-| 에러 발생 시 | `error-resilience.md` |
-| Step 6/7/17 검증 진입 시 | `context-separation.md` |
-| 전문가 팀 findings 작성 시 | `expert-output-schema.md` |
-| Forbidden Rules 참조 필요 시 | `forbidden-rules.md` |
-| 외부 라이브러리/서비스 사용 시 | `docs-first-protocol.md` |
-| Startup 또는 세션 복원 시 | `cross-cutting-protocols.md` |
-| Step 6/7/17 검증 진입 시 | `review-rubric.md` |
-| Gate 조건 참조 필요 시 | `gate-definitions.md` |
-| 산출물 생성 시 (Step 1-B, 18) | `generation-style-guide.md` |
+| 트리거 | 읽을 파일 | Tier | 비고 |
+|--------|----------|------|------|
+| Startup 또는 세션 복원 시 | `cross-cutting-protocols.md` | 1 | CWM, Session Isolation 등 핵심 프로토콜 |
+| Phase A 진입 | `phase-a-planning.md` | 1 | 계획 품질이 전체 파이프라인 품질을 결정 |
+| Phase B-E 구현 진입 | `phase-b-implementation.md` | 1 | TDD, Critical Rules 등 구현 핵심 |
+| Phase B-E 검증 진입 (Step 6+) | `phase-b-verification.md` | 2 | Step 6+ 진입 시 로딩 |
+| Integration/Review 진입 | `integration-and-review.md` | 2 | 후반 단계 |
+| Step 6/7/17 검증 진입 시 | `context-separation.md` | 2 | 검증 시에만 필요 |
+| Step 6/7/17 검증 진입 시 | `review-rubric.md` | 2 | 검증 시에만 필요 |
+| Agent Team 생성 시 | `agent-teams.md` | 3 | on-demand |
+| 에러 발생 시 | `error-resilience.md` | 3 | on-demand |
+| 전문가 팀 findings 작성 시 | `expert-output-schema.md` | 3 | on-demand |
+| Forbidden Rules 참조 필요 시 | `forbidden-rules.md` | 3 | PreToolUse 훅으로 구조적 강제됨 |
+| 외부 라이브러리/서비스 사용 시 | `docs-first-protocol.md` | 3 | on-demand |
+| Gate 조건 참조 필요 시 | `gate-definitions.md` | 3 | on-demand |
+| 산출물 생성 시 (Step 1-B, 18) | `generation-style-guide.md` | 3 | on-demand |
 
-이전에 로딩한 레퍼런스 내용은 컨텍스트 압축을 통해 유지된다. 압축이 심하게 이루어지지 않은 한 재읽기는 불필요하다.
+**Tier 정의:**
+- **Tier 1 (Early Load)**: 256K 이내에 반드시 로딩. compaction 후에도 최우선 재로딩
+- **Tier 2 (Phase Load)**: 해당 Phase 진입 시 로딩. compaction 후 현재 Phase의 Tier 2만 재로딩
+- **Tier 3 (On-Demand)**: 필요 시점에만 로딩. compaction 후 재로딩 불필요 (on-demand 트리거로 자연스럽게 재로딩)
 
 ### Subagent 사용 기준
 
