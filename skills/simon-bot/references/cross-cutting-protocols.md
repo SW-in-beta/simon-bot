@@ -1,6 +1,7 @@
 # Cross-Cutting Protocols (Detail)
 
 ## 목차
+- [Decision Journal](#decision-journal)
 - [Session Isolation Protocol](#session-isolation-protocol)
 - [Composable CLI Script Toolkit](#composable-cli-script-toolkit)
 - [Docs-First Protocol](#docs-first-protocol)
@@ -106,6 +107,34 @@ Step 20(마지막 단계)에 도달하지 못하더라도 사용자 피드백이
 **Step 20과의 관계**: Phase-end 회고가 이미 캡처한 패턴은 Step 20에서 중복 처리하지 않는다. Step 20은 전체 워크플로를 관통하는 종합 패턴(Phase 간 교차 패턴)에만 집중한다. 컨텍스트 부족으로 Step 20이 실행되지 않아도, 핵심 인사이트는 Phase-end에서 이미 캡처된 상태이므로 안전하다.
 
 **오버헤드**: user-feedback-log.md 스캔 + 1줄 출력 = 최소 컨텍스트 소비. boost-capture는 백그라운드이므로 포그라운드 작업에 영향 없음.
+
+## Decision Journal
+
+주요 판단 지점에서 `.claude/memory/decision-journal.md`에 누적 기록한다. 각 엔트리는 **Contrastive Decision** 형식을 따른다 — 선택한 대안뿐 아니라 기각한 대안과 기각 사유, 무효화 조건도 함께 기록하여 compaction 후에도 "왜 이 선택을 했는지"를 복원할 수 있도록 한다.
+
+**형식:**
+```
+[Decision] {선택} — {1줄 근거}
+  - 기각된 대안: {대안} — {기각 사유}
+  - 무효화 조건: {이 결정이 잘못될 조건}
+```
+
+**Few-shot 예시:**
+```
+[Decision] STANDARD 경로 — 변경 파일 8개, 신규 모듈 1개
+  - 기각된 대안: SMALL — 파일 수 기준 초과 (>5)
+  - 무효화 조건: 구현 중 변경 파일이 4개 이하로 축소되면 SMALL 전환 검토
+
+[Decision] Plan 수정 거부 — YAGNI, spec에 없는 캐싱 레이어 불필요
+  - 기각된 대안: Redis 캐시 추가 — AC에 성능 요구사항 없음
+  - 무효화 조건: 부하 테스트에서 p99 > 500ms 관측 시 캐싱 재검토
+
+[Decision] 리더 단독 판단 — auth-expert/stability-expert 미합의, 세션 토큰 만료 30m 채택
+  - 기각된 대안: 60m (stability-expert 주장) — 보안 위험이 편의성보다 우선
+  - 무효화 조건: 사용자 이탈율 데이터에서 30m이 UX 문제로 확인되면 재논의
+```
+
+**Anti-Oscillation Rule**: 기각한 전략을 재선택하려면, 기각 시점 이후에 **새로운 정보**(에러 메시지 변경, 환경 변화, 외부 의존성 업데이트 등)가 확인되었음을 기록해야 한다. "다시 해보자"는 허용되지 않는다 — 같은 전략을 같은 조건에서 반복하면 결과도 같다.
 
 ## Structured Step Result Protocol
 

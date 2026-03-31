@@ -41,6 +41,11 @@ Each Unit runs in an **isolated git worktree**. Independent Units run in **paral
    ```
 5. 해당 worktree로 작업 디렉토리 이동
 6. base commit SHA를 `.claude/memory/base-commit.md`에 기록
+6-B. **session-meta.json 갱신**: Phase B 진입을 반영한다.
+   ```json
+   { "current_phase": "B", "current_step": 5, "last_activity": "{ISO-8601}" }
+   ```
+   session-meta.json이 없으면 Startup에서 생성되지 않은 것이므로, Startup의 3-D 스키마로 초기화한 뒤 갱신한다.
 7. **[GATE — Base Stability]** worktree에서 빌드+기존 테스트를 실행하여 base branch가 안정적인지 검증한다. 깨진 base 위에 구현하면 Phase B 전체가 낭비되기 때문이다.
    - `verify-commands.md`의 빌드/테스트 명령 실행
    - **PASS** → Unit Runbook 생성으로 진행

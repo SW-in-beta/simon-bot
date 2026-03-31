@@ -61,3 +61,19 @@ subagent가 결과를 반환할 때 다음 prefix를 사용한다:
 - `ERROR: [{TYPE}/{SUBTYPE}] {에러 요약}` — error-resilience.md의 분류와 통합
 
 오케스트레이터는 이 prefix로 후속 분기를 결정한다.
+
+## Model Heterogeneity 가이드라인
+
+역할별로 최적의 모델을 선택한다. 모든 역할에 동일 모델을 사용하면 비용 대비 효과가 떨어진다 — 탐색은 빠른 모델이, 검증은 정확한 모델이 적합하다.
+
+| 역할 | 권장 모델 | 근거 |
+|------|----------|------|
+| executor | sonnet | 코드 생성 + 도구 사용이 주 작업, 속도와 품질 균형 |
+| verifier | opus | 미묘한 불일치/논리 오류 감지에 높은 추론 능력 필요 |
+| alignment-checker | opus | AC 대비 구현 정합성 판단은 추론 집약적 |
+| expert team member | sonnet | 도메인별 체크리스트 기반 분석, sonnet으로 충분 |
+| devil-advocate | opus | 기존 findings의 반증 생성은 높은 추론 능력 필요 |
+| explore | haiku | 파일 탐색/검색은 빠른 응답이 중요, 복잡한 추론 불필요 |
+| planner/architect | sonnet | 계획 수립은 도구 사용 + 구조화가 중심 |
+
+**Override 조건**: `config.yaml`의 `model_override` 설정이 있으면 위 기본값을 덮어쓴다. 비용 제한이 있으면 모든 역할을 sonnet으로 통일할 수 있다.

@@ -292,12 +292,34 @@ Startup 단계는 순서 의존성이 있으므로 순차 실행한다.
    ```
    이후 모든 `.claude/memory/`, `.claude/reports/` 경로는 `{SESSION_DIR}` 기준으로 해석한다.
 3-C. **workflow-state.json 초기화**: `{SESSION_DIR}/memory/workflow-state.json`에 초기 스키마를 기록한다 (State-Driven Execution 섹션 참조). 이미 존재하면 기존 세션 복원으로 판단하고 덮어쓰지 않는다.
+3-D. **session-meta.json 초기화**: `{SESSION_DIR}/memory/session-meta.json`에 세션 메타데이터를 생성한다. 이미 존재하면 기존 세션 복원으로 판단하고 덮어쓰지 않는다.
+   ```json
+   {
+     "branch": "{branch_name}",
+     "skill": "simon-bot",
+     "current_phase": "A",
+     "current_step": 0,
+     "total_steps": 19,
+     "status": "in_progress",
+     "last_activity": "{ISO-8601}",
+     "last_commit_hash": ""
+   }
+   ```
+   이후 Phase/Step 전환 시마다 `current_phase`, `current_step`, `last_activity`를 갱신한다. 커밋 생성 시 `last_commit_hash`를 갱신한다.
 4. **Handoff Manifest 처리** (P-009): `.claude/memory/handoff-manifest.json`이 존재하면:
    - `context_files`를 자동 로딩하여 컨텍스트 복원
    - `skip_steps`에 명시된 Step은 건너뛰기
    - `failure_context`가 있으면 `failure-log.md` 초기값으로 설정
    - `force_path`가 있으면 Step 0 Scope Challenge를 skip하고 해당 경로로 직행 (단, `config.yaml`의 `high_impact_paths`에 매칭되는 파일이 포함되면 STANDARD 이상을 강제)
-5. **Pre-flight 환경 검증**: Phase A 진입 전에 bash 기반 환경 검증을 수행한다 (LLM 토큰 0). Phase A에서 전문가 패널 분석과 계획서 작성에 대량 토큰을 소비한 후에야 환경 문제를 발견하는 것을 방지한다.
+5. **Context Completeness Assessment**: SESSION_DIR 초기화 후 핵심 memory 파일의 존재/유효성을 평가한다.
+   - 검증 대상: `config.yaml`, `workflow-state.json`, `session-meta.json`, `handoff-manifest.json` (있으면), `retrospective.md` (있으면)
+   - 판정 기준:
+     - **FULL**: config.yaml 존재 + workflow-state/session-meta 정상 초기화
+     - **PARTIAL**: config.yaml 존재하지만 일부 memory 파일 누락/불일치 (State Integrity Check 항목 참조)
+     - **MISSING**: config.yaml 자체가 없음 → install.sh 재실행
+   - 1줄 통보: `[Context Quality: {FULL|PARTIAL|MISSING}] — {상세}`
+   - PARTIAL인 경우: 누락된 파일을 명시하고 작업을 계속 진행한다. 세션 복원 시 State Integrity Check에서 git 이력 기반 재구성이 가능하다.
+6. **Pre-flight 환경 검증**: Phase A 진입 전에 bash 기반 환경 검증을 수행한다 (LLM 토큰 0). Phase A에서 전문가 패널 분석과 계획서 작성에 대량 토큰을 소비한 후에야 환경 문제를 발견하는 것을 방지한다.
    - `.claude/workflow/scripts/preflight.sh` 실행 (없으면 skip)
    - 검증 항목: 빌드 도구 존재, 런타임 버전, Docker 상태 (필요 시), 디스크 여유, 포트 충돌
    - 실패 시: Phase A 진입 차단, 사용자에게 환경 수정 요청

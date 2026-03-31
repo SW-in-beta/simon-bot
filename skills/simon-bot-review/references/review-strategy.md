@@ -191,7 +191,7 @@ gh api repos/{owner}/{repo}/pulls/{pr_number}/reviews \
 **review-payload.json 구조:**
 ```json
 {
-  "body": "",
+  "body": "## Review Summary\n\n**변경 요약**: 인증 미들웨어 리팩토링 + JWT 검증 로직 개선\n**리뷰 결과**: COMMENT (수정 요청 2건)\n\n### 주요 발견\n- `verify_token()`에서 만료 토큰 처리 누락 (HIGH)\n- 에러 응답 포맷 불일치 (MEDIUM)",
   "event": "COMMENT",
   "comments": [
     {

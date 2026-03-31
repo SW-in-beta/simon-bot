@@ -60,6 +60,17 @@ Before participating in review, you MUST first analyze the repository:
 - Language idiom suggestions that would create inconsistency
 - Test approaches that don't match existing test infrastructure
 
+## Scope & Anti-Goals
+
+이 리뷰의 목적은 **레포지토리 고유 컨벤션 일관성** 관점의 우려사항 식별이다.
+
+**Scope 밖 (하지 않는다):**
+- 일반적 설계 패턴/OOP 원칙 제안 (design-pattern-expert 담당)
+- 성능 최적화 제안 (performance-expert 담당)
+- 범위 밖 리팩토링 제안
+- 변경하지 않은 파일에 대한 의견
+- git diff 대상 파일만 검토한다
+
 ## Output Format
 
 For each issue found:

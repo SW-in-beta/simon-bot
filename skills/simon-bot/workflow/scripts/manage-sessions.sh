@@ -4,6 +4,7 @@
 #
 # Commands:
 #   list                  - 작업 현황 (git log + 워크트리 + 브랜치 + 상태 파일)
+#   search <keyword>      - 키워드로 세션 검색
 #   info <branch-name>    - 특정 세션/브랜치 상세 정보
 #   delete <branch-name>  - 세션 삭제 (워크트리 + 브랜치)
 
@@ -25,6 +26,15 @@ case "$COMMAND" in
     echo ""
 
     # 1. Current branch + recent commits
+    # Compute sessions directory
+    GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "")
+    if [ -n "$GIT_ROOT" ]; then
+      PROJECT_SLUG=$(echo "$GIT_ROOT" | tr '/' '-')
+      SESSIONS_DIR="${HOME}/.claude/projects/${PROJECT_SLUG}/sessions"
+    else
+      SESSIONS_DIR=""
+    fi
+
     CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
     echo -e "${GREEN}## 현재 브랜치: ${CURRENT_BRANCH}${NC}"
     echo ""
@@ -61,7 +71,15 @@ case "$COMMAND" in
       HAS_MEMORY="No"
       [ -d "$WT_PATH/.claude/memory" ] && HAS_MEMORY="Yes"
 
+      DESC=""
+      if [ -n "$SESSIONS_DIR" ] && [ -f "${SESSIONS_DIR}/${WT_BRANCH}/memory/CONTEXT.md" ]; then
+        DESC=$(head -1 "${SESSIONS_DIR}/${WT_BRANCH}/memory/CONTEXT.md" | sed 's/^#* *//')
+      elif [ -f "$WT_PATH/.claude/memory/CONTEXT.md" ]; then
+        DESC=$(head -1 "$WT_PATH/.claude/memory/CONTEXT.md" | sed 's/^#* *//')
+      fi
+
       echo "  [${WT_COUNT}] ${WT_BRANCH}"
+      [ -n "$DESC" ] && echo "      Desc: $DESC"
       echo "      Path: $WT_PATH"
       echo "      Last: $LAST_COMMIT"
       echo "      Memory: $HAS_MEMORY"
@@ -241,6 +259,102 @@ case "$COMMAND" in
     echo -e "${GREEN}세션 '$BRANCH' 삭제 완료.${NC}"
     ;;
 
+  search)
+    KEYWORD="$BRANCH"
+    if [ -z "$KEYWORD" ]; then
+      echo -e "${RED}Error: 검색 키워드를 입력하세요.${NC}"
+      echo "Usage: bash manage-sessions.sh search <keyword>"
+      exit 1
+    fi
+
+    echo -e "${CYAN}=== 세션 검색: '$KEYWORD' ===${NC}"
+    echo ""
+
+    GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "")
+    if [ -n "$GIT_ROOT" ]; then
+      PROJECT_SLUG=$(echo "$GIT_ROOT" | tr '/' '-')
+      SESSIONS_DIR="${HOME}/.claude/projects/${PROJECT_SLUG}/sessions"
+    else
+      SESSIONS_DIR=""
+    fi
+
+    FOUND=0
+
+    # Search worktrees
+    while IFS= read -r line; do
+      WT_PATH=$(echo "$line" | awk '{print $1}')
+      WT_BRANCH=$(echo "$line" | sed -n 's/.*\[\(.*\)\].*/\1/p')
+      [ -z "$WT_BRANCH" ] && continue
+
+      MATCH=""
+      echo "$WT_BRANCH" | grep -qi "$KEYWORD" && MATCH="branch"
+      git -C "$WT_PATH" log -10 --format="%s" 2>/dev/null | grep -qi "$KEYWORD" && MATCH="${MATCH:+$MATCH, }commits"
+      for CTX in "${SESSIONS_DIR}/${WT_BRANCH}/memory/CONTEXT.md" "$WT_PATH/.claude/memory/CONTEXT.md"; do
+        [ -f "$CTX" ] && grep -qi "$KEYWORD" "$CTX" 2>/dev/null && MATCH="${MATCH:+$MATCH, }CONTEXT.md" && break
+      done
+
+      if [ -n "$MATCH" ]; then
+        FOUND=$((FOUND + 1))
+        LAST=$(git -C "$WT_PATH" log -1 --format="%h %s (%cr)" 2>/dev/null || echo "N/A")
+        echo -e "  [${FOUND}] ${GREEN}${WT_BRANCH}${NC} (worktree)"
+        echo "      Match: $MATCH"
+        echo "      Last:  $LAST"
+        echo ""
+      fi
+    done < <(git worktree list 2>/dev/null)
+
+    # Search branches (skip those already found as worktrees)
+    while IFS= read -r branch; do
+      branch=$(echo "$branch" | xargs)
+      [ -z "$branch" ] && continue
+      git worktree list 2>/dev/null | grep -q "\[$branch\]" && continue
+
+      MATCH=""
+      echo "$branch" | grep -qi "$KEYWORD" && MATCH="branch"
+      git log -10 --format="%s" "$branch" 2>/dev/null | grep -qi "$KEYWORD" && MATCH="${MATCH:+$MATCH, }commits"
+
+      if [ -n "$MATCH" ]; then
+        FOUND=$((FOUND + 1))
+        LAST=$(git log -1 --format="%h %s (%cr)" "$branch" 2>/dev/null || echo "N/A")
+        echo -e "  [${FOUND}] ${GREEN}${branch}${NC} (branch)"
+        echo "      Match: $MATCH"
+        echo "      Last:  $LAST"
+        echo ""
+      fi
+    done < <(git branch --format='%(refname:short)' 2>/dev/null)
+
+    # Search home sessions (archived)
+    if [ -n "$SESSIONS_DIR" ] && [ -d "$SESSIONS_DIR" ]; then
+      for session_dir in "$SESSIONS_DIR"/*/; do
+        [ -d "$session_dir" ] || continue
+        SN=$(basename "$session_dir")
+        git worktree list 2>/dev/null | grep -q "\[$SN\]" && continue
+        git branch --list "$SN" 2>/dev/null | grep -q . && continue
+
+        MATCH=""
+        echo "$SN" | grep -qi "$KEYWORD" && MATCH="session"
+        CTX="${session_dir}memory/CONTEXT.md"
+        [ -f "$CTX" ] && grep -qi "$KEYWORD" "$CTX" 2>/dev/null && MATCH="${MATCH:+$MATCH, }CONTEXT.md"
+
+        if [ -n "$MATCH" ]; then
+          FOUND=$((FOUND + 1))
+          DESC=""
+          [ -f "$CTX" ] && DESC=$(head -1 "$CTX" | sed 's/^#* *//')
+          echo -e "  [${FOUND}] ${YELLOW}${SN}${NC} (archived)"
+          echo "      Match: $MATCH"
+          [ -n "$DESC" ] && echo "      Desc:  $DESC"
+          echo ""
+        fi
+      done
+    fi
+
+    if [ "$FOUND" -eq 0 ]; then
+      echo "  '$KEYWORD'와 일치하는 세션이 없습니다."
+    else
+      echo -e "${GREEN}총 ${FOUND}건${NC}"
+    fi
+    ;;
+
   help|*)
     echo "simon-bot Session Manager"
     echo ""
@@ -248,11 +362,13 @@ case "$COMMAND" in
     echo ""
     echo "Commands:"
     echo "  list                  작업 현황 (git log + 워크트리 + 브랜치 + 상태 파일)"
+    echo "  search <keyword>     키워드로 세션 검색 (브랜치명, 커밋, CONTEXT.md)"
     echo "  info <branch-name>   특정 세션/브랜치 상세 정보"
     echo "  delete <branch-name> 세션 삭제 (워크트리 + 브랜치)"
     echo ""
     echo "Examples:"
     echo "  bash manage-sessions.sh list"
+    echo "  bash manage-sessions.sh search auth"
     echo "  bash manage-sessions.sh info feat/add-auth"
     echo "  bash manage-sessions.sh info main"
     echo "  bash manage-sessions.sh delete feat/add-auth"

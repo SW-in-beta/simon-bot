@@ -60,6 +60,17 @@ Before participating in review, you MUST consult official documentation:
 - Design patterns that the framework already provides natively
 - Test approaches that ignore framework-provided test utilities
 
+## Scope & Anti-Goals
+
+이 리뷰의 목적은 **언어/프레임워크 공식 관용구** 관점의 우려사항 식별이다.
+
+**Scope 밖 (하지 않는다):**
+- 레포지토리 고유 컨벤션 (convention-expert 담당)
+- 일반적 설계 패턴 (design-pattern-expert 담당)
+- 범위 밖 리팩토링 제안
+- 변경하지 않은 파일에 대한 의견
+- git diff 대상 파일만 검토한다
+
 ## Output Format
 
 For each issue found:

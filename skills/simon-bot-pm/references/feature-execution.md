@@ -11,6 +11,7 @@ Phase 4에서 각 Feature를 실행하는 상세 프로토콜.
    - [브라우저 기반 통합 검증 (선택)](#브라우저-기반-통합-검증-선택)
 6. [Failure Recovery Details](#failure-recovery-details)
 7. [Progress Reporting](#progress-reporting)
+   - [Progress Bar](#progress-bar)
 
 ---
 
@@ -250,6 +251,11 @@ simon-bot으로 실행 중 3회 연속 실패 시:
 ```
 전환받는 스킬은 Startup 시 이 manifest를 감지하여 `context_files`를 자동 로딩하고, `failure_context`를 failure-log.md 초기값으로 사용한다.
 
+**Bot Switch Notification:** Bot 전환 시 사용자에게 다음 형식으로 알린다:
+```
+[Bot Switch] F{N}을(를) simon-bot → simon-bot-grind로 전환 (사유: 3회 연속 실패)
+```
+
 **force_path 필드**: PM이 Feature의 scope를 이미 판단한 경우, `force_path`에 경로를 지정하면 simon-bot이 Step 0 Scope Challenge를 skip하고 해당 경로로 직행한다. 단, `config.yaml`의 `high_impact_paths`에 매칭되는 파일이 포함되면 STANDARD 이상을 강제한다.
 
 ### PM_DISPATCH 모드
@@ -277,19 +283,36 @@ grind 모드에서도 해결 불가 시:
 
 ## Progress Reporting
 
+### Progress Bar
+
+각 Feature 완료/실패/전환 시 전체 진행률 바를 먼저 출력한다:
+```
+[████████░░░░░░░░░░░░] 3/8 Features (Group 2 진행 중)
+```
+- `█` = 완료된 Feature, `░` = 미완료 Feature
+- 총 20칸 고정, Feature 수에 비례하여 채움
+- Group 전환 시 현재 Group 표시
+
 ### Auto Mode
 
-각 Feature 완료/실패 시 사용자에게 한 줄 보고:
+각 Feature 완료/실패 시 진행률 바 + 한 줄 보고:
 ```
-[F2/6] 사용자 인증 ✓ 완료 (simon-bot-grind, 12min)
-[F3/6] 데이터 모델 ✓ 완료 (simon-bot, 8min)
+[████████████░░░░░░░░] 4/6 Features (Group 2 진행 중)
+[F4/6] 결제 시스템 ✓ 완료 (simon-bot, 15min)
 → Group 2 통합 검증 통과. Group 3 자동 시작...
+```
+
+Bot 전환 시:
+```
+[████████████░░░░░░░░] 4/6 Features (Group 2 진행 중)
+[Bot Switch] F5를 simon-bot → simon-bot-grind로 전환 (사유: 3회 연속 실패)
 ```
 
 ### Approval Mode
 
-각 Feature 완료 시 상세 보고 후 AskUserQuestion:
+각 Feature 완료 시 진행률 바 + 상세 보고 후 AskUserQuestion:
 ```
+[████████░░░░░░░░░░░░] 3/8 Features (Group 1 완료)
 [F2: 사용자 인증] 완료 보고
 
 구현 내용:
