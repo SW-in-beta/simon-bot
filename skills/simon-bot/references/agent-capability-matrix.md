@@ -64,6 +64,8 @@ subagent가 결과를 반환할 때 다음 prefix를 사용한다:
 
 ## Model Heterogeneity 가이드라인
 
+> **공식 모델 정책**: 이 매핑은 simon-bot 패밀리 전체(simon-bot, simon-bot-grind, simon-bot-review, simon-bot-report, simon-bot-pm, simon-study, simon-oncall, simon-company 등)에 적용된다. 각 스킬에서 Agent/subagent를 spawn할 때 이 테이블의 역할별 권장 모델을 따른다. 개별 스킬에 명시적 `model:` 지정이 있으면 그것이 우선한다.
+
 역할별로 최적의 모델을 선택한다. 모든 역할에 동일 모델을 사용하면 비용 대비 효과가 떨어진다 — 탐색은 빠른 모델이, 검증은 정확한 모델이 적합하다.
 
 | 역할 | 권장 모델 | 근거 |
@@ -75,5 +77,12 @@ subagent가 결과를 반환할 때 다음 prefix를 사용한다:
 | devil-advocate | opus | 기존 findings의 반증 생성은 높은 추론 능력 필요 |
 | explore | haiku | 파일 탐색/검색은 빠른 응답이 중요, 복잡한 추론 불필요 |
 | planner/architect | sonnet | 계획 수립은 도구 사용 + 구조화가 중심 |
+| writer | sonnet | 템플릿 기반 보고서/문서 생성, 구조화 중심 |
+| fact-checker | sonnet | 공식 문서 조회 + 사실 대조, 도구 중심 작업 |
+| spec-validator | sonnet | 기술 AC → 사용자 시나리오 변환, 기계적 변환 |
+| ci-watch | sonnet | CI 폴링 + 에러 분류 + 코드 수정, 패턴 매칭 기반 |
+| comment-watcher | sonnet | PR 댓글 폴링 + 분류, 기계적 폴링 |
+| internal-researcher | sonnet | Confluence/Slack 검색 스크립트 실행 + 결과 요약, 도구 중심 |
+| data-researcher | sonnet | 데이터 스킬 호출 + SQL 실행, 도구 중심 |
 
 **Override 조건**: `config.yaml`의 `model_override` 설정이 있으면 위 기본값을 덮어쓴다. 비용 제한이 있으면 모든 역할을 sonnet으로 통일할 수 있다.

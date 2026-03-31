@@ -139,9 +139,10 @@ STANDALONE 모드에서는 diff 크기 기반 자동 추천: 50줄 미만→QUIC
 
 **리뷰 사이클 카운터 초기화**: `echo "1" > {SESSION_DIR}/memory/review-cycle-counter.md`
 
-CONNECTED 모드에서는 **Blind-First 2-Pass**를 적용한다:
+**Cross-Model 3-Pass**를 적용한다 (모드 무관 — CONNECTED/STANDALONE 모두):
 - Pass 1 (Blind): diff만으로 독립 분석 + **독립 severity 판정** + 기존 패턴 스캔 + 공식 문서 검증
-- Pass 2 (Informed): review-sequence.md와 대조 + severity 불일치 시 [SEVERITY-DISPUTED] 태깅
+- Pass 2 (Informed): review-sequence.md와 대조 + severity 불일치 시 [SEVERITY-DISPUTED] 태깅 (CONNECTED 모드만)
+- Pass 3 (Cross-Model): Codex 독립 리뷰 → Cross-Model Reconciliation (**항상 실행**, `~/.claude/skills/_shared/cross-model-verification.md` 참조)
 
 각 변경 단위의 대표 파일 1-2개에 집중하여 인라인 코멘트를 작성하고, 영향 분석 Pass로 변경되지 않았지만 영향받는 코드를 식별하여 **해당 파일에 `[영향 분석: ...]` 양식의 인라인 코멘트를 작성한다** (review-payload.json의 comments 배열에 포함). Review Summary Body에 Architecture Impact 섹션과 영향 분석 요약을 포함한다 (STANDARD+ 경로).
 
@@ -154,7 +155,7 @@ CONNECTED 모드에서는 **Blind-First 2-Pass**를 적용한다:
 Step 2 완료 직후, CI 모니터링 + 자동 수정을 **simon-bot-ci-fix** 스킬에 위임한다. Background agent가 스킬 파일을 직접 읽고 실행하므로, CI 수정이 fresh context에서 전용 로직으로 수행된다.
 
 ```
-Agent(run_in_background=true):
+Agent(run_in_background=true, model="sonnet"):
   "다음 파일을 Read하고 그 지시를 따라 CI 수정을 실행하라:
    ~/.claude/skills/simon-bot-ci-fix/SKILL.md
 
@@ -189,7 +190,7 @@ date -u +"%Y-%m-%dT%H:%M:%SZ" > {SESSION_DIR}/memory/last-comment-check.md
 
 **Background Agent 시작:**
 ```
-Agent(run_in_background=true)
+Agent(run_in_background=true, model="sonnet")
 ```
 
 Agent에 전달할 컨텍스트:
@@ -329,7 +330,7 @@ ASK 항목만 Step 4-B의 전문가 검증 파이프라인으로 전달.
    - 수정 없음 (COUNTER만) → 4-E로 진행
 2. **simon-bot-ci-fix 위임**: Step 3과 동일한 패턴으로 background agent를 시작한다:
    ```
-   Agent(run_in_background=true):
+   Agent(run_in_background=true, model="sonnet"):
      "다음 파일을 Read하고 그 지시를 따라 CI 수정을 실행하라:
       ~/.claude/skills/simon-bot-ci-fix/SKILL.md
 

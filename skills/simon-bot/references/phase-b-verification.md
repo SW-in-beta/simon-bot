@@ -11,6 +11,7 @@
   - [7-A: 구현 결과 검증 (Agent Team 토론)](#7-a-구현-결과-검증-agent-team-토론)
   - [Interaction Boundary Analysis (P-001)](#interaction-boundary-analysis-p-001)
   - [Verification Layer (P-003) — Blind-First Protocol](#verification-layer-p-003--blind-first-protocol)
+  - [Phase 3: Cross-Model Verification (교차검증)](#phase-3-cross-model-verification-교차검증)
   - [Reproducibility Gate (P-007)](#reproducibility-gate-p-007)
   - [Finding Acceptance Tracking (P-008)](#finding-acceptance-tracking-p-008)
   - [7-B: 사전 우려사항 대조 검증](#7-b-사전-우려사항-대조-검증)
@@ -205,6 +206,29 @@ Contrastive 기법으로 finding의 "문제가 아닌 이유"를 생성할 때, 
 이 규칙은 CRITICAL **보안** finding에만 적용된다. 성능, 코드 품질 등 비보안 CRITICAL finding에는 기존 DISPUTED 프로세스를 유지한다.
 
 executor는 `VERIFIED` findings만 CRITICAL/HIGH로 처리한다. verifier는 finding 생성자와 다른 에이전트여야 한다.
+
+### Phase 3: Cross-Model Verification (교차검증)
+
+CRITICAL/HIGH findings가 1건 이상이거나 보안 관련 변경(`high_impact_paths` 매칭)이 포함된 경우, Codex를 독립 검증 레이어로 추가하여 Claude 단독 분석의 맹점을 보완한다 (`~/.claude/skills/_shared/cross-model-verification.md` 참조).
+
+**트리거 조건** (하나라도 해당 시):
+- CRITICAL/HIGH findings 1건 이상
+- `config.yaml`의 `high_impact_paths` 매칭 파일이 diff에 포함
+
+**실행**:
+1. `codex review --base {base_branch} -c 'model_reasoning_effort="xhigh"' --enable web_search_cached "CRITICAL/HIGH 이슈 독립 검증. 보안, 정확성, 성능 관점으로 분석."` (5분 타임아웃)
+2. 보안 관련 변경 시 추가로 `codex challenge` 실행 (adversarial 모드)
+3. Codex 결과와 Phase 1-2 결과를 대조하여 CROSS-MODEL RECONCILIATION 리포트 생성
+
+**결과 처리**:
+- `[CROSS-MODEL-CONFIRM]`: 양 모델 합의 → 최고 신뢰도, executor에 즉시 전달
+- `[CODEX-ONLY]`: Codex만 발견 → verifier가 해당 코드 재분석. 재현 시 findings에 추가
+- `[CLAUDE-ONLY]`: 기존 severity 유지, confidence 표기
+- `[SEVERITY-CROSS-DISPUTED]`: 높은 쪽 채택
+
+**Codex 실패 시**: `[CODEX-UNAVAILABLE]` 태깅 후 Phase 1-2 결과만으로 진행. 워크플로 중단 금지.
+
+- Save: `.claude/memory/unit-{name}/cross-model-reconciliation.md`
 
 ### Reproducibility Gate (P-007)
 
@@ -412,6 +436,11 @@ ARC-AGI에서 영감을 받은 반복 개선 루프. 기존 Steps 9-16의 개별
 - Spawn **fresh `production-readiness-auditor`** subagent: **plan-summary.md + 최종 git diff + verify-commands.md만** 전달. 중간 과정 산출물(inline-issues.md, review-findings.md, 토론 기록)은 **의도적으로 제외**
 - 프롬프트: "당신은 이 코드를 처음 보는 시니어 엔지니어입니다. 프로덕션 배포 전 최종 검증을 수행하세요. **반드시 Success Criteria의 각 항목에 대해 Verdict 테이블 형식(PASS/FAIL/NEEDS-HUMAN-REVIEW)으로 판정하세요.** '전반적으로 양호합니다' 같은 요약 판정은 금지합니다."
 - 별도로 `security-reviewer` (fresh subagent)를 parallel spawn — 보안 관점 독립 검증
+- **[Cross-Model]** Diff가 100줄 이상이면, Codex를 independent production auditor로 parallel spawn (`~/.claude/skills/_shared/cross-model-verification.md` 참조):
+  - `codex review --base {base_branch} -c 'model_reasoning_effort="xhigh"' --enable web_search_cached "프로덕션 배포 전 최종 검증. 보안, 데이터 무결성, 성능 위험 집중."` (5분 타임아웃)
+  - Codex Gate 결과(PASS/FAIL)를 Verdict Table에 반영한다
+  - **CODEX_GATE FAIL**: Codex의 P1 이슈를 auditor 결과와 대조 → 새 이슈 발견 시 `[CODEX-ONLY]` 태깅으로 추가
+  - **Codex 실패 시**: `[CODEX-UNAVAILABLE]` 태깅. 기존 auditor + security-reviewer 결과만으로 진행
 - **테스트 커버리지 검증**: `verify-commands.md`에 커버리지 측정 명령이 있으면 실행하여 80% 이상인지 확인. 미달 시 FAIL 판정하고 커버리지가 부족한 모듈을 리포트에 명시
 - **[GATE — Done-When Checks JSON]**: `workflow-state.json`의 `done_when_checks` 배열에서 `verified: false` 항목이 있으면 FAIL. 각 미검증 항목을 나열하고, 해당 검증을 수행한 뒤 `verified: true`로 갱신한다. 모든 항목이 `verified: true`여야 이 게이트를 통과한다 — JSON boolean은 LLM이 Markdown 체크리스트를 임의로 체크하는 것과 달리 명시적 갱신이 필요하므로 조기 완료 선언을 구조적으로 방지한다.
 - Final checklist: requirements met, build passes, tests pass, coverage ≥ 80%, no security issues, all done_when_checks verified

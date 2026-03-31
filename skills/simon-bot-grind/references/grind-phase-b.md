@@ -15,6 +15,7 @@
 - [Step 16: MEDIUM Issues](#step-16-medium-issues-max-10-step16)
 - [Step 17: Production Readiness](#step-17-production-readiness-max-10-step17_readiness)
 - [Integration](#integration-max-10-integration_conflict)
+- [Grind Cross-Model Diagnosis (Tier 2+ 공통)](#grind-cross-model-diagnosis-tier-2-공통)
 - [Steps 18-20 Overrides](#steps-18-20-overrides)
 
 > Base: `~/.claude/skills/simon-bot/references/phase-b-implementation.md`
@@ -114,6 +115,22 @@ regression 실패 발견 시, base branch에서 동일 테스트를 실행하여
 - **Attempt 9**: prioritize: fix security/correctness, accept style/design
 - **Attempt 10**: record remaining as "accepted trade-offs"
 
+### Step 12 Cross-Model Verification (항상 실행)
+
+Step 12 Full Change Review에서는 교차검증을 **항상** 실행한다 (`~/.claude/skills/_shared/cross-model-verification.md` 참조). 전체 변경사항을 다른 모델의 시각으로 독립 검증하여, Claude가 반복 수정 과정에서 놓칠 수 있는 이슈를 포착한다.
+
+**실행**: Attempt 1의 architect 리뷰와 **병렬로** `codex review` 실행:
+```bash
+codex review --base {base_branch} \
+  -c 'model_reasoning_effort="xhigh"' \
+  --enable web_search_cached \
+  "전체 변경사항의 일관성, 설계 품질, 잠재적 문제 분석."
+```
+
+**결과**: Codex findings를 architect의 findings와 reconcile한다. `[CODEX-ONLY]` 이슈는 executor 수정 대상에 추가. `[CROSS-MODEL-CONFIRM]` 이슈는 우선 수정 대상.
+
+**Codex 실패 시**: `[CODEX-UNAVAILABLE]` 태깅 후 architect 리뷰만으로 진행.
+
 ## Step 13: Dead Code Cleanup (max 10: `step13_cleanup`)
 
 - Attempt 1-5: fix breakage
@@ -157,6 +174,26 @@ regression 실패 발견 시, base branch에서 동일 테스트를 실행하여
 - Attempt 9: partial integration (non-conflicting Units first)
 - Attempt 10: last stand → AskUserQuestion with conflict details
 - Post-integration build failure → Step 5 build resilience loop (max 10)
+
+## Grind Cross-Model Diagnosis (Tier 2+ 공통)
+
+Attempt 4에 진입하면 (Tier 2 escalation), Claude의 Root Cause Analysis와 **병렬로** Codex에 독립 진단을 의뢰한다 (`~/.claude/skills/_shared/cross-model-verification.md` 참조). 기존 Claude 진단이 3회 실패했으므로, 다른 모델의 관점이 돌파구를 제공할 수 있다.
+
+**적용 Step**: Step 5, 7, 8, 12, 17의 Attempt 4+ (Tier 2 진입 시)
+
+**실행**:
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/codex-companion.mjs" task \
+  --effort xhigh \
+  "다음 에러/실패를 독립적으로 진단하라: {에러 메시지 또는 실패 테스트 목록}. 근본 원인과 수정 방향을 제시하라."
+```
+
+**결과 활용**:
+- Claude 진단과 Codex 진단이 **일치** → 해당 방향으로 즉시 수정 (높은 신뢰도)
+- **불일치** → Codex 진단을 먼저 시도한다 (기존 방향은 이미 실패했으므로)
+- failure-log.md에 `[CROSS-MODEL-DIAGNOSIS]` 태깅으로 양쪽 진단 결과를 기록한다
+
+**Codex 실패 시**: 기존 escalation ladder를 그대로 진행한다.
 
 ## Steps 18-20 Overrides
 

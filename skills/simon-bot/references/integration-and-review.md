@@ -56,7 +56,7 @@ Refs: Unit {N} — {Unit 목적 한줄 요약}
 
 ### 18-A: Report
 
-- Spawn `writer` — Use template: `.claude/workflow/templates/report-template.md`
+- Spawn `writer` (model: sonnet) — Use template: `.claude/workflow/templates/report-template.md`
 - **Language:** Follow `language` setting in `config.yaml` (default: `ko`)
 - Contents:
   - Before/After flow diagrams
@@ -70,7 +70,7 @@ Refs: Unit {N} — {Unit 목적 한줄 요약}
 
 ### 18-B: Review Sequence 생성
 
-- Spawn `architect`: 전체 변경사항을 **논리적 변경 단위(Logical Change Unit)**로 그룹핑
+- Spawn `architect` (model: sonnet): 전체 변경사항을 **논리적 변경 단위(Logical Change Unit)**로 그룹핑
 - 논리적 변경 단위 = 하나의 목적/기능을 달성하기 위해 함께 변경된 파일들의 묶음
 - **정렬 기준**: 데이터/호출 흐름 순서 (상류 → 하류)
 - **필수 입력**: `.claude/memory/plan-summary.md`를 읽어 각 변경 단위가 계획의 어떤 Unit/목표에 해당하는지 매핑

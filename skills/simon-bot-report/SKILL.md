@@ -81,7 +81,7 @@ settings.json에 등록하여 report 세션 동안만 활성화한다. simon-bot
 - 이전 보고서가 없으면 이 단계를 skip한다
 
 **1-A: 구조 탐색**
-- Spawn `explore-medium`: 주제 관련 디렉토리/파일 구조 스캔
+- Spawn `explore-medium` (model: haiku): 주제 관련 디렉토리/파일 구조 스캔
   - 관련 모듈, 클래스, 함수 식별
   - 의존성 관계 파악
   - 설정 파일, 테스트 파일 포함
@@ -175,7 +175,7 @@ settings.json에 등록하여 report 세션 동안만 활성화한다. simon-bot
 > **Reference Loading**: Step 4-B 진입 시 [examples.md](references/examples.md) 읽기
 
 - 작성 전 [예시 문서](references/examples.md)를 읽어 기대 톤과 구체성 수준을 확인한다
-- Spawn `writer`:
+- Spawn `writer` (model: sonnet):
   - 입력: Step 1 탐색 결과 + Step 2 코드 설계 분석 + Step 3 전문가 토론 결과
   - 템플릿의 플레이스홀더를 실제 분석 내용으로 채움
   - **Language:** config.yaml의 `language` 설정 (기본: `ko`)
