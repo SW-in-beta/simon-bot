@@ -223,6 +223,10 @@ Agent에 전달할 컨텍스트:
           전문가에게 코멘트 원문 + 관련 코드 + PR 맥락을 전달.
           전문가 프로토콜 상세: `~/.claude/skills/simon-bot-review/references/expert-comment-review.md`
       iii. 전문가 verdict를 `{SESSION_DIR}/memory/expert-verdicts/{comment_id}.md`에 저장
+      **[컨텍스트 격리]** 전문가 Agent는 verdict 전문을 파일에 저장하고, 반환값은 경량 형식으로 제한한다:
+      `{AGREE|PARTIAL|COUNTER}: {1줄 사유} [verdict: {SESSION_DIR}/memory/expert-verdicts/{comment_id}.md]`
+      이유: 대형 PR(20+ 코멘트)에서 per-comment verdict 전문이 메인 컨텍스트에 누적되면 수만 토큰을 소비한다.
+      상세 근거가 필요하면 verdict 파일을 선택적으로 Read한다.
       iv. verdict(AGREE/PARTIAL/COUNTER)에 따라:
            - AGREE → 코드 수정 → 커밋 → 푸시 → `[R{N}]` Before/After 포함 대댓글
            - PARTIAL → 수정된 방식으로 변경 → `[R{N}]` Before/After + 이유 대댓글
@@ -296,6 +300,9 @@ ASK 항목만 Step 4-B의 전문가 검증 파이프라인으로 전달.
    a. 코멘트의 도메인 식별 (아키텍처, 성능, 보안, 테스트, 비즈니스 로직, 코드 스타일 등)
    b. `Agent(subagent_type="general-purpose")`로 해당 도메인 전문가를 spawn하여 검증. 코멘트 원문 + 관련 코드 + PR 맥락을 전달
    c. 전문가 verdict를 `{SESSION_DIR}/memory/expert-verdicts/{comment_id}.md`에 저장 — verdict 파일이 존재해야 코드 수정 진행 가능
+   **[컨텍스트 격리]** 전문가 Agent는 verdict 전문을 파일에 저장하고, 반환값은 경량 형식으로 제한한다:
+   `{AGREE|PARTIAL|COUNTER}: {1줄 사유} [verdict: {SESSION_DIR}/memory/expert-verdicts/{comment_id}.md]`
+   상세 근거가 필요하면 verdict 파일을 선택적으로 Read한다.
    d. verdict에 따라:
       - **AGREE**: 코드 수정 → 커밋 → 푸시 → Before/After 포함 대댓글 (양식: `[R{N}]` 접두사)
       - **PARTIAL**: 수정된 방식으로 코드 변경 → Before/After + 다르게 적용한 이유 대댓글
