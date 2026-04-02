@@ -77,6 +77,8 @@ subagent가 결과를 반환할 때 다음 prefix를 사용한다:
 | devil-advocate | opus | 기존 findings의 반증 생성은 높은 추론 능력 필요 |
 | explore | haiku | 파일 탐색/검색은 빠른 응답이 중요, 복잡한 추론 불필요 |
 | planner/architect | sonnet | 계획 수립은 도구 사용 + 구조화가 중심 |
+| security-reviewer | opus | 보안 취약점 감지에 높은 정밀도 필요 |
+| production-readiness-auditor | opus | 최종 프로덕션 감사, 미묘한 이슈 감지 |
 | writer | sonnet | 템플릿 기반 보고서/문서 생성, 구조화 중심 |
 | fact-checker | sonnet | 공식 문서 조회 + 사실 대조, 도구 중심 작업 |
 | spec-validator | sonnet | 기술 AC → 사용자 시나리오 변환, 기계적 변환 |

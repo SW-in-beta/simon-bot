@@ -192,8 +192,15 @@ settings.json에 등록하여 report 세션 동안만 활성화한다. simon-bot
 
 **4-C: 출력**
 1. `.claude/reports/{document-type}-{topic-slug}.md`에 파일 저장
-2. 사용자에게 전체 내용을 화면에 출력
-3. 저장 경로 안내
+2. HTML Report Viewer로 렌더링 후 출력:
+   ```bash
+   REPORT_VIEWER="$HOME/.claude/skills/_shared/report-viewer/render-report.sh"
+   if [ -x "$REPORT_VIEWER" ]; then
+     $REPORT_VIEWER "{markdown_file}" --open
+   fi
+   ```
+   - Viewer 활성: 브라우저에서 보고서를 열고 저장 경로 안내
+   - Viewer 미활성: 기존 방식대로 터미널에 전체 내용 출력 + 저장 경로 안내
 
 **4-D: Knowledge Base 갱신**
 - 보고서의 핵심 발견사항(CRITICAL/HIGH)을 `.claude/reports/knowledge-base.md`에 누적 append한다
@@ -202,40 +209,36 @@ settings.json에 등록하여 report 세션 동안만 활성화한다. simon-bot
 
 **Gotchas 연동**: 보고서의 Code Design 분석 결과 중 "이 프로젝트의 관습이 Claude의 기본 패턴과 다른 항목"을 `~/.claude/projects/{slug}/state/gotchas.jsonl`에 append한다 — 코드 변경 없는 분석(report)에서도 gotchas를 축적하여 이후 simon-bot 실행 시 사전 인지하기 위함이다. 형식: `{"id": "G-xxx", "category": "convention|build|test", "gotcha": "...", "source_step": "report", "source_session": "report-{slug}", "added_at": "YYYY-MM-DD"}`.
 
-### Step 5: Interactive Guided Review (인터랙티브 가이드 리뷰)
+### Step 5: Report Review
 
-**목적**: 보고서의 각 섹션을 순서대로 하나씩 제시하며, 사용자와 대화형으로 리뷰 진행.
+**목적**: 보고서를 사용자가 검토하고 피드백을 반영하는 리뷰 과정.
 
-**5-A: 리뷰 개요 제시**
-- 사용자에게 전체 리뷰 개요를 먼저 보여줌:
-  - 문서 유형 (RFC / 현황 분석 / 커스텀)
-  - 총 섹션 수
-  - 각 섹션의 제목 리스트 (순서대로)
-  - 저장 경로
-- "리뷰를 시작하겠습니다" 안내
+> **HTML Report Viewer 통합**: `~/.claude/skills/_shared/report-viewer/integration-guide.md`의 코멘트 피드백 루프 프로토콜을 적용한다. Viewer 미활성 시 기존 순차 리뷰 방식으로 fallback.
 
-**5-B: 순차 리뷰 루프**
+**5-A: 리뷰 진행**
+
+**Viewer 활성 시 (HTML 코멘트 리뷰 루프):**
+
+integration-guide.md의 "코멘트 피드백 루프" 프로토콜을 따른다:
+1. 사용자에게 안내: "보고서를 브라우저에서 열었습니다. 내용을 확인하시고 코멘트를 남겨주세요. 완료되면 '리뷰 완료'라고 말씀해주세요."
+2. 사용자가 "리뷰 완료" → 코멘트 JSON 읽기
+3. 각 코멘트의 intent(fix/question/expand/approve)에 따라 마크다운 수정
+4. HTML 재생성 → "N개 코멘트를 처리했습니다. 추가 코멘트가 있으면 '리뷰 완료', 완료되었으면 '확정'이라고 말씀해주세요."
+5. 사용자가 "확정" → 리뷰 종료
+
+**Viewer 미활성 시 (순차 리뷰 루프):**
 - 보고서의 섹션을 순서대로 하나씩 제시
-- **각 섹션마다**:
-  1. **섹션 내용 제시**: 섹션 제목, 본문 내용을 마크다운으로 출력 (코드 스니펫, 다이어그램 포함)
-  2. **AskUserQuestion으로 피드백 수집**:
-     - **OK**: 다음 섹션으로 진행
-     - **수정 요청**: 사용자의 피드백을 받아 `writer`로 즉시 수정 → 수정된 결과를 다시 제시 → 재확인 (max 3회)
-     - **추가 분석 필요**: 관련 Step (1-3)으로 회귀하여 추가 분석 후 섹션 재작성
-     - **질문 있음**: 사용자 질문에 답변 후 다시 OK/수정 요청 선택
-  3. 리뷰 결과 기록: `.claude/reports/review-progress-{topic-slug}.md`에 각 섹션의 리뷰 상태 (OK / 수정완료 / 보류) 기록
-- **모든 섹션 리뷰 완료 후**:
-  - 전체 리뷰 요약 출력 (OK 수, 수정된 수, 보류 수)
-  - 수정된 섹션이 있다면: 최종 보고서 파일을 업데이트하여 저장
-  - 보류 항목이 있다면: 보고서 말미에 "**추후 보완 필요**" 섹션으로 기록
+- 각 섹션마다 AskUserQuestion으로 피드백 수집 (OK / 수정 요청 / 추가 분석 / 질문)
+- 수정 요청 시 `writer`로 즉시 수정 → 재확인 (max 3회)
+- 모든 섹션 리뷰 완료 후 전체 요약
 
-**5-C: 최종 확인**
-- AskUserQuestion: "모든 섹션 리뷰가 완료되었습니다. 추가 수정이 필요하신가요?"
+**5-B: 최종 확인**
+- "모든 리뷰가 완료되었습니다. 추가 수정이 필요하신가요?"
   - **완료**: 최종 보고서 저장 경로 안내
-  - **구현 시작 (simon-bot)**: 이 분석 결과를 컨텍스트로 simon-bot 워크플로를 시작합니다
-  - **프로젝트 관리 (simon-bot-pm)**: 이 분석 결과를 기반으로 PM 워크플로를 시작합니다
+  - **구현 시작 (simon-bot)**: 분석 결과를 컨텍스트로 simon-bot 워크플로 시작
+  - **프로젝트 관리 (simon-bot-pm)**: 분석 결과를 기반으로 PM 워크플로 시작
   - **양식 변경**: Step 4에서 다른 템플릿으로 재생성
-  - **추가 리뷰**: 5-B로 돌아가 특정 섹션 재리뷰
+  - **추가 리뷰**: 5-A로 돌아가 재리뷰
 
 ### Configuration
 

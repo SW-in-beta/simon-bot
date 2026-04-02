@@ -1,6 +1,7 @@
 ---
 name: simon-bot-healthcheck
 description: "스킬 건강 상태 대시보드 — simon-bot 패밀리 전체의 구조적 품질을 검증하고 대시보드로 출력합니다. Use when: (1) 스킬 상태 확인 ('스킬 상태', 'healthcheck', '스킬 점검', 'skill check'), (2) boost 적용 후 품질 확인, (3) 스킬 파일 수정 후 무결성 검증. 스킬 품질을 빠르게 확인하고 싶을 때 사용하세요."
+model: sonnet
 ---
 
 # simon-bot-healthcheck

@@ -26,9 +26,11 @@ compatibility:
 
 사용자가 제공하는 것:
 1. **슬랙 URL** — 온콜 문의 메시지 (buzzvil.slack.com)
-2. **레포 이름** — 관련 서비스의 레포지토리 (~/buzzvil/{repo_name}에 위치)
+2. **레포 이름** (선택) — 관련 서비스의 레포지토리 (~/buzzvil/{repo_name}에 위치)
 
-둘 중 하나가 빠져 있으면 요청합니다.
+슬랙 URL이 빠져 있으면 요청합니다.
+레포 이름이 빠져 있으면 `references/repo-map.md`를 참조하여 문의 키워드로 관련 레포를 추천합니다.
+추천이 명확하지 않을 때만 사용자에게 확인합니다.
 
 ## Instructions
 
@@ -57,6 +59,14 @@ compatibility:
 
 사용자에게 파악한 내용을 간단히 확인합니다:
 > "문의 내용을 이렇게 이해했습니다: [요약]. 맞나요?"
+
+### Phase 1.5: 레포 특정
+
+사용자가 레포를 명시하지 않았으면 `references/repo-map.md`를 읽고, Phase 1에서 파악한 키워드와 대조하여 관련 레포를 특정합니다.
+
+- 매핑이 명확하면 (1개 레포로 좁혀지면) 바로 진행하고 사용자에게 알림: "관련 레포로 {repo_name}을 선택했습니다"
+- 후보가 2-3개면 사용자에게 선택지 제시: "A, B, C 중 어디를 먼저 볼까요?"
+- 로컬에 레포가 없으면 클론: `gh repo clone Buzzvil/{repo_name} ~/buzzvil/{repo_name} -- --depth 1`
 
 ### Phase 2: 레포 준비
 
@@ -170,6 +180,28 @@ simon-study 결과를 온콜 맥락에 맞게 재구성합니다:
 - 코드 위치(`file:line`)나 설정값을 구체적으로 언급하면 신뢰도가 올라감
 - 불확실한 부분은 "추가 확인이 필요합니다"로 솔직하게
 - 간결하게 — 스레드에서 읽기 좋은 길이로. 상세 내용이 필요하면 "자세한 내용은 별도로 공유드리겠습니다"
+
+### Phase 4-3: HTML 렌더링 + 리뷰 (Report Viewer 통합)
+
+> **통합 프로토콜**: `~/.claude/skills/_shared/report-viewer/integration-guide.md` 참조
+
+심층 분석 보고서 마크다운 저장 직후 HTML Report Viewer를 실행한다.
+
+```bash
+REPORT_VIEWER="$HOME/.claude/skills/_shared/report-viewer/render-report.sh"
+if [ -x "$REPORT_VIEWER" ]; then
+  $REPORT_VIEWER "{markdown_file}" --open
+fi
+```
+
+**Viewer 활성 시:**
+1. 브라우저에서 보고서를 열고 사용자에게 안내: "분석 보고서를 브라우저에서 열었습니다. 내용을 확인하시고 코멘트를 남겨주세요. 완료되면 '리뷰 완료'라고 말씀해주세요."
+2. integration-guide.md의 코멘트 피드백 루프 프로토콜을 따라 코멘트 처리
+3. expand intent의 경우 해당 영역 추가 분석 수행 후 보고서 확장
+4. 사용자가 "확정" → 요약 + 슬랙 답변 초안을 터미널에 출력
+
+**Viewer 미활성 시:**
+기존 방식대로 터미널에 보고서 전문을 출력하고, 요약 + 슬랙 답변 초안을 이어서 출력한다.
 
 ### Phase 5: 추가 분석 (사용자 요청 시)
 

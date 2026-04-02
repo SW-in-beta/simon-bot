@@ -351,6 +351,23 @@ For detailed step instructions, read [phase-a-planning.md](references/phase-a-pl
   - NOT in scope: 범위 밖 항목 명시
 - Save: `plan-summary.md`
 
+**Step 1-B-ext: Plan HTML 렌더링 (Report Viewer 통합)**
+
+> **통합 프로토콜**: `~/.claude/skills/_shared/report-viewer/integration-guide.md` 참조
+
+plan-summary.md 저장 직후 HTML Report Viewer를 실행하여 사용자가 계획서를 시각적으로 검토할 수 있게 한다.
+
+```bash
+REPORT_VIEWER="$HOME/.claude/skills/_shared/report-viewer/render-report.sh"
+if [ -x "$REPORT_VIEWER" ]; then
+  $REPORT_VIEWER "{SESSION_DIR}/memory/plan-summary.md" --open
+fi
+```
+
+Viewer 활성 시: "계획서를 브라우저에서 열었습니다. Steps 2-4 자동 리뷰와 병행하여 확인해주세요." 안내 후 Steps 2-4 진행. Steps 2-4 완료 후 코멘트 피드백 루프(integration-guide.md)를 실행하여 사용자 피드백 수집.
+
+Viewer 미활성 시: 기존 방식대로 터미널에 계획서를 출력하고 진행.
+
 **Steps 2-4: Plan Review (Agent Team)**
 - planner + critic + architect 직접 토론
 - Step 2: Plan Review (max 3 iterations)

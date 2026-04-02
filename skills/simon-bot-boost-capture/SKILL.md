@@ -3,6 +3,7 @@ name: simon-bot-boost-capture
 description: "작업 중 스킬 개선점 백그라운드 캡처 — 현재 세션 컨텍스트를 자동 분석하여 개선 인사이트 리포트를 남기고, 작업 흐름을 즉시 이어갑니다. Use when: (1) 작업 중 스킬의 비효율·문제점을 발견했을 때 ('이거 개선점인데', '이 부분 아쉽다', '캡처해줘'), (2) simon-bot/grind/pm 실행 중 특정 단계에서 문제가 반복될 때, (3) 스킬 개선 아이디어가 떠올랐지만 지금 적용하기 어려울 때, (4) '나중에 고쳐야지', '이건 boost 감이다' 같은 메모성 언급. 작업을 멈추지 않고 개선점을 기록하는 모든 상황에서 이 스킬을 사용하세요."
 compatibility:
   tools: [Agent]
+model: sonnet
 ---
 
 # simon-bot-boost-capture
