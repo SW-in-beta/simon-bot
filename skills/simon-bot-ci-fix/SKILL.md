@@ -4,7 +4,6 @@ description: "CI 실패 자동 수정 — PR의 CI 체크를 모니터링하고,
 compatibility:
   tools: [Agent]
   skills: [git-commit]
-model: sonnet
 ---
 
 # simon-bot-ci-fix
