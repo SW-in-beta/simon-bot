@@ -95,10 +95,34 @@ settings.json에 등록하여 report 세션 동안만 활성화한다. simon-bot
   - 로컬에 존재하지 않으면 "**[외부 의존성]** — {서비스명}: 로컬에 코드 없음, 확인 불가"로 기록한다
 - 이 단계의 목적은 단일 서비스 내부만 보고 전체 흐름을 오해하는 것을 방지하기 위함이다
 
-**1-B: 핵심 코드 읽기**
-- 탐색 결과에서 핵심 파일 5-15개 선별
-- Read tool로 핵심 로직 파악
+**1-B: 핵심 코드 읽기 (Call Chain Protocol)**
+- 탐색 결과에서 **진입점(entry point)을 먼저 식별** — 이 로직이 어디서 시작되는가
+- 진입점 → 데이터 흐름 → caller/callee chain 순서로 체계적으로 추적
+- 관련 테스트 코드에서 기대 동작 역추적 — 코드 작성자의 의도를 확인
 - 데이터 흐름, 에러 처리, 인터페이스 구조 메모
+- **함수의 동작/반환값 기술 시 caller chain 전체를 근거에 포함** — 상위 레이어에 반환값을 변환하는 wrapper가 있을 수 있으므로 최종 동작은 chain 전체를 확인
+
+**1-C: 설계 의도 추적 (코드만으로 "왜 이렇게?" 파악이 어려울 때)**
+
+코드를 읽어도 설계 의도가 불명확한 경우, **Agent 서브에이전트를 통해** Confluence와 Slack에서 관련 자료를 검색한다. 컨텍스트 효율을 위해 raw 결과는 파일에 저장하고 요약만 반환받는다.
+
+```
+Agent(subagent_type="general-purpose", model="sonnet"):
+  "다음 스크립트로 사내 자료를 검색하고, 결과를 파일에 저장한 뒤 요약만 반환하라.
+
+   검색 실행:
+   - Confluence: ~/.claude/skills/buzzvil-confluence/scripts/search.sh -q '{검색어}' -s {space} -f
+   - Slack: ~/.claude/skills/buzzvil-slack/scripts/search.sh -q '{검색어}' -c {channel}
+
+   결과 저장: {SESSION_DIR}/raw/design-intent-$(date +%s).txt
+   반환 형식 (요약만):
+   - Confluence: 발견된 문서 수, 각 문서 제목 + URL + 핵심 내용 1-2문장
+   - Slack: 관련 스레드 수, 각 스레드 핵심 논점 + permalink
+   - 설계 의도에 관한 핵심 발견 3줄 이내
+   - raw 파일 경로"
+```
+
+발견된 설계 의도는 **반드시 원문 URL(Confluence 페이지 또는 Slack permalink)**과 함께 보고서에 기록한다. URL 없는 사내 자료 인용 금지.
 
 **중간 보고 (Progressive Disclosure):**
 - 탐색 완료 시 사용자에게 한 줄 요약 출력: "탐색 완료. N개 파일에서 M개 핵심 모듈 식별."
@@ -159,6 +183,12 @@ settings.json에 등록하여 report 세션 동안만 활성화한다. simon-bot
 
 6개 도메인 전문가 팀(Data, Integration, Safety, Ops, Code Design)이 각자의 관점에서 코드베이스를 분석한다. 팀 구성과 각 도메인의 분석 항목은 domain-teams.md 참조.
 
+**코드 증거 원칙 (전문가 공통 적용):**
+- 모든 분석 주장에는 `file:line` 코드 근거를 첨부한다
+- 코드를 직접 확인하지 못한 내용은 `**[미확인]**` 또는 `**[추정]** — {추정 근거}`로 표시
+- 함수의 동작/반환값 주장 시 해당 함수 코드뿐 아니라 **caller chain도 근거에 포함** — 상위 레이어에 반환값을 변환하는 wrapper가 있을 수 있으므로 최종 동작은 chain 전체를 확인
+- 각 전문가 spawn 시 이 원칙을 프롬프트에 포함한다
+
 **Save:** `.claude/reports/expert-findings-{topic-slug}.md`
 
 ### Step 4: Document Generation
@@ -189,6 +219,7 @@ settings.json에 등록하여 report 세션 동안만 활성화한다. simon-bot
       - `**[미확인]**` — 코드를 찾지 못했거나 읽지 않은 경우
       - `**[추정]** — {추정 근거}` — 간접 증거는 있으나 직접 확인하지 못한 경우
     - writer는 문서 작성 완료 후, 모든 사실 주장에 코드 근거가 있는지 자체 검증(self-audit)한다. 근거 없는 주장이 발견되면 해당 문장에 `[미확인]` 태그를 추가한다
+    - 특히 **함수의 동작/반환값을 주장할 때**는 해당 함수 코드뿐 아니라 caller 코드도 근거에 포함한다. 상위 레이어에서 반환값을 변환하는 wrapper가 있을 수 있으므로, 최종 동작은 caller 체인 전체를 확인해야 한다
 
 **4-C: 출력**
 1. `.claude/reports/{document-type}-{topic-slug}.md`에 파일 저장

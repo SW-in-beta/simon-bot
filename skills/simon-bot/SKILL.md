@@ -77,6 +77,9 @@ MEDIUM finding까지 모두 수정하여 scope creep이 발생한다. → CRITIC
 ### G-WF-006: 기존 코드 패턴 불일치를 확인 없이 버그로 단정
 if 브랜치와 else 브랜치에서 다른 변수명 패턴을 발견하고, git blame 확인 없이 "버그"로 단정하여 수정한다. → Intent-Before-Fix Gate (Critical Rules): git blame → git show → 커밋 전체 확인 후 의도적 설계 여부를 판단한 뒤 수정 여부를 결정한다.
 
+### G-WF-007: 단일 레이어 함수 분석으로 최종 동작 단정
+cpccpm.Throttle()이 ThrottleBy=100을 반환하는 것만 보고 "이 함수는 100을 반환한다"고 결론낸 사례처럼, 한 레이어의 반환값만 보고 시스템 전체 동작을 단정한다. → "이 함수가 X를 반환한다"고 주장하려면: (1) 해당 함수의 반환값을 직접 확인, (2) 그 함수를 호출하는 caller 코드를 grep으로 찾아 반환값이 어떻게 가공되는지 확인, (3) 최종 사용처(로그 출력, API 응답 등)까지 추적. 한 레이어만 읽고 결론 내는 것은 "검증했다"에 해당하지 않는다.
+
 ## Cross-Cutting Protocols
 
 > **Shared Protocols**: `~/.claude/skills/_shared/preamble.md` 읽기 — Session Isolation, Error Resilience, Forbidden Rules, Agent Teams, Cognitive Independence 공통 프로토콜 포함.
