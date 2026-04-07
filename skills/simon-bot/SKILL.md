@@ -80,6 +80,9 @@ if 브랜치와 else 브랜치에서 다른 변수명 패턴을 발견하고, gi
 ### G-WF-007: 단일 레이어 함수 분석으로 최종 동작 단정
 cpccpm.Throttle()이 ThrottleBy=100을 반환하는 것만 보고 "이 함수는 100을 반환한다"고 결론낸 사례처럼, 한 레이어의 반환값만 보고 시스템 전체 동작을 단정한다. → "이 함수가 X를 반환한다"고 주장하려면: (1) 해당 함수의 반환값을 직접 확인, (2) 그 함수를 호출하는 caller 코드를 grep으로 찾아 반환값이 어떻게 가공되는지 확인, (3) 최종 사용처(로그 출력, API 응답 등)까지 추적. 한 레이어만 읽고 결론 내는 것은 "검증했다"에 해당하지 않는다.
 
+### G-WF-008: 가설 고착 — 동일 방향 3회 실패 후 가설 리셋 없이 재시도
+첫 가설이 틀렸음을 시사하는 신호(동일 에러 반복, STALL 감지)에도 불구하고 같은 방향으로 계속 재시도한다. grind의 10회 재시도 환경에서 "열심히 했지만 결국 같은 방법을 10번 시도한 것"이 되는 사례. → 동일 전략으로 3회 연속 실패 시: "현재 접근의 근본 가정이 무엇인가?"를 명시적으로 자문하고, 대안 가설을 최소 2개 도출한다. grind에서는 grind-cross-cutting.md의 Hypothesis Reset Protocol을 따른다.
+
 ## Cross-Cutting Protocols
 
 > **Shared Protocols**: `~/.claude/skills/_shared/preamble.md` 읽기 — Session Isolation, Error Resilience, Forbidden Rules, Agent Teams, Cognitive Independence 공통 프로토콜 포함.
@@ -408,6 +411,9 @@ Each Unit: isolated git worktree. Independent Units: parallel.
 **Step 7: Bug/Security/Performance Review** — 도메인팀 Agent Team으로 구현 검증 + 사전 우려사항 대조 + Reproducibility Gate (P-007: CRITICAL/HIGH 이슈는 재현 테스트 후 수정) + 에이전트 역할별 도구 범위 명시 (P-011)
 
 **Step 8: Regression Verification** — Step 7 수정이 기존 기능 깨뜨리지 않았는지 확인
+
+**Step 8-B (SMALL path only): 경량 Cross-Impact 체크**
+변경된 파일의 importers를 grep으로 확인하여 영향받는 파일 목록을 파악한다. 예상 외 영향 파일이 발견되면 Step 17에서 architect에게 보고한다. "국소 최적화 — 한 곳 고치면 다른 곳이 깨짐" 패턴(G-WF 참조)을 SMALL 경로에서도 구조적으로 감지한다.
 
 --- SMALL path skips to Step 17 ---
 
