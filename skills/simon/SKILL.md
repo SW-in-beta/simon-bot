@@ -83,6 +83,19 @@ cpccpm.Throttle()이 ThrottleBy=100을 반환하는 것만 보고 "이 함수는
 ### G-WF-008: 가설 고착 — 동일 방향 3회 실패 후 가설 리셋 없이 재시도
 첫 가설이 틀렸음을 시사하는 신호(동일 에러 반복, STALL 감지)에도 불구하고 같은 방향으로 계속 재시도한다. grind의 10회 재시도 환경에서 "열심히 했지만 결국 같은 방법을 10번 시도한 것"이 되는 사례. → 동일 전략으로 3회 연속 실패 시: "현재 접근의 근본 가정이 무엇인가?"를 명시적으로 자문하고, 대안 가설을 최소 2개 도출한다. grind에서는 grind-cross-cutting.md의 Hypothesis Reset Protocol을 따른다.
 
+## Red Flags (워크플로 미준수 징후)
+
+이 징후가 보이면 워크플로가 올바르게 실행되고 있지 않다. 즉시 멈추고 원인을 파악한다:
+
+- workflow-state.json 갱신 없이 3개 이상의 Step을 진행함
+- Plan에 없는 파일을 조용히 수정하고 있음
+- "나중에 테스트 작성하겠다"고 기록함
+- 100줄 이상 코드를 작성했는데 빌드/테스트를 실행하지 않음
+- Step 6 Purpose Alignment을 "명백히 통과"로 건너뜀
+- 전문가 리뷰에서 CRITICAL을 보고도 다음 Step으로 진행함
+- "이건 간단하니까 SMALL 경로"라고 결정했지만 5개+ 파일을 수정함
+- 스펙과 기존 코드가 충돌하는데 Confusion Management 없이 임의 해석으로 진행함
+
 ## Cross-Cutting Protocols
 
 > **Shared Protocols**: `~/.claude/skills/_shared/preamble.md` 읽기 — Session Isolation, Error Resilience, Forbidden Rules, Agent Teams, Cognitive Independence 공통 프로토콜 포함.
@@ -202,17 +215,7 @@ plan-summary.md에 명시된 변경만 구현한다. 범위 밖 개선(docstring
 
 ### User Interaction Recording
 
-매 단계에서 사용자 응답(AskUserQuestion, PR 피드백 등)을 받을 때마다, 워크플로/스킬 개선에 반영할 만한 인사이트를 `.claude/memory/user-feedback-log.md`에 누적 기록한다.
-
-기록 형식 (append):
-```
-## [Step N] {단계명}
-- **User said**: (사용자 발언 요약)
-- **Interpretation**: (의도 해석)
-- **Skill implication**: (스킬/워크플로 개선점, 없으면 "None")
-```
-
-이 기록은 Step 20에서 스킬 자기 개선의 입력이 된다. 사용자의 교정, 불만, 반복 요청에 특히 주의를 기울여 기록할 것.
+AskUserQuestion·PR 피드백 응답 시 `.claude/memory/user-feedback-log.md`에 누적 기록. 형식: `## [Step N] {단계명}` 아래 User said / Interpretation / Skill implication 3항목 append. Step 20 자기 개선의 입력 — 교정·불만·반복 요청에 특히 주의.
 
 ### Phase-End Auto-Retrospective
 
@@ -293,6 +296,13 @@ Startup 단계는 순서 의존성이 있으므로 순차 실행한다.
    - Phase A Step 1에서 Prior Context Brief를 architect에게 전달하여 이전 결정과 일관된 계획 수립을 유도한다
 3. **브랜치명 자동 생성** (P-001): 사용자 요청에서 브랜치명을 자동 생성한다. 예: "인증 기능 추가해줘" → `feat/add-auth`. AskUserQuestion 없이 통보: `[Default] Branch: feat/add-auth — 변경하려면 알려주세요.` → `.claude/memory/branch-name.md`에 저장
    > **주의**: 이 단계에서는 브랜치명만 결정한다. 실제 git 브랜치 생성은 Phase B Pre-Phase에서 `git fetch origin {base_branch}` 후 `origin/{base_branch}` 기반으로 수행한다. Startup에서 `git checkout -b`로 직접 브랜치를 생성하는 것은 **금지** — stale한 로컬 main을 사용하여 원격에 머지된 커밋을 놓칠 수 있다.
+3-A. **원격 ref 동기화** (P-001): 브랜치명 결정 직후 원격 상태를 로컬로 가져온다.
+   ```bash
+   git fetch origin
+   ```
+   - 로컬 워킹 디렉토리와 현재 브랜치는 변경되지 않는다. 원격 추적 ref(`origin/*`)만 갱신된다.
+   - 이후 main/master 기준 조회(`origin/main`, `git log origin/main..HEAD` 등)는 이 시점에 동기화된 ref를 사용한다.
+   - 실패 시 워크플로를 중단하지 않는다. 실패 시: `[Warning] git fetch 실패 — 원격 ref 없이 진행`
 3-B. **SESSION_DIR 초기화**: 브랜치명 확정 후 세션 디렉토리를 생성한다.
    ```bash
    PROJECT_SLUG=$(git rev-parse --show-toplevel | tr '/' '-')
@@ -453,10 +463,7 @@ For detailed instructions, read [integration-and-review.md](references/integrati
 - 새 세션에서 워크플로 전반의 종합 패턴 분석 + evaluator tuning loop 데이터 수집
 - Phase-End Auto-Retrospective가 이미 Phase별 핵심 인사이트를 캡처하므로, Step 20 미실행 시에도 핵심 피드백은 보존됨
 - 실행: 사용자가 `/retro`를 호출하거나, simon 완료 시 자동 Handoff
-- **Standup Entry**: 세션 완료 시 `~/.claude/projects/{slug}/state/standup.jsonl`에 append. Startup에서 최근 5개 entry를 자동 로딩하여 이전 세션의 학습(gotchas, 미해결 결정)을 사전 인지한다.
-  ```json
-  {"skill":"simon","branch":"feat/xxx","date":"2026-03-30","status":"completed","key_decisions":["SMALL path"],"gotchas_learned":["asdf Go 버전"],"unresolved":["캐시 TTL"]}
-  ```
+- **Standup Entry**: 세션 완료 시 `~/.claude/projects/{slug}/state/standup.jsonl`에 append (skill, branch, date, status, key_decisions, gotchas_learned, unresolved 필드). Startup에서 최근 5개 entry를 자동 로딩하여 이전 세션의 학습(gotchas, 미해결 결정)을 사전 인지한다.
 - **Gotcha 축적**: 세션 중 발견한 프로젝트 gotcha를 `gotchas.jsonl`에도 append. Workflow Gotchas(SKILL.md 상주)와 달리, 프로젝트별 gotcha는 jsonl에 축적하여 다음 세션의 Phase A에서 자동 로딩한다.
 
 ### Harness Stress Test (데이터 수집)
@@ -505,16 +512,8 @@ For full rule list and Runtime Guard (P-008), read [forbidden-rules.md](referenc
 
 ## Context Window Management
 
-컨텍스트 윈도우가 자동 압축(compact)되므로, 토큰 예산 걱정으로 작업을 조기에 중단하지 않는다. 압축이 발생해도 `.claude/memory/`에 상태가 저장되어 있으므로 작업을 계속 진행한다.
+컨텍스트 윈도우가 자동 압축(compact)되므로 토큰 예산 걱정으로 조기 중단하지 않는다. 상태는 `.claude/memory/`에 유지됨. 상세 프로토콜은 [cross-cutting-protocols.md](references/cross-cutting-protocols.md) 참조.
 
-For detailed protocols (선제적 Compaction, Compaction 후 상태 검증, 새 세션 시작, 세션 분할 경계), read [cross-cutting-protocols.md](references/cross-cutting-protocols.md).
+## Memory Persistence & Unresolved Decisions
 
-## Memory Persistence
-
-Record at: Step 완료 시, agent 전환 시, loop rollback 시, Unit 완료 시.
-각 Step 시작 전에 관련 memory 파일을 읽는다 — 이전 판단과 상태를 복원하여 일관된 진행을 보장하기 위함이다.
-
-## Unresolved Decision Tracking
-
-미해결 결정사항 → `.claude/memory/unresolved-decisions.md`에 기록.
-Step 18 report에 "may bite you later" warning 포함. 암묵적 기본값 대신 명시적으로 결정사항을 문서화한다.
+Step 완료·agent 전환·loop rollback·Unit 완료 시 기록. Step 시작 전 관련 memory 파일 읽기 (이전 판단 복원). 미해결 결정 → `.claude/memory/unresolved-decisions.md`, Step 18에 "may bite you later" warning 포함.

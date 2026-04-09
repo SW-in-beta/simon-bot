@@ -93,6 +93,10 @@ loop_limits:
     on_progress: true      # Progress Detection "진전 있음" 시 best 태그
     strategy_pivot: true   # 기존과 동일
     rollback_target: best  # pivot 시 initial 대신 best로 롤백 (없으면 initial)
+
+  # ── Per-Attempt Efficiency ───────────────
+  per_attempt_warning_turns: 30   # 개별 attempt가 30턴 이상 소비 시 경고
+  total_turns_warning: 200        # 전체 누적 턴이 200 이상 시 사용자에게 경고
 ```
 
 ### Reference Loading Policy

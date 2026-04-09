@@ -23,6 +23,7 @@
 - **실패해도 포기하지 않습니다** — grind 모드는 자동 진단, 전략 전환, 체크포인트 롤백으로 끝까지 해결합니다
 - **안전하게 격리됩니다** — 모든 작업은 독립 worktree에서 실행되고, TDD가 필수이며, 파괴적 명령은 차단됩니다
 - **진행 상태를 잃지 않습니다** — State-Driven Execution으로 매 턴마다 workflow-state.json에서 정확한 Step 위치를 복원합니다
+- **합리화를 스스로 차단합니다** — Anti-Rationalization Tables와 Red Flags가 잘못된 지름길(Step 건너뛰기, 임의 해석, 미검증 진행)을 구조적으로 탐지합니다
 
 ---
 
@@ -262,6 +263,35 @@ expert_panel:
 
 전문가 리뷰 기준은 `.claude/workflow/prompts/*.md`에서 수정 가능 (22개 전문가 프롬프트).
 회고 피드백은 `.claude/memory/retrospective.md`에 저장되어 다음 실행 시 자동 참조됩니다.
+</details>
+
+<details>
+<summary><strong>Anti-Rationalization & Red Flags</strong></summary>
+<br>
+
+워크플로를 올바르게 따르도록 구조적으로 강제하는 두 가지 메커니즘:
+
+**Anti-Rationalization Tables** — Phase A/B 각 단계에서 흔히 발생하는 합리화와 현실을 대조합니다.
+
+| 합리화 | 현실 |
+|--------|------|
+| "스펙이 명확하니까 Step 0은 건너뛰자" | Scope Challenge가 SMALL/STANDARD/LARGE를 결정한다. 건너뛰면 불필요한 파이프라인이나 검증 누락이 발생한다 |
+| "구현이 간단하니까 TDD 없이 먼저 코드 작성" | 테스트 없는 코드는 Step 7 Expert Review에서 즉시 CRITICAL 이슈가 된다 |
+| "이미 비슷한 걸 만들었으니 기존 코드 재사용은 안 해도 됨" | Reuse Review(Step 10)에서 중복 구현이 발견되면 재작업이 필요하다 |
+
+**Red Flags** — 이 징후가 보이면 워크플로가 올바르게 실행되고 있지 않다:
+
+- `workflow-state.json` 갱신 없이 3개 이상의 Step 진행
+- Plan에 없는 파일을 조용히 수정
+- "나중에 테스트 작성하겠다"고 기록
+- Step 6 Purpose Alignment를 "명백히 통과"로 건너뜀
+- 전문가 리뷰에서 CRITICAL을 보고도 다음 Step으로 진행
+- **스펙과 기존 코드가 충돌하는데 Confusion Management 없이 임의 해석으로 진행**
+
+**Confusion Management Protocol** — 스펙·코드·요구사항 간 불일치 발견 시 추측으로 진행하지 않고 명시적으로 혼동 지점을 명시한 뒤 사용자 결정을 기다린다.
+
+**Post-Implementation Simplicity Check** — 구현 완료 후 불필요한 복잡성(추상화 과잉, 미사용 설계 여유, 코드 중복)을 탐지하여 제거한다.
+
 </details>
 
 <details>

@@ -378,6 +378,50 @@ simon-pm은:
 5. 완료된 Feature의 DoD 1차 검증 (R1 Self-Review)
 6. **Feature 완료 시 result.md 작성 + shared-context.md 업데이트 확인**
 
+### Sprint @reviewer Teammate (Feature 3개+ Sprint)
+
+Feature 3개 이상인 Sprint에서 실시간 교차 검증을 수행하는 전용 읽기 전용 리뷰어를 Agent Team에 추가한다. 검증이 Sprint Review(4-C)에서 사후적으로만 이루어지면, Feature 간 인터페이스 불일치를 너무 늦게 발견하여 대규모 재작업이 발생할 수 있다.
+
+**역할 구성:**
+- **도구**: Read, Glob, Grep, Bash(빌드/린트/테스트 실행만) — Edit/Write 금지
+- **트리거**: 각 Feature의 simon이 Step 8(SMALL) 또는 Step 17(STANDARD+)을 완료할 때 자동 리뷰 수행
+- **비율**: 빌더 3-4명당 리뷰어 1명
+
+**리뷰 범위:**
+1. **Contract 준수 확인**: Feature의 구현이 `contracts/`의 API/Data/Component Contract을 준수하는지 검증
+2. **공유 파일 수정 감지**: Feature가 자신의 File Ownership 외의 파일을 수정했는지 git diff로 확인
+3. **전체 빌드/테스트 통과**: 해당 Feature 커밋 후 전체 빌드 + 테스트 통과 확인
+4. **Sprint Shared Context 일관성**: result.md와 shared-context.md가 갱신되었는지 확인
+
+**이슈 발견 시 행동:**
+- CRITICAL (Contract 위반, 빌드 실패): 해당 Feature의 simon에게 즉시 SendMessage로 전달 → Sprint Review 전 조기 수정
+- HIGH (공유 파일 수정): CEO에게 보고 → 파일 소유권 재확인
+- LOW (shared-context 미갱신): 해당 Feature의 simon에게 알림
+
+**적용 조건:** Feature 2개 이하 Sprint에서는 오버헤드가 이득보다 크므로 적용하지 않는다. Sprint Review(4-C)의 사후 검증으로 충분하다.
+
+**Spawn Prompt:**
+```
+<role>
+sprint-reviewer — Sprint 실행 중 실시간 교차 검증 리뷰어
+Mode: VERIFICATION
+Tools ALLOWED: [Read, Glob, Grep, Bash(빌드/린트/테스트만)]
+Tools FORBIDDEN: [Edit, Write] — 읽기 전용으로 코드를 수정하지 않는다
+</role>
+
+<context>
+- contracts/ 디렉토리의 API/Data/Component Contract
+- Sprint Shared Context (.claude/company/sprints/sprint-{N}/shared-context.md)
+- Feature별 File Ownership (tasks/{feature-id}/spec.md)
+</context>
+
+<instructions>
+1. Feature 완료 알림 수신 시 해당 Feature의 diff를 확인한다
+2. contracts/ 준수, 파일 소유권, 빌드/테스트 통과를 검증한다
+3. 이슈 발견 시 severity 분류 후 해당 Feature의 simon 또는 CEO에게 보고한다
+</instructions>
+```
+
 ### 4-C: Sprint Review (Agent Team)
 
 Sprint의 모든 Feature가 완료되면 **Agent Team**으로 팀 리드를 소집하여 검증한다.

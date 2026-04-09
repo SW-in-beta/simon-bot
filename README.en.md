@@ -23,6 +23,7 @@ Most AI coding assistants generate code and hope for the best. simon treats ever
 - **Get smarter over time** — Built-in retrospectives feed back into future runs. A dedicated boost skill lets you teach it new tricks from articles, repos, and papers.
 - **Stay safe by default** — No force pushes, no real DB access, no destructive commands. Ever.
 - **Never lose your place** — State-Driven Execution restores the exact step position from workflow-state.json on every turn, surviving compaction and session resumption.
+- **Self-correcting against rationalization** — Anti-Rationalization Tables and Red Flags structurally detect shortcuts (skipped steps, arbitrary interpretation, unverified progress) before they cause rework.
 
 ## How It Works
 
@@ -231,6 +232,34 @@ Auto-fixes CI failures on PRs with specialized recovery strategies per error typ
 - **Error-type routing** — different strategies for lint, test, build, type-check failures
 - **Dual mode** — auto-invoked by simon-code-review's CI Watch, or run standalone
 - **Smart diagnosis** — analyzes CI logs to identify root cause before attempting fixes
+
+</details>
+
+<details>
+<summary><strong>Anti-Rationalization & Red Flags</strong></summary>
+
+Two structural mechanisms that keep the workflow on track:
+
+**Anti-Rationalization Tables** — Each Phase A/B step lists common rationalizations and why they fail.
+
+| Rationalization | Reality |
+|----------------|---------|
+| "The spec is clear, skip Step 0" | Scope Challenge determines SMALL/STANDARD/LARGE. Skipping causes over-engineering or missed validation |
+| "Simple implementation, write code first, tests later" | Code without tests becomes an instant CRITICAL issue at Step 7 Expert Review |
+| "I've built something similar, don't need reuse review" | Duplicate implementations found at Step 10 require rework |
+
+**Red Flags** — If you see these, the workflow is not executing correctly:
+
+- 3+ Steps progressed without updating `workflow-state.json`
+- Quietly modifying files not in the plan
+- Logging "will write tests later"
+- Skipping Step 6 Purpose Alignment as "obviously passing"
+- Proceeding to next step after a CRITICAL expert finding
+- **Spec conflicts with existing code — proceeding with arbitrary interpretation instead of Confusion Management**
+
+**Confusion Management Protocol** — When spec, code, or requirements conflict, stop and explicitly name the confusion point with options before proceeding.
+
+**Post-Implementation Simplicity Check** — After implementation, detect and remove unnecessary complexity (over-abstraction, unused design slack, code duplication).
 
 </details>
 

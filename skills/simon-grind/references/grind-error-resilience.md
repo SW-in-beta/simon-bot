@@ -146,6 +146,34 @@ WORKFLOW_ERROR도 동일한 10회 escalation ladder를 따른다:
 
 **Progress Detection 연계**: 진전 없는 재시도가 2회 연속되면 현재 tier를 건너뛰고 다음 tier로 즉시 이동한다 (상세: grind-cross-cutting.md의 Progress Detection 참조).
 
+### Context-Reset at Tier Boundaries (Ralph Loop Pattern)
+
+Tier 전환 시점(Attempt 3→4, 6→7)에서 기존 subagent의 컨텍스트를 리셋하고 fresh subagent를 spawn하여, 이전 실패의 인지적 오염을 구조적으로 제거한다. Hypothesis Reset Protocol은 "가설을 바꾸라"고 지시하지만 같은 컨텍스트 내에서 실행되므로 이전 시도의 사고 패턴이 잔류한다. Context-Reset은 컨텍스트 자체를 리셋하여 구조적으로 fresh perspective를 강제한다.
+
+**Tier 전환 시 실행 절차:**
+
+1. 현재 tier의 failure-log.md 항목을 정리하여 `{SESSION_DIR}/memory/tier-{N}-summary.md`에 요약 저장:
+   - 각 attempt의 에러 분류 + 시도 내역 (1줄씩)
+   - Mini-Contract의 결과 (성공 기준 충족 여부)
+   - 최종 에러 상태
+2. `checkpoint.sh`로 현재 상태를 보존 (Tier 경계 Checkpoint)
+3. 현재 subagent를 종료하고 **fresh subagent**를 spawn
+
+**Fresh Subagent에게 전달하는 것 (What):**
+- plan-summary.md (요구사항)
+- tier-{N}-summary.md (이전 tier 요약 — 원인 분류와 시도 결과만)
+- checkpoint git tag (코드 상태 복원용)
+- Mini-Contract의 다음 tier success_criteria
+
+**전달하지 않는 것 (Why):**
+- 이전 tier의 코드 diff (어떻게 고치려 했는지)
+- 이전 tier의 Dual-Hypothesis 분석 (왜 실패했다고 생각했는지)
+- failure-log.md 원본 (요약만 전달)
+
+이 분리를 통해 중기(4-6)와 후기(7-9) tier의 에이전트가 이전 실패 패턴에 오염되지 않은 관점으로 접근할 수 있다.
+
+**적용 조건:** CODE_LOGIC 실패에만 적용한다. ENV_INFRA와 WORKFLOW_ERROR는 환경/상태 문제이므로 동일 컨텍스트에서의 단계적 복구가 더 효과적이다.
+
 ## 핵심 행동 원칙
 
 grind의 차별점은 자동 복구 능력이다. 다음 순서를 따른다:

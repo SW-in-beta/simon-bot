@@ -5,6 +5,7 @@
 - [Session Isolation Protocol](#session-isolation-protocol)
 - [Composable CLI Script Toolkit](#composable-cli-script-toolkit)
 - [Docs-First Protocol](#docs-first-protocol)
+- [Confusion Management Protocol](#confusion-management-protocol)
 - [Context Window Management](#context-window-management)
 
 ## Clean Working Tree Check
@@ -52,6 +53,30 @@ mkdir -p "${SESSION_DIR}/memory" "${SESSION_DIR}/reports"
 
 유닉스 파이프라인 철학 — 작은 도구들을 조합하여 복잡한 결과를 만드는 composability — 을 따른다. LLM에 원본 데이터를 통째로 전달하지 않고, CLI로 핵심만 추출하여 전달함으로써 컨텍스트 효율을 극대화한다.
 
+## Confusion Management Protocol
+
+스펙·코드·요구사항 간 불일치 또는 모호함을 발견하면 추측으로 진행하지 않는다 — 임의 해석은 재작업의 가장 큰 원인이다.
+
+1. **STOP** — 추측으로 진행하지 않는다
+2. **NAME** — 구체적 혼동 지점을 명시한다:
+   ```
+   CONFUSION:
+   스펙: "{스펙이 말하는 내용}"
+   기존 코드: "{기존 코드의 패턴}" (src/path/file.ts)
+   
+   Options:
+   A) 스펙을 따른다 — {근거}
+   B) 기존 패턴을 따른다 — {근거}
+   C) 사용자에게 확인한다
+   → 어떤 방향으로 할까요?
+   ```
+3. **WAIT** — guided/interactive 모드에서 사용자 결정을 기다린다
+4. **RECORD** — 결정을 Decision Journal에 기록한다
+
+**ship 모드**: Options 중 기존 코드 패턴을 우선 적용하고 Decision Journal에 `[AUTO-DECIDED]` 태그와 함께 기록한다. 사용자가 사후 검토할 수 있도록 Step 18 Work Report에 자동 결정 목록을 포함한다.
+
+**적용 대상**: Phase B executor, Phase A planner, 모든 subagent. 특히 plan-summary.md에 명시되지 않은 엣지 케이스를 구현할 때 반드시 이 프로토콜을 따른다.
+
 ## Docs-First Protocol
 
 라이브러리·DB·프레임워크·외부 서비스 등을 사용할 때, 학습 데이터 기반 기억에 의존하지 않고 공식 문서를 먼저 조회한다. LLM의 학습 데이터는 버전·API 시그니처·설정 방법에 대해 오래되었거나 부정확할 수 있기 때문이다.
@@ -64,7 +89,7 @@ For detailed protocol (적용 기준, 도구 우선순위, 조회 불가 시 대
 세션 간 구조화된 상태를 `~/.claude/projects/{slug}/state/`에 jsonl로 관리한다:
 
 - `reviews.jsonl`: 리뷰 결과 (severity, file, finding, resolution, timestamp, expires_at)
-- `decisions.jsonl`: 아키텍처 결정 (decision, rationale, rejected_alternatives, timestamp)
+- `decisions.jsonl`: 아키텍처 결정 (decision, rationale, rejected_alternatives, invalidation_condition, timestamp, implemented_in, outcome, outcome_timestamp). `implemented_in`은 Step 5 완료 시 브랜치명으로 자동 기록하고, `outcome`은 Step 17에서 done_when_checks 검증 시 관련 decision의 결과("OK" 또는 "issue: {설명}")를 자동 갱신한다. Startup의 Prior Context Brief에서 outcome이 있는 결정을 우선 표시하여 이전 세션의 결정이 어떤 결과를 낳았는지 즉시 파악할 수 있다.
 - `test-insights.jsonl`: 반복 실패 패턴, 환경 의존 테스트 목록
 - `gotchas.jsonl` — 프로젝트에서 Claude가 반복적으로 잘못하는 패턴. **유효기간 없음** (영구 축적). 카테고리: build, convention, test, api, infra.
 
@@ -103,6 +128,12 @@ Step 20(마지막 단계)에 도달하지 못하더라도 사용자 피드백이
    - **감지 패턴**: {패턴 요약 또는 "없음"}
    - **캡처**: {boost insight 파일명 또는 "N/A"}
    ```
+6. **Agent Self-Reflection** (Phase A 완료 및 Unit 완료 시에만 실행 — Integration 완료 시는 skip):
+   현재 Phase에서 에이전트가 겪은 구체적 경험을 3항목으로 구조화한다. user-feedback 기반 패턴 탐지(1-5)와 달리, 이는 에이전트의 내부 경험에서 학습을 추출한다.
+   - **Surprise**: 예상과 달랐던 것 (코드 패턴, 빌드 동작, 테스트 결과 등). 예: "Go의 context.WithCancel이 부모 취소 시 자식 goroutine을 즉시 종료하지 않았음"
+   - **Pattern Proposal**: `gotchas.jsonl`에 추가할 프로젝트 gotcha 1건. 예: `{"category": "test", "pattern": "testcontainers 포트 바인딩이 CI에서 간헐적 실패", "mitigation": "retry with backoff"}`
+   - **Workflow Observation**: 워크플로 단계 중 비효율적이었던 것 1건. 예: "Step 4-B Expert Review에서 Data 전문가의 finding이 항상 0건 — 이 프로젝트에서는 DB 변경이 없어 불필요"
+7. Surprise + Pattern을 `gotchas.jsonl`에 append한다. Workflow Observation은 `retrospective.md`에 기록한다.
 
 **Step 20과의 관계**: Phase-end 회고가 이미 캡처한 패턴은 Step 20에서 중복 처리하지 않는다. Step 20은 전체 워크플로를 관통하는 종합 패턴(Phase 간 교차 패턴)에만 집중한다. 컨텍스트 부족으로 Step 20이 실행되지 않아도, 핵심 인사이트는 Phase-end에서 이미 캡처된 상태이므로 안전하다.
 

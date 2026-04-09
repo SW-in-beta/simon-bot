@@ -40,6 +40,8 @@ Tools FORBIDDEN: [{금지 목록}] — 금지 도구 사용 시 결과를 무효
 <context>
 - Project: {프로젝트명}
 - Scope: {탐색/수정 가능 파일 범위}
+- Current branch: {current_branch} — 현재 작업 기준. 코드베이스 탐색 시 이 브랜치 상태를 사용한다.
+- Base branch: origin/{base_branch} — main/master 기준 조회(머지 여부, 최신 변경 등) 시 이 ref를 사용한다. git fetch는 Startup에서 완료됨.
 - Prior findings: {이전 단계 결과 요약 또는 "없음"}
 </context>
 

@@ -89,6 +89,15 @@ Step 0에서 SMALL로 판별 시 Phase A를 압축 실행한다:
 - Step 4-B: Safety + Code Design always 멤버만 경량 리뷰
 - 사용자 인터랙션: Step 0+1-B 통합, Expert Review CRITICAL만 확인 (총 2회)
 
+### Phase A Common Rationalizations
+
+| 합리화 | 현실 |
+|--------|------|
+| "스펙이 명확하니까 Step 0은 건너뛰자" | Scope Challenge가 SMALL/STANDARD/LARGE를 결정한다. 건너뛰면 과도한 파이프라인을 돌리거나 필요한 검증을 누락한다 |
+| "코드를 보면 아니까 인터뷰는 필요 없다" | 비즈니스 결정(우선순위, 제약, 의도)은 코드에 없다. Interview Guard를 따른다 |
+| "계획은 대충 써도 구현하면서 맞추면 된다" | plan-summary.md가 불완전하면 executor가 임의로 해석한다. Done-When Checks가 없으면 Step 17에서 완료 판정이 불가능하다 |
+| "Expert Review까지는 과하다" | CRITICAL 이슈는 구현 후 발견하면 재작업 비용이 10배다. Phase A에서 잡는 것이 가장 싸다 |
+
 ## Step 1-A: Project Analysis + Code Design Analysis
 
 - Spawn `explore-medium`: Scan project structure
