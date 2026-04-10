@@ -92,6 +92,7 @@ Then in Claude Code:
 | `/simon-company` | Full-stack software company — multi-team collaboration from planning to deployment & ops |
 | `/simon-presenter` | Live demo presenter — run apps with Playwright for interactive demonstrations |
 | `/simon-md-reviewer` | Open a Markdown file in a browser HTML viewer and run an inline-comment review loop |
+| `/simon-web-search` | Deep web research — question decomposition → multi-pass parallel search → source triangulation → confidence-rated structured report |
 
 ### Pick the Right Skill
 
@@ -111,6 +112,7 @@ Then in Claude Code:
 | Auto-fix CI failures (PR checks failing) | `/simon-ci-fix` |
 | Demo a finished app with live browser interaction | `/simon-presenter` |
 | Review a Markdown file with inline browser comments | `/simon-md-reviewer` |
+| Deep research a technical topic with a structured report | `/simon-web-search` |
 
 <details>
 <summary><strong>Expert Teams (5 domains, 22 specialists)</strong></summary>
@@ -222,6 +224,21 @@ Runs finished apps with a Playwright headed browser for interactive live demonst
 **simon-boost-capture** — Records skill improvement insights in the background during active work. Captures ideas without interrupting your workflow for later batch processing.
 
 **simon-boost-review** — Reviews and applies accumulated insights from boost-capture. Batch-processes captured improvement proposals into actual skill changes.
+
+</details>
+
+<details>
+<summary><strong>simon-web-search</strong></summary>
+
+Deep research skill for technical topics. Goes beyond simple search:
+
+- **Question decomposition** — breaks the main question into 3-8 sub-topics before searching
+- **Multi-pass parallel search** — Round 1 broad search, Round 2 gap detection, Round 3+ focused verification (deep mode)
+- **Source triangulation** — cross-validates claims across independent sources. Single-source claims are marked `[UNVERIFIED]`
+- **Source chain verification** — tracks 2nd-hand citations back to primary sources (no "A says B said C" without verifying C)
+- **Confidence ratings** — every factual claim tagged with source URL and HIGH/MEDIUM/LOW confidence
+- **Depth modes** — quick (1 round, ~1-2 min), standard (2-3 rounds, ~3-5 min), deep (3-5 rounds, ~7-15 min)
+- **Report viewer integration** — generates a structured Markdown report and optionally renders it as HTML
 
 </details>
 

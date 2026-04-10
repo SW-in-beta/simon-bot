@@ -26,30 +26,7 @@ You are executing the **simon** deep workflow. This is a 19-step quality pipelin
 
 workflow-state.json이 없으면 Startup부터 시작한다.
 
-```json
-{
-  "current_phase": "A",
-  "current_step": "0",
-  "scope": null,
-  "completed_steps": [],
-  "next_step": "0",
-  "blocked": false,
-  "blocked_reason": null,
-  "done_when_checks": [],
-  "phase_timestamps": {},
-  "last_updated": "2026-03-17T00:00:00+09:00"
-}
-```
-
-**갱신 규칙:**
-- Step 시작: `current_step` 갱신
-- Step 완료: `completed_steps`에 추가, `next_step` 갱신
-- Phase 전환: `current_phase` 갱신, `phase_timestamps`에 `{phase: {start, end}}` 기록
-- 중단/에러: `blocked: true`, `blocked_reason` 기록
-- SMALL path에서 Steps 9-16 skip 시: `skipped_steps`에 기록, `skip_reason` 명시
-- Phase A 완료 시: plan-summary.md의 Done-When Checks를 `done_when_checks` 배열로 추출 (각 항목: `{"id": "DW-001", "description": "...", "type": "mechanical|behavioral", "verified": false}`)
-- 검증 통과 시: 해당 항목의 `verified`를 `true`로 갱신 (Step 5d VERIFY, Step 6, Step 17에서 갱신)
-- Step 17: `done_when_checks`에 `verified: false` 항목이 있으면 FAIL — LLM이 Markdown 체크리스트를 임의로 체크하는 것과 달리 JSON boolean은 명시적 갱신이 필요하므로 조기 완료 선언을 방지한다
+**갱신 규칙:** Step 시작 시 `current_step`, 완료 시 `completed_steps`+`next_step`, Phase 전환 시 `current_phase`+`phase_timestamps` 갱신. 중단/에러: `blocked: true`. SMALL skip 시 `skipped_steps` 기록. Phase A 완료 시 Done-When Checks → `done_when_checks` 배열 추출 (`verified: false` 초기값). Step 5d/6/17 검증 통과 시 `verified: true` 갱신. Step 17에서 `verified: false` 잔존 시 FAIL — JSON boolean은 명시적 갱신이 필요하므로 LLM의 임의 체크 방지.
 
 ### Cross-Session State
 
@@ -253,22 +230,7 @@ Startup에서 이전 세션의 `session-modifiers.json`을 복원하여 활성 h
 
 ### Handoff Manifest (Instruction)
 
-스킬 전환 시 `{SESSION_DIR}/memory/handoff-manifest.json`을 생성하여 컨텍스트 전달을 결정론적으로 보장한다:
-
-```json
-{
-  "from_skill": "simon",
-  "to_skill": "simon-code-review",
-  "trigger_step": "Step 19",
-  "transfer_files": ["review-sequence.md", "branch-name.md", "{feature-name}-report.md", "plan-summary.md"],
-  "block_files": ["implementation.md (추론 과정)", "inline-issues.md (해석 부분)"],
-  "context_note": "CONNECTED 모드. Blind-First 2-Pass 적용됨.",
-  "session_dir": "{SESSION_DIR}"
-}
-```
-
-수신 스킬은 이 manifest를 자동 파싱하여 transfer_files만 로딩하고, block_files는 로딩하지 않는다.
-What-not-Why Handoff 규칙이 manifest에 내장되어 Cognitive Independence 위반을 구조적으로 방지한다.
+스킬 전환 시 `{SESSION_DIR}/memory/handoff-manifest.json`을 생성하여 컨텍스트 전달을 결정론적으로 보장한다. 필드: `from_skill`, `to_skill`, `trigger_step`, `transfer_files`(로딩할 파일), `block_files`(로딩 금지), `context_note`, `session_dir`. 수신 스킬은 transfer_files만 로딩하고 block_files는 제외 — What-not-Why Handoff 규칙이 내장되어 Cognitive Independence 위반을 구조적으로 방지한다.
 
 ### AskUserQuestion Standard Format (Guidance)
 
@@ -324,20 +286,7 @@ Startup 단계는 순서 의존성이 있으므로 순차 실행한다.
    ```
    이후 모든 `.claude/memory/`, `.claude/reports/` 경로는 `{SESSION_DIR}` 기준으로 해석한다.
 3-C. **workflow-state.json 초기화**: `{SESSION_DIR}/memory/workflow-state.json`에 초기 스키마를 기록한다 (State-Driven Execution 섹션 참조). 이미 존재하면 기존 세션 복원으로 판단하고 덮어쓰지 않는다.
-3-D. **session-meta.json 초기화**: `{SESSION_DIR}/memory/session-meta.json`에 세션 메타데이터를 생성한다. 이미 존재하면 기존 세션 복원으로 판단하고 덮어쓰지 않는다.
-   ```json
-   {
-     "branch": "{branch_name}",
-     "skill": "simon",
-     "current_phase": "A",
-     "current_step": 0,
-     "total_steps": 19,
-     "status": "in_progress",
-     "last_activity": "{ISO-8601}",
-     "last_commit_hash": ""
-   }
-   ```
-   이후 Phase/Step 전환 시마다 `current_phase`, `current_step`, `last_activity`를 갱신한다. 커밋 생성 시 `last_commit_hash`를 갱신한다.
+3-D. **session-meta.json 초기화**: `{SESSION_DIR}/memory/session-meta.json`에 세션 메타데이터 생성 (필드: `branch`, `skill`, `current_phase`, `current_step`, `total_steps`, `status`, `last_activity`, `last_commit_hash`). 이미 존재하면 기존 세션 복원으로 판단하고 덮어쓰지 않는다. Phase/Step 전환 시 `current_phase`, `current_step`, `last_activity` 갱신. 커밋 생성 시 `last_commit_hash` 갱신.
 4. **Handoff Manifest 처리** (P-009): `.claude/memory/handoff-manifest.json`이 존재하면:
    - `context_files`를 자동 로딩하여 컨텍스트 복원
    - `skip_steps`에 명시된 Step은 건너뛰기

@@ -75,6 +75,7 @@ install_global() {
     install_skill "simon-sessions"
     install_skill "simon-company"
     install_skill "simon-presenter"
+    install_skill "simon-web-search"
 
     echo ""
 
