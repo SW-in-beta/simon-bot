@@ -71,6 +71,8 @@ Step 5: 마무리
 
 ## Step 0: Standalone 분석 (STANDALONE 모드만)
 
+> **Reference Loading** (선택적): graphify-out/GRAPH_REPORT.md가 존재하면 `~/.claude/skills/_shared/graphify-context.md`를 참조한다. 변경 파일이 god node에 해당하면 "이 파일은 N개 모듈이 의존하는 핵심 파일입니다" 경고를 리뷰 코멘트에 포함하고, 변경이 여러 community에 걸치면 cross-community 영향 경고를 추가한다.
+
 STANDALONE 모드에서는 simon의 Step 18-A/B에 해당하는 분석을 자체적으로 수행한다. simon이 전문가 패널을 거쳐 생성하는 review-sequence와 동등한 품질을 위해 agent team을 구성한다.
 
 For detailed instructions, read [standalone-analysis.md](references/standalone-analysis.md).

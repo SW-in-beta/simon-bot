@@ -83,7 +83,7 @@ Sprint 실행 전반에 걸친 공통 프로토콜. Shared Context, Conflict Res
 
 - **의뢰 모드 자동 감지:** 불명확한 요청 → 의뢰 모드를 기본값으로 제시.
 - **Scope Guard 자동 적용:** 팀 2개 이하 → simon-pm 리다이렉트를 기본값에 포함.
-- **Existing 프로젝트**: `git log --oneline -20`으로 현재 상태 파악, 통합 확인에 "현재 상태" 항목 포함. "simon-report로 사전 분석 먼저?" 선택사항 제시.
+- **Existing 프로젝트**: `git log --oneline -20`으로 현재 상태 파악, 통합 확인에 "현재 상태" 항목 포함. "simon-report로 사전 분석 먼저?" 선택사항 제시. `graphify-out/GRAPH_REPORT.md` 존재 시 god nodes와 communities를 읽어 팀 편성과 스프린트 분배에 활용 (`~/.claude/skills/_shared/graphify-context.md` 참조).
 
 **0-B: 초기 상태 저장** — `roster.json`과 `state.json`을 `.claude/company/`에 생성.
 

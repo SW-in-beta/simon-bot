@@ -18,7 +18,8 @@ Phase 0의 상세 프로세스. SKILL.md에서 참조한다.
 사용자가 교정하면 반영, 교정 없으면 기본값으로 진행.
 
 Existing인 경우:
-- 코드베이스 탐색 (`explore-medium`)으로 현황 파악
+- `graphify-out/GRAPH_REPORT.md` 존재 시: `~/.claude/skills/_shared/graphify-context.md` 읽기 → god nodes/communities로 프로젝트 구조 선파악
+- 코드베이스 탐색 (`explore-medium`)으로 현황 파악 — 그래프가 있으면 관련 community 중심으로 탐색 범위 축소
 - "simon-report로 사전 분석 보고서를 먼저 작성할까요?" (선택사항, 한 번만 질문)
 
 ## 0-B: 초기 상태 저장

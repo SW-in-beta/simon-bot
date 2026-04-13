@@ -108,6 +108,7 @@ loop_limits:
 | Phase B-E 진입 | grind-phase-b.md + simon phase-b-implementation.md |
 | 에러 발생 시 | grind-error-resilience.md |
 | Cross-cutting 참조 시 | grind-cross-cutting.md |
+| 코드 탐색 시 (graphify-out/ 존재 시) | `~/.claude/skills/_shared/graphify-context.md` — 그래프 기반 탐색으로 진입점·영향범위 파악 효율화 |
 
 > **Note**: 초기 로딩을 경량화하여 grind의 재시도 집약적 특성에서 컨텍스트를 절약한다.
 

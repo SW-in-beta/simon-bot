@@ -126,6 +126,18 @@ Step 0에서 SMALL로 판별 시 Phase A를 압축 실행한다:
 
 ## Step 1-A: Project Analysis + Code Design Analysis
 
+### Graphify Knowledge Graph 활용 (탐색 전)
+
+`graphify-out/GRAPH_REPORT.md`가 존재하면 `~/.claude/skills/_shared/graphify-context.md`를 읽고 아래 순서로 활용한다. 그래프가 없으면 이 섹션을 건너뛰고 explore-medium부터 진행한다.
+
+1. GRAPH_REPORT.md 읽기 → god nodes, communities, surprising connections 추출
+2. 사용자 요청과 관련된 community 식별 → explore-medium의 탐색 범위를 해당 community 중심으로 축소
+3. 변경 대상이 god node에 해당하면 Scope Challenge에서 STANDARD 이상을 권장하는 추가 근거로 활용
+4. `graphify explain "대상모듈"`로 연결된 파일 목록을 확보하여 Reference chain traversal의 시작점으로 사용
+5. cross-community 연결이 발견되면 Step 4-B Expert Review에 파급 범위 경고 전달
+
+그래프 쿼리 결과가 부족하면 반드시 Grep/Read로 폴백한다 — 그래프는 탐색 가속기이지 유일한 소스가 아니다.
+
 - Spawn `explore-medium`: Scan project structure
 - Spawn `analyst`: Generate analysis report + recommend principles
 - Use Context7 MCP (`resolve-library-id` → `query-docs`) for library docs — **Docs-First Protocol**: 기술 스택의 설정·마이그레이션·플러그인에 대해 학습 데이터 기반 기억이 아닌 공식 문서에서 확인한 정보를 사용한다. 조회 불가 시 기억으로 추측하지 않고 사용자에게 직접 확인을 요청한다.

@@ -151,6 +151,7 @@ ENV_INFRA로 테스트 실행 자체가 불가능한 경우, 사용자 명시적
 | 외부 라이브러리/서비스 사용 시 | `docs-first-protocol.md` | 3 | on-demand |
 | Gate 조건 참조 필요 시 | `gate-definitions.md` | 3 | on-demand |
 | 산출물 생성 시 (Step 1-B, 18) | `generation-style-guide.md` | 3 | on-demand |
+| 코드 탐색 시 (`graphify-out/` 존재 시) | `~/.claude/skills/_shared/graphify-context.md` | 3 | on-demand, 그래프 없으면 skip |
 
 **Tier 정의:**
 - **Tier 1 (Early Load)**: 256K 이내에 반드시 로딩. compaction 후에도 최우선 재로딩
@@ -316,6 +317,7 @@ For detailed step instructions, read [phase-a-planning.md](references/phase-a-pl
 - SMALL 판별 시 **Fast Track** 적용: Phase A 압축 실행 (상세: phase-a-planning.md)
 
 **Step 1-A: Project Analysis + Code Design Analysis**
+- `graphify-out/GRAPH_REPORT.md` 존재 시: `~/.claude/skills/_shared/graphify-context.md` 읽기 → god nodes/communities로 전체 구조 선파악 후 탐색 범위 축소
 - subagent: 프로젝트 구조 스캔 + 분석
 - Context7 MCP로 라이브러리 문서 조회
 - **Agent Team: Code Design Team** — convention/idiom/design-pattern/testability experts 토론
