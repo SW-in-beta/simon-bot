@@ -145,6 +145,14 @@ simon-code-review가 처리하는 항목:
 - 최종 마무리 (PR ready 전환, feedback.md, retrospective.md, CONTEXT.md 갱신)
 - Completion Summary 출력
 
+**▶ EMIT** `workflow_complete` @ `null` — 워크플로 종료 이벤트
+```bash
+$E --type workflow_complete \
+  --title "워크플로 완료" \
+  --data '{"status":"success","summary":"전체 요약"}' \
+  2>/dev/null || true
+```
+
 ## Step 20: Self-Improvement (회고 기반 스킬 개선)
 
 워크플로 전체에서 축적된 사용자 피드백을 분석하여, 스킬 자체의 개선이 필요한지 판단하고 적용한다.

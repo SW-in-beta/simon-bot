@@ -38,7 +38,6 @@
 
 **적용 제외:**
 - 결정론적 검증 (빌드, 테스트 실행) — 코드 실행으로 확인 가능한 것은 인간 판단이 아니므로 Blind-First 불필요
-- SMALL 경로의 경량 리뷰 — 비용 대비 효과 부족
 
 ### 2. Adversarial Default (반증 탐색 기본 태도)
 
@@ -104,9 +103,8 @@ Cognitive Independence 적용은 추가 토큰을 소비한다. 다음 기준으
 | 상황 | 적용 수준 | 에이전트 유형 |
 |------|----------|-------------|
 | CRITICAL/HIGH finding 검증 | Full (Blind-First + Adversarial + Fresh) | Sub-agent (Monte Carlo) |
-| STANDARD+ 경로의 주요 게이트 (Step 6, 7, 17) | Full | Sub-agent (Monte Carlo) |
+| 주요 게이트 (Step 6, 7, 17) | Full | Sub-agent (Monte Carlo) |
 | 도메인 전문가 토론 (Step 1-A, 4-B, 7-A Phase 2) | N/A (토론은 Cognitive Independence 미적용) | Agent Team (Six Hats) |
-| SMALL 경로 | Adversarial Default만 (프롬프트 수준) | 직접 (subagent 없음) |
 | 결정론적 검증 (빌드, 테스트) | 미적용 | 직접 (subagent 없음) |
 | MEDIUM finding | 미적용 (Verification Layer에서도 CRITICAL/HIGH만) | 직접 (subagent 없음) |
 
@@ -124,5 +122,4 @@ Cognitive Independence 적용은 추가 토큰을 소비한다. 다음 기준으
 | Grind Escalation (Attempt 4+) | - | - | ✓ | ✓ |
 | Grind Escalation (Attempt 7+) | - | - | ✓ | ✓ |
 | simon-code-review CONNECTED | ✓ | - | - | - |
-| SMALL 경로 | - | ✓ (프롬프트만) | - | - |
 | 결정론적 검증 (빌드/테스트) | - | - | - | - |

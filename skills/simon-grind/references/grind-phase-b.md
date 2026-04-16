@@ -55,6 +55,8 @@ CONTEXT.md 추가 항목:
    - **Attempt 10**: **Last Stand** — 완전 fresh context (최소 정보만 전달) architect + executor
      - Fails → `.claude/memory/escalation-report.md` + AskUserQuestion (skip Unit option)
 
+> **[MONITOR]** 재시도 시: 매 attempt 시작 시 `retry` 이벤트, 실패 시 `error` 이벤트, 전략 전환 시 `decision` 이벤트를 발신한다 (SKILL.md의 Monitor Protocol 참조).
+
 ## Step 6: Purpose Alignment (max 10: `step6_executor`)
 
 - **Attempt 1-3**: executor auto-fix

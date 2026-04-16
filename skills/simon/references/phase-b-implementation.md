@@ -13,7 +13,7 @@ Each Unit runs in an **isolated git worktree**. Independent Units run in **paral
   - [기존 구현 참조 (P-013)](#기존-구현-참조-p-013)
   - [TDD Cycle (RED → GREEN → REFACTOR)](#tdd-cycle-red--green--refactor)
   - [Test Case Summary 생성 (Step 5c-post)](#test-case-summary-생성-step-5c-post)
-  - [Test-Spec Alignment Gate (STANDARD+ 경로)](#test-spec-alignment-gate-standard-경로)
+  - [Test-Spec Alignment Gate](#test-spec-alignment-gate)
   - [Agent 출력물 검증 게이트](#agent-출력물-검증-게이트)
   - [Inline Issue Capture (P-010)](#inline-issue-capture-p-010)
   - [Ground Truth 검증 게이트](#ground-truth-검증-게이트)
@@ -22,27 +22,30 @@ Each Unit runs in an **isolated git worktree**. Independent Units run in **paral
   - [Self-correction (Step 6 전 자가 검증)](#self-correction-step-6-전-자가-검증)
 - [Step 6 이후: Verification](#step-6-이후-verification)
 
+## Step I/O Interface
+
+각 Step의 입력과 출력 아티팩트. 새 세션에서 Step N을 시작하려면 `Input` 파일들이 SESSION_DIR에 있어야 한다.
+
+| Step | Input (필수) | Output (생성) |
+|------|-------------|--------------|
+| Pre-Phase | `memory/plan-summary.md`, `memory/expert-plan-concerns.md`, `memory/code-design-analysis.md`, `memory/verify-commands.md` | `CONTEXT.md`, `memory/unit-{name}/runbook.md` |
+| Step 5 | `memory/unit-{name}/runbook.md`, `memory/code-design-analysis.md`, `memory/verify-commands.md` | `memory/unit-{name}/test-case-summary.md`, `memory/unit-{name}/inline-issues.md`, `memory/unit-{name}/implementation.md` |
+
 ## Pre-Phase: Base Branch Sync & Worktree 생성
 
 > **[GATE — Remote Sync]** 브랜치 생성 전 원격 동기화는 **필수**다. `git fetch` 없이 브랜치를 생성하면 stale한 로컬 main을 기반으로 작업하게 되어, 원격에 이미 머지된 커밋(다른 팀원의 변경, 버그 수정 등)을 놓치고 conflict가 발생할 수 있다.
 
 1. default branch 감지 (`auto`이면 main/master 자동 감지)
-2. **[필수] 원격 최신 동기화**:
+2. `.claude/memory/branch-name.md`에서 사용자가 입력한 브랜치명 읽기
+3. **[필수] `scripts/create-branch.sh`로 브랜치 생성** — 원격 동기화 + `origin/{base_branch}` 기반 생성을 구조적으로 보장:
    ```bash
-   git fetch origin {base_branch}
+   bash ~/.claude/skills/simon/scripts/create-branch.sh {branch-name} {base_branch} true
    ```
-   실패 시 네트워크 에러로 분류하고 Error Resilience 적용. fetch 없이 다음 단계로 진행하는 것은 **금지**.
-3. `.claude/memory/branch-name.md`에서 사용자가 입력한 브랜치명 읽기
-4. **[필수] `origin/{base_branch}` 기반 브랜치 생성** — 로컬 `{base_branch}`가 아닌 반드시 `origin/{base_branch}`를 사용:
-   ```bash
-   git worktree add .claude/worktrees/{branch-name} -b {branch-name} origin/{base_branch}
-   ```
-   worktree 미사용 시:
-   ```bash
-   git checkout -b {branch-name} origin/{base_branch}
-   ```
-5. 해당 worktree로 작업 디렉토리 이동
-6. base commit SHA를 `.claude/memory/base-commit.md`에 기록
+   - 인자: `<branch-name> [base-branch=main] [use-worktree=true]`
+   - 스크립트가 `git fetch origin {base_branch}` → `origin/{base_branch}` 기반 worktree/branch 생성 → base commit SHA 출력을 순차 수행
+   - `set -e`로 fetch 실패 시 자동 중단 — fetch 없이 브랜치를 생성하는 것을 구조적으로 방지
+4. 해당 worktree로 작업 디렉토리 이동
+5. base commit SHA를 `.claude/memory/base-commit.md`에 기록 (스크립트 출력의 마지막 줄에서 추출)
 6-B. **session-meta.json 갱신**: Phase B 진입을 반영한다.
    ```json
    { "current_phase": "B", "current_step": 5, "last_activity": "{ISO-8601}" }
@@ -163,6 +166,10 @@ plan-summary.md의 Files Changed 테이블과 code-design-analysis.md가 아래 
 
 **갱신 시점**: 각 Step 완료 시 즉시 해당 항목을 갱신한다. 여러 Step을 한꺼번에 모아서 갱신하지 않는다. 또한 Step 내에서도 중요 이벤트(전략 변경, 블로커 발생, 검증 실패 등) 발생 시 "현재 상태"와 "실행 로그"를 즉시 갱신하여 컨텍스트 압축 후에도 최신 상태를 복원할 수 있도록 한다.
 
+**Step Output Artifacts** (Step 5 진입 전 필요):
+- `CONTEXT.md` — 브랜치 목표·현재 진행 상태·핵심 결정·주의사항을 담은 워크트리 루트 파일. 새 세션에서 단독 로딩으로 Phase B 전체 컨텍스트 복원 가능
+- `memory/unit-{name}/runbook.md` — Unit별 목표·변경 파일·Done-When Checks·주의사항·Decision Authority 요약
+
 ## Critical Rules
 
 - All verification/review: ONLY changed files (git diff based). 변경하지 않은 파일을 리뷰하면 노이즈가 증가하고 핵심 변경점을 놓칠 수 있다.
@@ -173,7 +180,7 @@ plan-summary.md의 Files Changed 테이블과 code-design-analysis.md가 아래 
 - **테스트 격리**: 테스트는 mock/stub으로 외부 의존성을 격리한다. 테스트가 실제 DB나 외부 API를 호출하면 프로덕션 데이터가 손상되거나 의도치 않은 외부 요청이 발생하기 때문이다.
 - Commands: NEVER access real external systems. CONTEXT-SENSITIVE 규칙에 해당하는 경우 SKILL.md의 판단 절차를 따른다.
 - **코드 확인 후 의견**: 파일은 Read로 열어본 후에 의견을 제시한다. 추측 기반 수정은 기존 코드의 숨겨진 의도를 놓쳐 새로운 버그를 만들기 때문이다.
-- **Intent-Before-Fix Gate**: 기존 코드를 "버그"로 판단하여 수정하기 전에 다음을 순서대로 확인한다:
+- **Intent-Before-Fix Gate**: 기존 코드를 **제거, 단순화, 또는 "버그"로 판단**하여 수정하기 전에 다음을 순서대로 확인한다 (버그 수정뿐 아니라 "중복 제거", "불필요한 검증 삭제", "단순화" 판단에도 동일하게 적용한다):
   1. `git blame {file}` — 해당 라인의 작성자와 커밋 해시 확인
   2. `git show {commit_hash}` — 커밋 전체를 확인하여 if/else 양쪽에서 동일 작성자가 서로 다른 패턴을 사용했는지 확인
   3. 커밋 메시지 또는 PR 설명을 읽어 의도 파악
@@ -181,7 +188,7 @@ plan-summary.md의 Files Changed 테이블과 code-design-analysis.md가 아래 
   이 게이트는 리뷰 중 발견된 패턴 불일치(if vs else, A 함수 vs B 함수 등)에 필수 적용한다.
 - **일반적 해결책 우선**: 모든 유효한 입력에 대해 올바르게 동작하는 일반적 해결책을 구현한다. 특정 테스트 입력에 맞춘 하드코딩은 해당 테스트만 통과시키고 실제 문제를 숨기기 때문이다.
 - **Auto-Verification Hook**: 소스코드 파일 수정(Edit/Write) 후 `verify-commands.md`의 빌드/린트 명령을 즉시 실행한다. 실패 시 **Stop-and-Fix Gate 적용** — 수정 완료 전까지 다음 작업 진행 금지. `.md`, `.json` 등 비소스코드는 제외. (SKILL.md Cross-Cutting Protocol 참조)
-- **Step Transition Gate**: Step N에서 Step N+1로 진입하기 전에 `verify-commands.md`의 빌드/린트/테스트를 실행하여 전부 통과해야 한다. 이전 Step의 미수정 실패를 다음 Step으로 넘기면 디버깅이 기하급수적으로 어려워진다. 실패 시 Stop-and-Fix Gate가 자동 발동된다. (SMALL 경로에서도 적용)
+- **Step Transition Gate**: Step N에서 Step N+1로 진입하기 전에 `verify-commands.md`의 빌드/린트/테스트를 실행하여 전부 통과해야 한다. 이전 Step의 미수정 실패를 다음 Step으로 넘기면 디버깅이 기하급수적으로 어려워진다. 실패 시 Stop-and-Fix Gate가 자동 발동된다. (모든 경로에서 적용)
 - **Plan Immutability**: Phase A에서 확정된 `plan-summary.md`는 Phase B 이후 암묵적으로 변경할 수 없다. 변경이 필요한 경우 다음 절차를 따른다: (1) 변경 사유를 `.claude/memory/plan-amendments.md`에 기록, (2) 영향받는 Unit/Step 식별, (3) 사용자에게 변경 승인 요청 (AskUserQuestion), (4) 승인 후 plan-summary.md와 관련 memory 파일 일괄 갱신. 이 절차 없이 계획을 조용히 변경하면 Acceptance Criteria와 실제 구현이 괴리되어 Step 17에서 대규모 재작업이 발생한다.
 - **Step Progress Pulse (P-007)**: 각 Step 완료 시 사용자에게 1줄 상태를 출력한다 (AskUserQuestion이 아닌 단순 텍스트 출력이므로 사용자를 중단시키지 않는다). 형식: `[Step {N}/{total}] {Step명} 완료 — {핵심 결과 요약}`. 예: `[Step 7/17] Expert Review 완료 — CRITICAL 0, HIGH 2, MEDIUM 5`. Phase B-E 시작 시 예상 Step 수를 안내한다: `{경로} 경로: Steps 5-{N} ({M} steps)`.
 
@@ -215,7 +222,15 @@ plan-summary.md의 Files Changed 테이블과 code-design-analysis.md가 아래 
 - **먼저 읽기**: `expert-plan-concerns.md`, `code-design-analysis.md`, `verify-commands.md`
 - **검증 명령 활용**: `verify-commands.md`에 기록된 통합 검증 명령을 TDD 사이클의 VERIFY 단계에서 사용. 프로젝트 고유의 lint/build/test를 한번에 실행하여 빠른 피드백을 확보한다.
 - **Docs-First**: 처음 사용하는 라이브러리 API·DB 기능·프레임워크 설정은 구현 전 context7 또는 WebFetch로 공식 문서를 조회한다. 코드베이스에 이미 동일 패턴이 있으면 생략 가능.
-- Spawn `executor`, parallel for independent files (maxTurns: SKILL.md Subagent 사용 기준 테이블 참조 — SMALL 50, STANDARD 100, LARGE 200)
+**▶ EMIT** `subagent_spawn` @ `B/5` — executor 서브에이전트 시작
+```bash
+$E --step "B/5" --type subagent_spawn \
+  --title "executor 서브에이전트 시작" \
+  --data '{"agent_name":"executor","agent_type":"general-purpose","task":"TDD 구현","background":true}' \
+  2>/dev/null || true
+```
+
+- Spawn `executor`, parallel for independent files (maxTurns: SKILL.md Subagent 사용 기준 테이블 참조 — STANDARD 100, LARGE 200)
 - executor에게 코드를 전달할 때도 Context Preparation 원칙을 적용한다 — 파일 전체가 아닌 변경 대상 함수/메서드 단위로 추출하고, diff는 노이즈를 제거한 후 전달한다.
 - executor는 code-design-analysis.md의 컨벤션과 패턴을 따라 구현
 - 전문가 우려사항 중 HIGH 이상 항목을 구현 시 반드시 고려
@@ -303,11 +318,11 @@ REFACTOR 이후 테스트 구조가 안정된 시점에서, 각 테스트의 분
 
 빈 카테고리는 생략한다. 테스트가 여러 카테고리에 걸치면 주된 목적 기준으로 하나만 선택한다. executor가 테스트를 방금 작성한 시점이므로 추가 분석 없이 즉시 기록 가능하다.
 
-### Test-Spec Alignment Gate (STANDARD+ 경로)
+### Test-Spec Alignment Gate
 
 TDD RED(Step 5a) 직후, GREEN(Step 5b) 전에 fresh `test-alignment-checker` subagent가 테스트와 AC의 정합성을 독립 검증한다. 동일 executor가 테스트 + 구현 모두 작성하면 해석 편향이 양쪽에 동일하게 반영되어 "self-congratulation machine"이 된다 — 구현 코드가 없는 시점에서 테스트의 AC 정합성을 검증하여 이를 방지한다.
 
-- **트리거**: STANDARD+ 경로에서만 적용. SMALL 경로는 skip
+- **트리거**: 모든 경로에서 적용
 - **전달**: plan-summary.md의 Acceptance Criteria(Mechanical + Behavioral Checks) + 작성된 테스트 코드. 구현 코드 없음 (아직 미작성)
 - **프롬프트**: "이 테스트들이 Acceptance Criteria의 모든 시나리오를 정확하게 커버하는지 검증하세요. (1) 누락된 AC 시나리오, (2) AC 해석의 정확성 (예: '5회 실패' = 연속? 누적?), (3) edge case 커버리지를 확인하세요. (4) 각 테스트 함수를 Happy Path / Edge Case / Error Case / Boundary로 분류하고, 아래 포맷으로 정리하세요."
 - **결과**:
@@ -403,20 +418,14 @@ executor가 구현을 완료하면, Step 6으로 넘기기 전에 plan-summary.m
 
 - Save: `.claude/memory/unit-{name}/implementation.md`
 
-### Complexity Checkpoint (Dynamic Path Upgrade)
-
-Step 5 완료 후, SMALL 경로로 시작한 경우 아래 조건을 확인한다:
-- inline-issues.md에 HIGH+ 이슈 3건 이상
-- TDD 사이클 실패 재시도 3회 이상
-- 구현 과정에서 plan-summary.md에 없는 파일 수정 3개 이상
-
-2개 이상 해당 시 STANDARD 경로 업그레이드를 제안한다. Decision Journal에 기록하고 사용자에게 1줄 통보: `[Decision] SMALL → STANDARD 업그레이드 제안 — {사유}. 거부 시 SMALL 유지.`
-
-사용자가 거부하면 SMALL을 유지하되, Step 17에서 해당 판단을 참조하여 추가 검증 항목을 고려한다.
+**Step Output Artifacts** (Step 6 진입 전 필요):
+- `memory/unit-{name}/test-case-summary.md` — TDD 테스트 케이스 분류 요약 (Happy Path / Edge Cases / Error Cases / Boundary)
+- `memory/unit-{name}/inline-issues.md` — 구현 중 발견된 비실패성 이슈 (Step 7 Expert Review 입력)
+- `memory/unit-{name}/implementation.md` — Self-correction 완료 기록 (AC 대조 결과)
 
 ### Unit Retrospective Checkpoint
 
-Unit의 마지막 Step 완료 시 (SMALL: Step 8, STANDARD+: Step 17), **Phase-End Auto-Retrospective** 프로토콜을 실행한다 (SKILL.md Cross-Cutting Protocol 참조). 해당 Unit 구현 중 축적된 사용자 피드백에서 반복 패턴을 탐지하고, 필요 시 boost-capture를 백그라운드로 트리거한다.
+Unit의 마지막 Step 완료 시 (Step 17), **Phase-End Auto-Retrospective** 프로토콜을 실행한다 (SKILL.md Cross-Cutting Protocol 참조). 해당 Unit 구현 중 축적된 사용자 피드백에서 반복 패턴을 탐지하고, 필요 시 boost-capture를 백그라운드로 트리거한다.
 
 ## Step 6 이후: Verification
 

@@ -244,18 +244,17 @@ quadrantChart / flowchart / ...
 
 ---
 
-### Phase 5: HTML 렌더링 (Report Viewer 통합)
+### Phase 5: 보고서 저장 및 리뷰
 
-보고서 마크다운을 `/tmp/simon-web-search-{timestamp}.md`에 저장 후 HTML Viewer 실행:
+보고서 마크다운을 `~/claude-reports/simon-web-search-{timestamp}.md`에 저장:
 
 ```bash
-REPORT_VIEWER="$HOME/.claude/skills/_shared/report-viewer/render-report.sh"
-if [ -x "$REPORT_VIEWER" ]; then
-  $REPORT_VIEWER "/tmp/simon-web-search-$(date +%s).md" --open
-fi
+mkdir -p "$HOME/claude-reports"
+REPORT_PATH="$HOME/claude-reports/simon-web-search-$(date +%s).md"
+# 보고서 내용을 해당 경로에 저장
 ```
 
-Viewer 미활성 시: 터미널에 보고서 전체 출력.
+저장 완료 후 `/simon-md-reviewer {저장된 파일 경로}` 를 호출하여 Obsidian에서 리뷰할 수 있도록 안내한다.
 
 ---
 

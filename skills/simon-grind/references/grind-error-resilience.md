@@ -144,6 +144,8 @@ WORKFLOW_ERROR도 동일한 10회 escalation ladder를 따른다:
 
 > **Fresh Context 원칙** (`context-separation.md` 참조): Attempt 4+에서 spawn하는 에이전트에게 결과(What: 에러 메시지, 실패 테스트, git diff)는 전달하되 추론(Why: 이전 접근법의 판단 근거, 실패 분석)은 차단한다. 이전 에이전트의 사고 패턴이 새 에이전트를 오염시키면 fresh context의 이점이 상실된다.
 
+> **[MONITOR]** 에러 분류 완료 시 `error` 이벤트를, 재시도 시작 시 `retry` 이벤트를 발신한다 (SKILL.md의 Monitor Protocol 참조).
+
 **Progress Detection 연계**: 진전 없는 재시도가 2회 연속되면 현재 tier를 건너뛰고 다음 tier로 즉시 이동한다 (상세: grind-cross-cutting.md의 Progress Detection 참조).
 
 ### Context-Reset at Tier Boundaries (Ralph Loop Pattern)
