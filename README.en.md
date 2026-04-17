@@ -88,10 +88,17 @@ Then in Claude Code:
 | `/simon-boost` | Read external resources and improve simon's own skills |
 | `/simon-boost-capture` | Background capture of skill improvements — record insights without interrupting workflow |
 | `/simon-boost-review` | Review & apply accumulated improvement insights from boost-capture |
+| `/simon-brain-query` | Personal knowledge base search — unified search across Obsidian wiki vaults, answers using accumulated knowledge |
+| `/simon-brain-update` | Knowledge base update — auto-classify MD files into the right vault and organize as wiki pages |
 | `/simon-ci-fix` | Auto-fix CI failures — log analysis, error classification, code fix, push (up to 5 cycles) |
 | `/simon-company` | Full-stack software company — multi-team collaboration from planning to deployment & ops |
-| `/simon-presenter` | Live demo presenter — run apps with Playwright for interactive demonstrations |
+| `/simon-healthcheck` | Skill health dashboard — validate structural quality across the entire simon skill family |
 | `/simon-md-reviewer` | Open a Markdown file in a browser HTML viewer and run an inline-comment review loop |
+| `/simon-monitor` | Workflow real-time visualization — track every stage of simon/grind/pm pipelines via web dashboard |
+| `/simon-oncall` | On-call inquiry analysis — deep analysis of Slack messages + related repos to diagnose root cause and draft responses |
+| `/simon-presenter` | Live demo presenter — run apps with Playwright for interactive demonstrations |
+| `/simon-publish` | Confluence auto-publish — classify MD files into the right category and publish to personal workspace |
+| `/simon-study` | Problem-based deep learning — from a concrete problem, understand concepts, code, trade-offs in one report |
 | `/simon-web-search` | Deep web research — question decomposition → multi-pass parallel search → source triangulation → confidence-rated structured report |
 
 ### Pick the Right Skill
@@ -109,9 +116,16 @@ Then in Claude Code:
 | Auto-search latest trends and improve skills | `/simon-auto-boost` |
 | Note a skill improvement without stopping work | `/simon-boost-capture` |
 | Batch-review and apply accumulated improvements | `/simon-boost-review` |
+| Search my personal wiki / knowledge base | `/simon-brain-query` |
+| Save analysis results to the knowledge base | `/simon-brain-update` |
 | Auto-fix CI failures (PR checks failing) | `/simon-ci-fix` |
-| Demo a finished app with live browser interaction | `/simon-presenter` |
+| Validate skill quality after edits | `/simon-healthcheck` |
 | Review a Markdown file with inline browser comments | `/simon-md-reviewer` |
+| Watch a simon workflow in real time | `/simon-monitor` |
+| Diagnose an on-call inquiry and draft a response | `/simon-oncall` |
+| Demo a finished app with live browser interaction | `/simon-presenter` |
+| Publish an analysis report to Confluence | `/simon-publish` |
+| Learn a concept deeply starting from a real problem | `/simon-study` |
 | Deep research a technical topic with a structured report | `/simon-web-search` |
 
 <details>
@@ -224,6 +238,74 @@ Runs finished apps with a Playwright headed browser for interactive live demonst
 **simon-boost-capture** — Records skill improvement insights in the background during active work. Captures ideas without interrupting your workflow for later batch processing.
 
 **simon-boost-review** — Reviews and applies accumulated insights from boost-capture. Batch-processes captured improvement proposals into actual skill changes.
+
+</details>
+
+<details>
+<summary><strong>Brain Family (brain-query / brain-update)</strong></summary>
+
+**simon-brain-query** — Dynamically detects Obsidian wiki vaults via `~/Obsidian/*-wiki/` glob pattern and performs unified search. Combines fast INDEX.md/TAGS.md matching with ripgrep deep search. Cross-vault connections are explicitly surfaced. Other skills (simon-oncall, simon-study, etc.) use the same search logic to access prior knowledge.
+
+**simon-brain-update** — Reads each vault's CLAUDE.md to understand its domain, then classifies incoming MD files into the right vault and category. Detects conflicts with existing wiki content and asks for user guidance. Indexing (INDEX.md, TAGS.md, GRAPH.md) is handled automatically by a Python script to ensure accuracy.
+
+</details>
+
+<details>
+<summary><strong>simon-healthcheck</strong></summary>
+
+Validates the structural quality of the entire simon skill family and outputs a dashboard. Use after applying boost improvements or modifying skill files to verify integrity.
+
+</details>
+
+<details>
+<summary><strong>simon-monitor</strong></summary>
+
+Real-time web dashboard (port 3847) for simon/grind/pm workflow execution:
+
+- **Live step tracking** — pending → running → completed/failed/skipped per step
+- **Expert panel opinions** — shows each team's discussion and consensus
+- **Sub-agent activity** — spawn events, task descriptions, and returned results
+- **Decision log** — what was decided, why, and what alternatives were considered
+- **Gate history** — pass/fail for each verification gate
+- **Session history** — replay completed sessions for retrospectives
+
+Emits events via `{SESSION_DIR}/events.jsonl`. Falls back to polling `workflow-state.json` for basic step timeline even without explicit instrumentation.
+
+</details>
+
+<details>
+<summary><strong>simon-oncall</strong></summary>
+
+Takes a Slack message URL and related repositories, deeply analyzes the on-call inquiry, and provides:
+
+- Root cause diagnosis (via simon-study-style code analysis + internal docs search)
+- Recommended solutions with supporting evidence
+- Draft Slack response ready to send
+
+</details>
+
+<details>
+<summary><strong>simon-publish</strong></summary>
+
+Publishes finalized Markdown files to Confluence personal workspace:
+
+- **Auto-classification** — analyzes content keywords to determine the right category page
+- **Existing category detection** — searches workspace for existing parent pages before creating new ones
+- **Duplicate handling** — detects same-title pages and offers update or new-with-date-suffix options
+- **Confluence-compatible formatting** — converts custom MD blocks to Confluence storage format before publishing
+
+</details>
+
+<details>
+<summary><strong>simon-study</strong></summary>
+
+Problem-based deep learning skill. Starting from a concrete problem or question:
+
+- Retrieves prior knowledge via simon-brain-query
+- Analyzes relevant code in the codebase
+- Explains underlying concepts and design trade-offs
+- Suggests improvement directions
+- Produces a single structured learning report that can be saved to the knowledge base via simon-brain-update
 
 </details>
 

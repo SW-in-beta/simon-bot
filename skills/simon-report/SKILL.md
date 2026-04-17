@@ -79,11 +79,12 @@ settings.json에 등록하여 report 세션 동안만 활성화한다. simon의 
 - `graphify-out/GRAPH_REPORT.md` 존재 시: `~/.claude/skills/_shared/graphify-context.md` 읽기 → god nodes/communities로 전체 구조 선파악 후 분석 주제와 관련된 community를 식별하여 탐색 범위 축소
 - 그래프 없으면 skip
 
-**1-0: Report Memory (이전 보고서 참조)**
+**1-0: Report Memory (이전 보고서 + 개인 지식 베이스 참조)**
 - `~/claude-reports/` 디렉토리의 기존 보고서 목록을 스캔한다
 - 현재 분석 주제와 관련된 이전 보고서가 있으면 핵심 발견사항을 컨텍스트로 활용한다
 - 이전 보고서의 발견사항 중 아직 해결되지 않은 항목을 "기존 이슈"로 표시한다
-- 이전 보고서가 없으면 이 단계를 skip한다
+- **개인 지식 베이스 조회**: Obsidian wiki vault(`~/Obsidian/*-wiki/`)에서 분석 주제 관련 기존 지식을 검색한다. 각 vault의 `wiki/` 디렉토리에서 핵심 키워드로 Grep 검색 → 매칭 문서를 Read하여 관련 내용 추출. 발견한 기존 지식은 이전 보고서와 동등한 참고 자료로 활용한다
+- 이전 보고서도 기존 지식도 없으면 이 단계를 skip한다
 
 **1-0-ext: Codebase Health Assessment**
 
@@ -266,6 +267,7 @@ Agent(subagent_type="general-purpose", model="sonnet"):
 **5-B: 최종 확인**
 - "모든 리뷰가 완료되었습니다. 추가 수정이 필요하신가요?"
   - **완료**: 최종 보고서 저장 경로 안내
+  - **지식 베이스 저장 (`/simon-brain-update`)**: 보고서를 개인 wiki에 저장
   - **구현 시작 (simon)**: 분석 결과를 컨텍스트로 simon 워크플로 시작
   - **프로젝트 관리 (simon-pm)**: 분석 결과를 기반으로 PM 워크플로 시작
   - **양식 변경**: Step 4에서 다른 템플릿으로 재생성

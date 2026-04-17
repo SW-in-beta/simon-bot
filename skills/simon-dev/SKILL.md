@@ -133,7 +133,7 @@ ENV_INFRA로 테스트 실행 자체가 불가능한 경우, 사용자 명시적
 | Gate 조건 참조 필요 시 | `gate-definitions.md` | 3 | on-demand |
 | 산출물 생성 시 (Step 1-B, 18) | `generation-style-guide.md` | 3 | on-demand |
 | 코드 탐색 시 (`graphify-out/` 존재 시) | `~/.claude/skills/_shared/graphify-context.md` | 3 | on-demand, 그래프 없으면 skip |
-| Startup (workflow-state.json 초기화 후) | `~/.claude/skills/_shared/monitor-protocol.md` | 3 | on-demand, monitor 미실행 시 skip |
+| Startup (3-E 단계) | `~/.claude/skills/_shared/monitor-protocol.md` | 2 | Startup 필수. emit.sh 실패는 허용하되 발신 시도 자체는 건너뛰지 않음 |
 
 **Tier 정의:**
 - **Tier 1 (Early Load)**: 256K 이내에 반드시 로딩. compaction 후에도 최우선 재로딩
@@ -229,11 +229,15 @@ config.yaml의 `interaction_mode` 설정에 따라 사용자 인터랙션 수준
 
 - **ship**: test failure, build failure, CRITICAL security finding, merge conflict에서만 정지. 나머지는 AI 자동 결정 + Decision Journal 기록. "한 번 입력 후 PR URL까지."
 - **guided** (기본값): 핵심 판단점(경로 선택, CRITICAL 이슈)에서만 AskUserQuestion. 대부분 자동 진행.
+    - **자율 완주 범위 (사용자 확인 불필요)**: 커밋 생성, 브랜치 푸시, PR Draft 생성, Integration Stage의 merge/rebase, emit.sh 발신, session 파일 갱신, worktree upstream 설정, 테스트·빌드 재시도. 이 단계들은 파이프라인의 기계적 실행 단계이며, 사용자 판단이 필요한 핵심 판단점이 아니다. AskUserQuestion을 사용하면 파이프라인 자율성이 깨지고 "한 번 입력 후 PR URL까지"라는 ship 철학이 무너진다.
+    - **확인이 필요한 핵심 판단점**: Scope Challenge 경로 선택(STANDARD vs LARGE), CRITICAL 보안/데이터 이슈 발견, plan 단계의 비즈니스 결정, merge conflict, 실패 재시도 한계 초과 후 전략 전환.
 - **interactive**: 모든 AskUserQuestion 유지. 현재 동작과 동일.
 
 Startup에서 `config.yaml`의 `interaction_mode`를 읽고, 없으면 `guided`를 기본값으로 사용한다.
 
 ## Startup
+
+> **HARD GATE**: Startup은 건너뛸 수 없다. 사용자가 즉시 구현을 요청하더라도, Startup이 완료되지 않은 상태에서 Phase A 또는 그 이후 단계에 진입하는 것은 절대 금지다. SESSION_DIR 초기화, workflow-state.json 생성, Monitor workflow_start 발신이 완료된 후에만 다음 단계로 진행한다. "이미 안다", "이번엔 급하니까"는 Startup 생략 사유가 되지 않는다.
 
 Startup 단계는 순서 의존성이 있으므로 순차 실행한다.
 
@@ -269,22 +273,66 @@ Startup 단계는 순서 의존성이 있으므로 순차 실행한다.
    이후 모든 `.claude/memory/`, `.claude/reports/` 경로는 `{SESSION_DIR}` 기준으로 해석한다.
 3-C. **workflow-state.json 초기화**: `{SESSION_DIR}/memory/workflow-state.json`에 초기 스키마를 기록한다 (State-Driven Execution 섹션 참조). 이미 존재하면 기존 세션 복원으로 판단하고 덮어쓰지 않는다.
 3-D. **session-meta.json 초기화**: `{SESSION_DIR}/memory/session-meta.json`에 세션 메타데이터 생성 (필드: `branch`, `skill`, `current_phase`, `current_step`, `total_steps`, `status`, `last_activity`, `last_commit_hash`). 이미 존재하면 기존 세션 복원으로 판단하고 덮어쓰지 않는다. Phase/Step 전환 시 `current_phase`, `current_step`, `last_activity` 갱신. 커밋 생성 시 `last_commit_hash` 갱신.
-3-E. **Monitor 자동 시작 + workflow_start 발신**:
-   1. **모니터 서버 자동 시작**: PID 파일을 확인하여 서버가 실행 중이 아니면 자동 시작한다.
+3-E. **Monitor 자동 시작 + 주소 통보 + workflow_start 발신**:
+
+   > **멀티세션 설계 원칙**: simon-monitor는 **단일 공유 서버**로 운영한다. `server.py`의 `find_sessions()`가 `~/.claude/projects/*/sessions/**/events.jsonl`을 glob으로 모두 발견하여 하나의 대시보드에 여러 세션을 표시하므로, 세션마다 별도 서버를 띄울 필요가 없다. 포트 충돌 방지는 **세션 격리가 아니라 포트 폴백**(3847이 점유되면 3848, 3849 ...)으로 해결한다.
+
+   1. **모니터 서버 자동 시작 및 주소 통보**: PID 파일을 확인하여 서버가 실행 중이 아니면, 사용 가능한 포트(3847~3857 범위)를 찾아 시작한다. **시작 여부와 무관하게 실제 포트가 포함된 브라우저 주소를 반드시 사용자에게 텍스트로 통보한다** — `open` 명령은 브라우저 설정/OS에 따라 실패할 수 있으므로, URL 텍스트 출력이 항상 우선이다.
       ```bash
-      if ! ([ -f /tmp/simon-monitor.pid ] && kill -0 $(cat /tmp/simon-monitor.pid) 2>/dev/null); then
-        [ -f /tmp/simon-monitor.pid ] && rm /tmp/simon-monitor.pid
-        nohup python3 ~/.claude/skills/simon-monitor/scripts/server.py \
-          --session "$SESSION_DIR" --port 3847 > /tmp/simon-monitor.log 2>&1 &
-        echo $! > /tmp/simon-monitor.pid
-        open http://localhost:3847 2>/dev/null || true
+      MONITOR_PID_FILE=/tmp/simon-monitor.pid
+      MONITOR_PORT_FILE=/tmp/simon-monitor.port
+      MONITOR_PORT=""
+
+      find_available_port() {
+        for p in $(seq 3847 3857); do
+          if ! lsof -iTCP:$p -sTCP:LISTEN >/dev/null 2>&1; then
+            echo $p; return 0
+          fi
+        done
+        return 1
+      }
+
+      if ! ([ -f "$MONITOR_PID_FILE" ] && kill -0 $(cat "$MONITOR_PID_FILE") 2>/dev/null); then
+        [ -f "$MONITOR_PID_FILE" ] && rm "$MONITOR_PID_FILE"
+        MONITOR_PORT=$(find_available_port) || MONITOR_PORT=""
+        if [ -n "$MONITOR_PORT" ]; then
+          nohup python3 ~/.claude/skills/simon-monitor/scripts/server.py \
+            --session "$SESSION_DIR" --port "$MONITOR_PORT" > /tmp/simon-monitor.log 2>&1 &
+          echo $! > "$MONITOR_PID_FILE"
+          echo "$MONITOR_PORT" > "$MONITOR_PORT_FILE"
+          MONITOR_STATUS="시작"
+        else
+          MONITOR_STATUS="실패(3847-3857 포트 모두 점유)"
+        fi
+      else
+        MONITOR_PORT=$(cat "$MONITOR_PORT_FILE" 2>/dev/null || echo 3847)
+        MONITOR_STATUS="이미 실행 중"
       fi
+      MONITOR_URL="http://localhost:${MONITOR_PORT:-3847}"
+      [ -n "$MONITOR_PORT" ] && open "$MONITOR_URL" 2>/dev/null || true
       ```
+      **통보 의무**: bash 실행 직후 반드시 아래 형식으로 **실제 포트**를 포함하여 한 줄 통보한다. 이 통보가 누락되면 사용자는 폴백된 포트를 알 수 없어 대시보드에 접근할 수 없다.
+      ```
+      [Monitor] {시작|이미 실행 중|실패(...)} — http://localhost:{MONITOR_PORT}
+      ```
+      `lsof`가 없는 환경(드물지만 가능)에서는 `find_available_port`가 모두 "비어있음"으로 판정할 수 있다. 이 경우 첫 시도 포트로 시작하되 bind 실패 시 server.py 로그(/tmp/simon-monitor.log)를 확인하여 다음 포트로 재시도한다.
    2. **workflow_start 발신** — 대시보드가 전체 Step 목록을 렌더링하는 데 필요:
       ```bash
       bash ~/.claude/skills/simon-monitor/scripts/emit.sh workflow_start "" "워크플로 시작" '{"skill":"simon","branch":"'"$BRANCH"'","task":"'"$TASK_SUMMARY"'","scope":"TBD","workflow_steps":[{"id":"A/0","name":"Scope Challenge","phase":"A"},{"id":"A/1-A","name":"Project Analysis","phase":"A"},{"id":"A/1-B","name":"Plan Creation","phase":"A"},{"id":"A/2","name":"Plan Review","phase":"A"},{"id":"A/3","name":"Meta Verification","phase":"A"},{"id":"A/4","name":"Over-engineering Check","phase":"A"},{"id":"A/4-B","name":"Expert Plan Review","phase":"A"},{"id":"A/calibration","name":"Phase A Calibration","phase":"A"},{"id":"B/5","name":"Implementation","phase":"B"},{"id":"B/6","name":"Purpose Alignment","phase":"B"},{"id":"B/7","name":"Code Review","phase":"B"},{"id":"B/8","name":"Regression Verification","phase":"B"},{"id":"B/9","name":"File/Function Splitting","phase":"B"},{"id":"B/10","name":"Integration/Reuse Review","phase":"B"},{"id":"B/11","name":"Side Effect Check","phase":"B"},{"id":"B/12","name":"Full Change Review","phase":"B"},{"id":"B/13","name":"Dead Code Cleanup","phase":"B"},{"id":"B/14","name":"Code Quality","phase":"B"},{"id":"B/15","name":"Flow Verification","phase":"B"},{"id":"B/16","name":"MEDIUM Issue Resolution","phase":"B"},{"id":"B/17","name":"Production Readiness","phase":"B"},{"id":"review/18-A","name":"Work Report","phase":"review"},{"id":"review/18-B","name":"Review Sequence","phase":"review"},{"id":"review/19","name":"Code Review","phase":"review"}]}'
       ```
       `$BRANCH`는 `.claude/memory/branch-name.md`에서, `$TASK_SUMMARY`는 사용자 요청에서 추출. emit.sh가 없거나 실패하면 무시하고 진행.
+3-F. **Startup Completion Gate** — 아래 항목이 모두 충족된 후에만 Phase A로 진입한다. bash로 실제 존재를 확인하며, "이미 했다"는 LLM 기억에 의존하지 않는다 (Deterministic Gate Principle).
+   ```bash
+   echo "=== Startup Completion Gate ==="
+   test -f "${SESSION_DIR}/memory/workflow-state.json" && echo "OK workflow-state.json" || echo "FAIL workflow-state.json 없음"
+   test -f "${SESSION_DIR}/memory/session-meta.json" && echo "OK session-meta.json" || echo "FAIL session-meta.json 없음"
+   (test -f /tmp/simon-monitor.pid && kill -0 $(cat /tmp/simon-monitor.pid) 2>/dev/null) && echo "OK monitor 실행 중" || echo "WARN monitor 미실행 (허용)"
+   ```
+   - [ ] `${SESSION_DIR}/memory/workflow-state.json` 존재 (필수)
+   - [ ] `${SESSION_DIR}/memory/session-meta.json` 존재 (필수)
+   - [ ] Monitor URL 사용자 통보 완료 (실제 서버 실행은 failure tolerant)
+   - [ ] workflow_start 이벤트 발신 시도 완료 (emit.sh 실패 시 skip 기록)
+   FAIL 항목이 있으면 Phase A 진입을 중단하고 해당 단계(3-C/3-D/3-E)로 돌아가 재수행한다.
 4. **Handoff Manifest 처리** (P-009): `.claude/memory/handoff-manifest.json`이 존재하면:
    - `context_files`를 자동 로딩하여 컨텍스트 복원
    - `skip_steps`에 명시된 Step은 건너뛰기
