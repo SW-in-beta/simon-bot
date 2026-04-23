@@ -165,11 +165,18 @@ echo "${SESSION_DIR}" > "${SESSION_DIR}/pm/session-path.txt"
 
 단일 파일 수정이나 간단한 작업은 PM이 직접 수행한다. Subagent는 독립적 컨텍스트가 필요한 병렬 작업에만 사용한다. Subagent를 불필요하게 spawn하면 컨텍스트 전달 오버헤드와 조율 비용이 생기기 때문이다.
 
-| 상황 | 수행 방식 |
-|------|----------|
-| 단일 파일 수정, 설정 변경, 간단한 스크립트 | PM 직접 수행 |
-| 독립적인 Feature 구현, 전문 분석(CTO/보안 리뷰) | Subagent spawn |
-| 같은 파일을 건드리는 여러 작업 | 순차로 직접 수행 (병렬 불가) |
+**핵심 판단 기준**: "이 작업의 중간 도구 출력(파일 읽기, 로그 스캔, 테스트 출력)이 메인 컨텍스트에 필요한가, 아니면 결론만 필요한가?" 결론만 필요하면 → Subagent.
+
+| 상황 | 중간 출력 볼륨 | 수행 방식 |
+|------|--------------|----------|
+| 단일 파일 수정, 설정 변경, 간단한 스크립트 | 낮음 | PM 직접 수행 |
+| 독립적인 Feature 구현, 전문 분석(CTO/보안 리뷰) | 높음 (다수 파일 탐색) | Subagent spawn |
+| 같은 파일을 건드리는 여러 작업 | 낮음 | 순차로 직접 수행 (병렬 불가) |
+| Phase 5 Architecture/Security Review (다수 파일 스캔) | 높음 | Subagent spawn — 결과 요약만 반환 |
+| PRD 기반 task 분해 (architect 에이전트 분석) | 중간 | Subagent spawn — tasks.json만 반환 |
+| 다른 서비스 코드베이스 요약 (기술 리서치) | 높음 | Subagent spawn — research.md 요약만 반환 |
+
+Subagent spawn prompt에는 반드시 "결론과 필수 액션만 반환, 중간 탐색 출력은 반환 금지" 문구를 포함한다 (simon-dev SKILL.md의 Result-Only 반환 원칙 참조).
 
 ### State Management
 
@@ -385,3 +392,18 @@ Final Report → Guided Review → **Code Review (simon-code-review)** → Compl
 Phase 4 진입 시 PM은 Phase 1-3의 "과정"(인터뷰 대화, 패널 토론 기록, scaffolding 출력)을 컨텍스트에서 제거하고, `state.json`의 `load_files`가 가리키는 "결과물"만 로딩한다. Phase 1-3의 상세 맥락이 필요한 상황(Re-planning Gate에서 spec 변경 필요 등)이 발생하면 그때 선택적으로 읽는다.
 
 복원: `.claude/pm/state.json` + 해당 시점의 저장 파일 읽기 → 다음 Phase/Step 이어서 실행
+
+### Compact Hint (PM Phase별)
+
+컨텍스트 활용률 45% 이상 시 `/compact <hint>` 실행. 방향 없는 압축은 PRD나 기술 결정을 잘라낼 수 있으므로 반드시 hint를 명시한다:
+
+| Phase | Compact Hint |
+|-------|-------------|
+| Phase 1 (Spec-Driven Design) | `focus on user requirements from interview, feature list, and technical constraints. Drop interview conversation turns and exploration.` |
+| Phase 2 (Task Breakdown) | `focus on tasks.json structure, dependency graph, and bot assignments. Drop PRD prose and architecture discussion.` |
+| Phase 4 (Feature Execution) | `focus on tasks completion status, current feature being executed, and blocking issues. Drop previous features' implementation details.` |
+| Phase 5 (Full Verification) | `focus on verification failures, CRITICAL/HIGH issues, and resolution status. Drop passing test output.` |
+
+**Bot 위임 후** (Feature Execution 중): 완료된 Feature의 구현 세부사항은 compaction 대상이다. `tasks/{task-id}/result.md`에 저장되어 있으므로 컨텍스트에 유지할 필요 없다. Hint에 `drop completed feature implementation details, keep result file paths only`를 항상 포함한다.
+
+**ship 모드**: hint를 자동 적용. **guided 모드**: hint 확인 후 실행.

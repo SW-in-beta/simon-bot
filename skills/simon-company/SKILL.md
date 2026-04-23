@@ -314,6 +314,24 @@ Sprint 완료 시 `state.json`에 Sprint 진행 상태를 기록한다:
 
 For Checklist Protocol details (SSoT 역할 분리, 형식 표준, 적용 범위) → read [operational-protocols.md](references/operational-protocols.md)
 
+### Compact Hint (simon-company Phase별)
+
+컨텍스트 활용률이 일정 수준에 도달하면 `/compact <hint>` 실행. simon-company는 simon-pm에 실제 구현을 위임하지만 오케스트레이터 레이어에서도 TRP 토론, Agent Team 대화가 누적되므로 Phase 경계에서 선제적 압축이 필요하다.
+
+| Phase | Compact Hint |
+|-------|-------------|
+| Phase 1 → 2 전환 | `focus on spec.md, story-map.md, constitution.md content. Drop PM interview conversation and Design discussion.` |
+| Phase 3 → 4 전환 (Sprint 시작 전) | `focus on architecture.md core, contracts/ interfaces, backlog.json, sprint-plan.md. Drop Phase 0-3 TRP discussion and Agent Team transcripts.` |
+| Sprint N 완료 후 (활용률 40-60%) | `focus on state.json, backlog.json remaining sprints, sprint-plan.md. Drop completed Sprint's TRP discussion and Agent Team transcripts.` |
+| Phase 5 (QA) | `focus on test-report.md, security-audit.md findings. Drop passing test output and individual code walkthroughs.` |
+
+**Sprint 경계 활용률 기준** (Sprint 완료 후):
+- 40% 미만: 다음 Sprint 계속 진행
+- 40-60%: 위 Sprint N hint로 /compact 실행 후 계속
+- 60% 이상: 세션 분할 (기존 경계 4-a 적용)
+
+Phase 4 반복 사이클에서는 "완료 Sprint 상세"가 쌓이지 않도록 compact hint를 매 경계에서 적용한다.
+
 ---
 
 ## Reference Loading Policy

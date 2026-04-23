@@ -39,7 +39,7 @@ Each Unit runs in an **isolated git worktree**. Independent Units run in **paral
 2. `.claude/memory/branch-name.md`에서 사용자가 입력한 브랜치명 읽기
 3. **[필수] `scripts/create-branch.sh`로 브랜치 생성** — 원격 동기화 + `origin/{base_branch}` 기반 생성을 구조적으로 보장:
    ```bash
-   bash ~/.claude/skills/simon/scripts/create-branch.sh {branch-name} {base_branch} true
+   bash ~/.claude/skills/simon-dev/scripts/create-branch.sh {branch-name} {base_branch} true
    ```
    - 인자: `<branch-name> [base-branch=main] [use-worktree=true]`
    - 스크립트가 `git fetch origin {base_branch}` → `origin/{base_branch}` 기반 worktree/branch 생성 → base commit SHA 출력을 순차 수행

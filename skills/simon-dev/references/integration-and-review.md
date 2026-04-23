@@ -46,7 +46,7 @@ Refs: Unit {N} — {Unit 목적 한줄 요약}
 
 ## Step 18: Work Report + Draft PR
 
-> **[GATE — 필수 실행]** Step 18-19는 SMALL/STANDARD/LARGE **모든 경로**에서 반드시 실행한다. 경로나 변경 규모에 관계없이 skip 불가. PR 생성은 Step 19에서 simon-code-review 스킬이 담당한다 — simon/grind가 직접 `gh pr create`를 실행하는 것은 금지다.
+> **[GATE — 필수 실행]** Step 18-19는 STANDARD/LARGE **모든 경로**에서 반드시 실행한다. 경로나 변경 규모에 관계없이 skip 불가. PR 생성은 Step 19에서 simon-code-review 스킬이 담당한다 — simon/grind가 직접 `gh pr create`를 실행하는 것은 금지다.
 
 **IMPORTANT: Step 18은 반드시 foreground에서 실행한다.**
 
@@ -57,6 +57,7 @@ Refs: Unit {N} — {Unit 목적 한줄 요약}
 ### 18-A: Report
 
 - Spawn `writer` (model: sonnet) — Use template: `.claude/workflow/templates/report-template.md`
+- **컨텍스트 보호 원칙**: writer subagent는 git diff, unit-{name}/review-findings.md, plan-summary.md를 직접 읽고 보고서를 파일에 저장한다. 오케스트레이터는 writer에게 컨텍스트를 통째로 전달하거나, writer의 중간 탐색 출력을 메인 컨텍스트로 받지 않는다. **반환값: 파일 경로 1줄** (`DONE: .claude/reports/{feature-name}-report.md 생성 완료`). 보고서 내용이 필요하면 메인이 직접 파일을 Read한다.
 - **Language:** Follow `language` setting in `config.yaml` (default: `ko`)
 - Contents:
   - Before/After flow diagrams
@@ -212,7 +213,7 @@ $E --type workflow_complete \
 
 ## Summary
 - Branch: {branch}
-- Scope: SMALL / STANDARD / LARGE
+- Scope: STANDARD / LARGE
 - PR: {url}
 
 ## What Went Well

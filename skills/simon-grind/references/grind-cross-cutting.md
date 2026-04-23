@@ -413,17 +413,48 @@ Every agent output in Phase A must include confidence assessments.
 - WTF-Likelihood: {N}%
 - 계속 진행할까요?
   - **계속**: 현재 전략으로 계속 진행
-  - **피드백**: 사용자 힌트를 반영하여 재시도
+  - **피드백 (현재 컨텍스트에 반영)**: 지금 컨텍스트에서 힌트를 추가하여 재시도
+    → 현재 실패 이력이 컨텍스트에 쌓여 있을 때 적합
+  - **피드백 + /rewind 권장**: 아래 structured re-prompt 템플릿을 출력하고 사용자에게 /rewind 후 복사하여 사용할 것을 권장
+    → approach 자체가 wrong direction일 때 더 효과적
   - **전략 변경**: 다른 접근법으로 전환 (구체적 방향 제시 가능)
   - **중단**: 현재까지의 결과물로 마무리
   - **예산 추가**: 재시도 예산 추가 (예: "+20")
 ```
 
+사용자가 "피드백"을 선택하면 grind는 다음 형식으로 structured constraint를 자동 생성하여 출력한다:
+
+```
+[Rewind 제약 템플릿 — 복사 후 /rewind re-prompt에 사용]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+현재 접근 ({current_approach})은 사용하지 마세요:
+- 실패 이유: {top_failure_reason from failure-log.jsonl}
+- 시도 횟수: {N}회, 마지막 에러: {last_error_summary}
+
+대신 이 방향으로 진행해주세요:
+- [사용자가 입력할 새 제약 또는 방향]
+
+유지할 컨텍스트: 파일 읽기 결과는 버리지 마세요 ({key_files_read})
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+실패 이유와 시도 횟수는 `failure-log.jsonl`에서 결정론적으로 추출한다. 사용자가 채울 부분은 `[사용자가 입력할 새 제약 또는 방향]` 한 곳으로 최소화한다.
+
 이 분리는 grind의 "끝까지 물고 늘어지는" 철학을 유지하면서, 진짜 위험 신호에서만 사용자를 멈춘다.
 
 ### 원칙
 - Progress Pulse는 **에스컬레이션이 아니다** — 문제 해결을 사용자에게 떠넘기는 것이 아니라, 경로 이탈을 조기에 감지하기 위한 상황 공유. "Escalation Ladder 소진 전 에스컬레이션 금지" 원칙과 충돌하지 않는다.
-- **경량 체크포인트** — 사용자가 "계속"이면 즉시 재개. 사용자 피드백이 있으면 반영 후 재시도.
+- **경량 체크포인트 + Anti-Correction-Accumulation**: 사용자가 "계속"이면 즉시 재개. 사용자 피드백이 있을 때, 다음 기준으로 반영 방식을 결정한다:
+  - **현재 컨텍스트에 반영** (적합 조건): 피드백이 현재 approach의 세부 조정(파라미터 변경, 특정 파일 제외 등)
+  - **/rewind 권장** (적합 조건): 전략 전환이 2회 이상 발생했거나, 피드백이 "A 말고 B로 해야 한다"는 approach 전환일 때
+
+  /rewind 권장 시 grind는 블로킹하지 않고 다음만 출력한다:
+  ```
+  [Anti-Correction] 전략 전환이 {N}회 발생했습니다. 피드백을 현재 컨텍스트에 쌓는 것보다
+  /rewind (Esc Esc)로 파일 읽기 직후 지점에서 재시작하는 것이 더 효과적일 수 있습니다.
+  계속 진행합니다. (중단하려면 /rewind를 직접 실행하세요.)
+  ```
+  사용자가 /rewind를 선택하지 않으면 grind는 그냥 계속 진행한다 — "절대 멈추지 않는다" 원칙과 충돌하지 않는다.
 - Progress Pulse를 통해 받은 피드백도 `user-feedback-log.md`에 기록
 
 ## Escalation Report Format
@@ -456,6 +487,32 @@ When human escalation is needed, generate `.claude/memory/escalation-report.md`:
 ## Context Files
 - failure-log.md, checkpoints.md, unit-{name}/implementation.md
 ```
+
+## /rewind Re-prompt 초안 (권장 조치)
+
+10회 시도에서 학습한 제약을 반영한 re-prompt 초안이다.
+/rewind (Esc Esc)로 이 세션의 파일 읽기 완료 직후로 돌아간 뒤,
+아래를 붙여넣어 재시작하면 실패 이력 없이 최적 경로로 시작할 수 있다:
+
+```
+{task_description}
+
+제약 (10회 시도에서 확인된 사항):
+- {approach_A}는 불가: {failure_reason_A}
+- {approach_B}는 불가: {failure_reason_B}
+- 확인된 유효 방향: {viable_direction from failure-log의 PROGRESS 판정 attempt}
+
+유지할 컨텍스트: {key_files_read_list}
+```
+
+**자동 추출 규칙** (failure-log.jsonl에서 결정론적):
+- 기각된 접근법: `jq '[.[] | select(.event == "strategy_pivot")] | .[-3:]' failure-log.jsonl`
+- 유효 방향: PROGRESS 판정 attempt 중 가장 최근 것
+- key_files: `assumptions-registry.md`의 `Source Step: Step 0-1` 항목
+
+**예외 처리**:
+- `failure-log.jsonl` 파싱 실패 또는 데이터 부족 시 초안 섹션 자체를 생략 — 불완전한 초안이 사용자를 오도하는 것보다 없는 게 낫다.
+- 세션이 분할된 경우(컨텍스트 90% 임계값 도달)에는 초안 레이블을 "새 세션의 첫 프롬프트"로 변경하여 제시한다.
 
 ## Agent Teams Fallback
 

@@ -282,6 +282,8 @@ Takes a Slack message URL and related repositories, deeply analyzes the on-call 
 - Recommended solutions with supporting evidence
 - Draft Slack response ready to send
 
+**Multi-path hypothesis exploration**: Even when the first hypothesis looks convincing, the skill deliberately searches for alternative hypotheses and a second processing path in code. **Flow Verification Expert**: For hypotheses involving DI/dependency injection, an independent expert Agent cross-validates by attempting to refute the conclusion. **Confidence tagging**: Analysis conclusions are tagged as `[Verified — code+data]`, `[Verified — code only]`, `[Inferred — hypothesis]`, or `[Single hypothesis — alternatives unexplored]`, and the report and Slack draft tone are automatically adjusted to match confidence level.
+
 </details>
 
 <details>

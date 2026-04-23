@@ -17,7 +17,6 @@
 | explore | Read, Glob, Grep | Edit, Write, Agent | 20 | 탐색 결과 |
 
 **maxTurns by 경로:**
-- SMALL: executor 50, 검증 20
 - STANDARD: executor 100, 검증 30
 - LARGE: executor 200, 검증 30
 

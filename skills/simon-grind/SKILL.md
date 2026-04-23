@@ -169,7 +169,19 @@ For detailed 10-attempt ladder + error classification tree, read [grind-error-re
 ## Cross-Cutting: Auto-Diagnosis, Checkpoints, Confidence, Progress Detection, Retry Budget
 
 - **Auto-Diagnosis**: 모든 실패를 failure-log.md에 기록, 패턴 감지 후 전략 전환
-- **Progress Detection**: 매 재시도 후 이전 결과와 구조적 비교 (실패 수, 에러 메시지, 변경 라인 수). 진전 없는 재시도가 2회 연속되면 즉시 전략 전환 -- 같은 접근법의 무의미한 반복을 방지한다.
+- **Progress Detection**: 매 재시도 후 이전 결과와 구조적 비교. `progress-detect.sh`가 출력하는 3가지 상태별 대응:
+  - `PROGRESS`: 계속 진행.
+  - `STALL` (진전 없음 2회 연속): 즉시 전략 전환 — 같은 접근법의 무의미한 반복을 방지한다.
+  - `REGRESS` (퇴행 — failing_tests_delta > 0 또는 새 에러 도입): checkpoint 롤백 + 세션 레벨 오염 의심 → 사용자에게 /rewind 힌트 텍스트 출력 (블로킹 X):
+    ```
+    [REGRESS 감지 — Step {N}, Attempt {M}]
+    이전보다 실패가 {delta}건 늘었습니다. checkpoint-{tag}로 자동 롤백했습니다.
+    /rewind (Esc Esc)를 사용하면 더 효과적일 수 있습니다:
+      1. 파일 읽기 직후 지점으로 돌아가기
+      2. 다음 제약으로 re-prompt: "{current_approach}는 {실패_이유} 때문에 불가. {suggested_alternative} 방향으로."
+      3. 또는 계속 진행 (grind가 다음 tier로 자동 전환)
+    ```
+    사용자가 /rewind를 쓰지 않으면 grind는 다음 tier로 자동 전환. ship 모드는 출력 후 즉시 다음 tier로 진행.
 - **Total Retry Budget**: 워크플로 전체에 총 재시도 예산(기본 50회) 적용. 70% 소비 시 경고, 100% 소비 시 사용자 승인 필요 -- 개별 Step에만 집중하다 전체 비용을 놓치는 것을 방지한다.
 - **Checkpoint**: 전략 전환 전 `git tag checkpoint-step{N}-attempt{M}` -- 롤백 가능
 - **Confidence Scoring**: Phase A 모든 agent 출력에 confidence + impact 태깅, assumptions-registry.md 추적
@@ -258,6 +270,28 @@ simon-dev의 체크리스트 + 추가:
 ## Context Window Management
 
 simon-dev과 동일한 세션 분할 경계. **추가 주의**: 재시도가 많을수록 컨텍스트 소비가 빠르므로, 경계 2 전에 잔여량을 반드시 확인.
+
+### Failure-Log Compaction Directive
+
+재시도가 쌓이면서 failure-log.md가 컨텍스트의 주요 소비원이 된다. 다음 시점에서 선제적으로 `/compact`를 실행한다:
+
+**트리거 조건** (하나라도 충족 시):
+- 누적 재시도 10회 도달 (전체 예산 20% 소비)
+- 컨텍스트 활용률 40% 이상 (simon-dev의 45%보다 5pp 낮게 — 재시도 자체가 컨텍스트를 빠르게 소비)
+- failure-log.md 엔트리 5건 이상 누적
+
+**Grind 전용 보존 프롬프트**:
+```
+keep: failure-log 마지막 3건 attempt 전체 + 나머지는 "attempt N: {에러 분류}/{요약}" 1줄로 압축.
+keep: 현재 Step 번호, 잔여 retry budget, 현재 tier, 현재 Mini-Contract.
+keep: 성공한 checkpoint 태그 목록 (best checkpoint).
+drop: 개별 빌드 출력 전체, grep 결과 원본, 이미 완료된 Step의 에러 상세.
+```
+
+**실행 시기**: 현재 attempt 완료 직후, 다음 attempt 시작 전. attempt 도중 압축 시 수정 맥락이 유실된다.
+
+**ship 모드**: 보존 프롬프트를 자동 적용하여 사용자 확인 없이 실행.
+**guided 모드**: 보존 프롬프트를 제안하고 사용자 추가 항목 확인 후 실행.
 
 ## Memory Persistence (Extended)
 

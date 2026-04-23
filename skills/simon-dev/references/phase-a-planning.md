@@ -320,7 +320,19 @@ explore-medium과 analyst에게 다음 리서치 프레임워크를 적용한다
 
 ### 개인 지식 베이스 조회 (Brain Query)
 
-코드 탐색과 병렬로, Obsidian wiki vault(`~/Obsidian/*-wiki/`)에서 구현 주제 관련 기존 지식을 검색한다. 각 vault의 `wiki/` 디렉토리에서 핵심 키워드로 Grep 검색 → 매칭 문서를 Read하여 관련 내용 추출. 이전 분석(simon-study, simon-report 등)에서 축적된 설계 결정, 트레이드오프, 관련 패턴 등을 사전에 파악하여 계획 수립에 반영한다. 기존 지식이 없으면 skip.
+코드 탐색과 병렬로, Obsidian wiki vault(`~/Obsidian/*-wiki/`)에서 구현 주제 관련 기존 지식을 검색한다. 각 vault의 `wiki/` 디렉토리에서 핵심 키워드로 Grep 검색 → 매칭 문서를 Read하여 관련 내용 추출. simon-brain-query 스킬의 Step 1~4(vault 감지 → INDEX 매칭 → ripgrep 심층 검색 → 문서 읽기) 로직을 재사용한다.
+
+**두 축으로 검색**:
+
+1. **설계 지식 축** (기존): 이전 분석(simon-study, simon-report 등)에서 축적된 설계 결정, 트레이드오프, 관련 패턴. 계획 수립의 positive input으로 활용한다.
+2. **우려/인시던트 축** (추가): 같은 도메인에서 과거에 실제로 터진 버그·인시던트·회고, 놓쳤던 엣지케이스, TODO/FIXME로 남아있는 우려사항. 전문가 패널이 blind로 만들어낸 concern을 나중에 역사적 데이터로 보강하기 위한 seed가 된다. Step 4-B(Historical Concerns Cross-Reference)에서 다시 참조되므로, 결과를 `.claude/memory/brain-historical-context.md`로 보존한다.
+
+**검색 쿼리 예시** (우려 축):
+- "{도메인/모듈명}에서 과거 발생한 인시던트 또는 버그"
+- "{핵심 개념}과 관련해 회고·부검에서 반복 언급된 우려"
+- "{변경 영역} 관련 TODO/FIXME/known-issue 메모"
+
+**출력**: `.claude/memory/brain-historical-context.md`에 `## 설계 지식`, `## 과거 우려/인시던트` 두 섹션으로 분리 저장. 각 항목은 vault 출처(파일 경로)를 명시한다. 기존 지식이 없으면 "해당 없음"으로 명시하고 skip — 파일을 생성해두면 Step 4-B에서 존재 여부로 분기할 수 있다.
 
 ### 사내 자료 맥락 연구 (Design Intent Research)
 

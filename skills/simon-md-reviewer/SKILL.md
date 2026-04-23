@@ -137,21 +137,20 @@ Read 도구로 MD 파일을 읽고, `%%...%%` 코멘트를 모두 찾는다.
 
 → Phase 4로 진행.
 
-### Step 2: 이전 라운드 빨간 마킹 초기화
+### Step 2: 이전 라운드 변경 마킹 초기화
 
-코멘트를 처리하기 전, 이전 라운드에서 추가한 빨간 마킹을 먼저 제거한다.
-빨간 마킹을 제거할 때 텍스트 내용은 그대로 유지한다.
+코멘트를 처리하기 전, 이전 라운드에서 추가한 변경 표시 callout을 먼저 제거한다.
 
 ```python
 import re, pathlib
 p = pathlib.Path(md_file)
 content = p.read_text()
-# <span style="color:red">...</span> 제거 (내용은 보존, 멀티라인 포함)
-content = re.sub(r'<span style="color:red">(.*?)</span>', r'\1', content, flags=re.DOTALL)
-# 블록 요소용 변경 표시 callout 제거
-content = re.sub(r'> \[!note\] 🔴 아래 섹션 수정됨\n', '', content)
+# 이전 라운드의 변경 표시 callout만 제거 (다른 [!note] callout은 보존)
+content = re.sub(r'> \[!note\] 🔴 아래 섹션 수정됨\n\n?', '', content)
 p.write_text(content)
 ```
+
+> 과거 버전에서 `<span style="color:red">` 방식이 함께 쓰였다면, 해당 태그가 포함된 파일은 수동으로 정리해야 한다 (아래 Step 3 주의사항 참조).
 
 ### Step 3: 코멘트 처리
 
@@ -162,19 +161,23 @@ p.write_text(content)
    - "수정해줘", "~로 바꿔" → 해당 내용 수정
    - "왜?", "근거?", "이게 뭔가요?" → 답변/설명 추가
    - "더 자세히", "예시 추가" → 섹션 확장
-3. **변경하거나 새로 추가한 텍스트를 `<span style="color:red">...</span>`으로 감싼다**
-   - 기존 문장/단어 수정: `<span style="color:red">새 텍스트</span>`으로 교체
-   - 새 문장/단락 추가: 추가된 내용 전체를 `<span style="color:red">추가 내용</span>`으로 감싸기
-   - 섹션 확장: 새로 추가된 부분만 감싸기 (기존 내용은 마킹 불필요)
+3. **변경하거나 새로 추가한 내용의 바로 위에 변경 표시 callout을 한 줄 추가한다**:
+   ```
+   > [!note] 🔴 아래 섹션 수정됨
+
+   (변경된/추가된 내용)
+   ```
+   - 인라인 단어·문장 수정: 해당 문단 바로 위에 callout 한 줄
+   - 새 문단·섹션·리스트 추가: 추가된 블록 바로 위에 callout 한 줄
+   - 연속된 변경: 하나의 callout으로 범위를 묶음 (중첩 callout 생성 금지)
+   - callout과 본문 사이 빈 줄 1칸 유지
 4. 처리된 `%%코멘트%%` 태그 제거 (Edit 도구)
 
-**블록 요소 처리 (코드 블록, 표 등)**: 코드 펜스나 표 내부는 span 감싸기가 불가능하다. 이런 경우 해당 블록 **바로 위에** 변경 표시 callout을 추가한다:
-
-```
-> [!note] 🔴 아래 섹션 수정됨
-```
-
-(초기화 시 이 callout도 함께 제거한다 — Step 2의 python script에 `re.sub(r'> \[!note\] 🔴.*\n', '', content)` 추가)
+> [!danger] raw HTML 태그 삽입 금지
+> `<span>`, `<div>`, `<mark>` 등 raw HTML 태그로 변경 내용을 감싸지 말 것.
+> CommonMark/Obsidian 파서는 여러 줄 HTML 블록을 만나면 그 내부의 블록 레벨 MD
+> (callout, 표, 리스트, 코드 펜스 등)를 일체 파싱하지 않으므로, 이후 문법이 통째로 깨진다.
+> 색상·강조는 callout 마킹만으로 충분하다.
 
 모든 코멘트를 한 번에 처리한다. Obsidian이 파일 변경을 감지하여 자동 리로드.
 

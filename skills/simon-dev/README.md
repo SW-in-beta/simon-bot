@@ -26,7 +26,7 @@ Claude Code에서 위 명령어를 입력하면 워크플로가 시작됩니다.
 
 | Step | 이름 | 설명 |
 |------|------|------|
-| 0 | Scope Challenge | git 히스토리 분석, 최소 변경 범위 결정, 리뷰 경로 선택 (SMALL/STANDARD/LARGE) |
+| 0 | Scope Challenge | git 히스토리 분석, 최소 변경 범위 결정, 리뷰 경로 선택 (STANDARD/LARGE) |
 | 1-A | Project Analysis + Code Design | 프로젝트 구조 스캔, 스택 분석, Code Design Team이 레포 컨벤션/패턴/공식 권장사항 사전 분석 |
 | 1-B | Plan Creation | 유닛 분할 (max 5파일, 200줄), 의존성 그래프, 구현 순서 결정 |
 | 2 | Plan Review | critic이 계획 검토, planner와 직접 토론으로 수정 (max 3회) |
@@ -106,7 +106,6 @@ Step 19는 사용자와의 대화형 코드 리뷰 단계입니다.
 
 | 경로 | 포함 Step | 용도 |
 |------|-----------|------|
-| SMALL | 5-8, 17 | 간단한 변경, 빠른 검증 |
 | STANDARD | 5-17 전체 | 일반적인 기능 구현 |
 | LARGE | 5-17 + 확장 분석 | 대규모 변경, 실패 모드 분석 포함 |
 
@@ -130,7 +129,6 @@ Step 19는 사용자와의 대화형 코드 리뷰 단계입니다.
 
 | 리뷰 경로 | 활성화 팀 |
 |-----------|----------|
-| SMALL | Safety + Code Design (always 멤버만) |
 | STANDARD | Safety + Code Design + auto-detect된 Data/Integration/Ops |
 | LARGE | 전체 + extended failure mode analysis |
 
