@@ -197,7 +197,7 @@ Phase 4 진입 시 PM은 Phase 1-3의 과정을 컨텍스트에서 제거하고 
 
 작업 완료 후 PR 생성과 코드 리뷰를 수행합니다:
 
-- **Draft PR 생성** — 변경사항 분석 기반 PR 자동 생성 + Review Guide 섹션 포함
+- **Draft PR 생성** — 변경사항 분석 기반 PR 자동 생성 + Review Guide 섹션 포함. PR body는 게시 전 고유명사 최소화·전문용어 풀이·존대 변환 등 독자 독립성 기준으로 자동 변환됩니다
 - **Blind-First 2-Pass 리뷰** — review-sequence.md에 anchoring되지 않도록 diff만으로 먼저 분석 후 대조. 독립 severity 판정 후 구현자 판정과 불일치 시 `[SEVERITY-DISPUTED]` 태깅
 - **기존 패턴 스캔** — diff에 도입된 새 패턴에 대해 코드베이스 내 기존 대안을 능동적으로 탐색
 - **공식 문서 검증** — 사용된 API/패턴을 공식 문서(context7 MCP, WebSearch)로 fact-check하여 deprecated API, anti-pattern 사전 식별
@@ -240,7 +240,7 @@ STANDALONE 모드에서는 3개 Agent Team(architect, writer, impact-analyzer)�
 <summary><strong>기타 스킬 상세 (report / boost 패밀리 / brain 패밀리 / sessions / 기타)</strong></summary>
 <br>
 
-**simon-report** — 코드 변경 없이 구현 전 분석 문서(RFC, 현황 분석, 커스텀 포맷)를 생성합니다. simon과 동일한 5개 도메인 전문가 팀 토론 구조를 사용하며, git 이력 기반 **Codebase Health Assessment**(고churn 파일, bug hotspot, firefighting 빈도 등 정량 진단)를 포함하여 의사결정 근거를 강화합니다. **graphify 통합**: `graphify-out/` 그래프가 존재하면 god nodes/communities로 전체 구조를 선파악하고 분석 범위를 최적화합니다. 리뷰 후 simon / simon-pm으로 원활하게 핸드오프할 수 있습니다.
+**simon-report** — 코드 변경 없이 구현 전 분석 문서(RFC, 현황 분석, 커스텀 포맷)를 생성합니다. simon과 동일한 5개 도메인 전문가 팀 토론 구조를 사용하며, git 이력 기반 **Codebase Health Assessment**(고churn 파일, bug hotspot, firefighting 빈도 등 정량 진단)를 포함하여 의사결정 근거를 강화합니다. **graphify 통합**: `graphify-out/` 그래프가 존재하면 god nodes/communities로 전체 구조를 선파악하고 분석 범위를 최적화합니다. **대상 독자/게시 플랫폼 감지**: 문서 용도에 따라 대상 독자(개발자/비개발자/경영 보고)와 플랫폼을 자동 추론하여 용어 정의·고유명사 추상화·플랫폼 독립적 출처 등 독자 독립성 체크를 수행합니다. 리뷰 후 simon / simon-pm으로 원활하게 핸드오프할 수 있습니다.
 
 **simon-auto-boost** — Claude Code 공식 문서, Hacker News, Medium, YouTube 등에서 최신 AI 코딩 에이전트 best practices를 자동 검색하고, 6인 전문가 패널 분석 → 사용자 승인 → 적용 → 스킬 가이드라인 검증 → 스모크 테스트까지 수행합니다. 마지막 검색 시점을 기록하여 이후 콘텐츠만 처리합니다.
 
@@ -250,7 +250,7 @@ STANDALONE 모드에서는 3개 Agent Team(architect, writer, impact-analyzer)�
 
 **simon-boost-review** — `simon-boost-capture`로 축적된 개선 인사이트를 검토하고 실제 스킬에 반영합니다. 캡처된 개선안을 모아서 한번에 처리할 때 사용합니다.
 
-**simon-brain-query** — `~/Obsidian/*-wiki/` 패턴으로 vault를 동적 감지하고 통합 검색합니다. INDEX.md/TAGS.md 빠른 매칭과 ripgrep 심층 검색을 조합하며, 크로스-vault 연결을 명시합니다. 다른 스킬(simon-oncall, simon-study 등)이 사전 지식 조회에 활용하는 공통 검색 로직이기도 합니다.
+**simon-brain-query** — `~/Obsidian/*-wiki/` 패턴으로 vault를 동적 감지하고 통합 검색합니다. INDEX.md/TAGS.md 빠른 매칭과 ripgrep 심층 검색을 조합하며, 크로스-vault 연결을 명시합니다. 질문이 특정 기능의 동작·적용 범위에 관한 것이면 entry condition(적용 대상/전제 조건/예외 케이스)을 문서에서 명시적으로 추출하고, 확인되지 않으면 "[미확인]"으로 표기합니다. 다른 스킬(simon-oncall, simon-study 등)이 사전 지식 조회에 활용하는 공통 검색 로직이기도 합니다.
 
 **simon-brain-update** — 분석 결과물(MD 파일)을 Obsidian wiki vault에 정리합니다. vault의 CLAUDE.md를 읽어 도메인을 파악하고 적합한 vault와 카테고리를 자동 판별합니다. 기존 wiki와 충돌하는 내용은 사용자에게 확인 후 처리하며, 인덱싱(INDEX.md, TAGS.md, GRAPH.md)은 스크립트로 자동 갱신합니다.
 
@@ -262,17 +262,17 @@ STANDALONE 모드에서는 3개 Agent Team(architect, writer, impact-analyzer)�
 
 **simon-monitor** — simon/grind/pm 워크플로의 실행 과정을 웹 대시보드(포트 3847)로 실시간 시각화합니다. 전문가 패널 의견, 서브에이전트 호출/결과, 의사결정 근거, 게이트 통과/실패를 시각적으로 확인합니다. 완료된 세션의 이력 리뷰도 지원합니다.
 
-**simon-oncall** — 슬랙 메시지 URL과 관련 레포를 입력받아 온콜 문의를 분석합니다. 코드·사내 자료를 심층 분석(simon-study 활용)하여 원인 진단, 해결책, 슬랙 답변 초안을 제공합니다. **복수 경로/가설 탐색**: 첫 번째 가설이 그럴듯해도 대안 가설과 제2 처리 경로를 의도적으로 탐색합니다. **Flow Verification Expert**: DI/의존성 주입 관련 가설은 독립 전문가 Agent가 반박 시도 관점에서 교차 검증합니다. **확신도 태그**: `[검증됨 — 코드+데이터]`, `[검증됨 — 코드만]`, `[추정 — 가설]`, `[단일 가설 — 대안 미탐색]`으로 분석 결론의 신뢰도를 명시하고, 보고서·슬랙 답변 톤을 확신도에 맞게 자동 조정합니다.
+**simon-oncall** — 슬랙 메시지 URL과 관련 레포를 입력받아 온콜 문의를 분석합니다. 코드·사내 자료를 심층 분석(simon-study 활용)하여 원인 진단, 해결책, 슬랙 답변 초안을 제공합니다. **복수 경로/가설 탐색**: 첫 번째 가설이 그럴듯해도 대안 가설과 제2 처리 경로를 의도적으로 탐색합니다. **Flow Verification Expert**: DI/의존성 주입 관련 가설은 독립 전문가 Agent가 반박 시도 관점에서 교차 검증합니다. **확신도 라벨**: 🟢 HIGH(검증됨) / 🟡 MEDIUM(부분 확인) / 🔴 LOW(모호함 큼) 3단계로 분석 결론의 신뢰도를 명시하고, Investigation Map으로 확인된·미확인 근거를 한눈에 정리합니다. 슬랙 답변은 원 스레드 없이도 판단 가능한 자기완결적 형식으로 작성됩니다.
 
-**simon-publish** — simon-md-reviewer로 확정된 MD(또는 임의의 MD 파일)를 Confluence 개인 워크스페이스에 게시합니다. 콘텐츠를 분석하여 카테고리를 자동 분류하고, 중복 페이지 감지 후 업데이트 또는 신규 생성을 선택합니다.
+**simon-publish** — simon-md-reviewer로 확정된 MD(또는 임의의 MD 파일)를 Confluence 개인 워크스페이스에 게시합니다. 콘텐츠를 분석하여 카테고리를 자동 분류하고, 중복 페이지 감지 후 업데이트 또는 신규 생성을 선택합니다. 게시 전 **독자 독립성 검증**: 세션 내 맥락 레퍼런스, 편집 이력 흔적, 비교 맥락 등 처음 보는 독자가 오해할 수 있는 표현을 게시 전에 검토합니다.
 
-**simon-study** — 구체적인 문제에서 출발하여 관련 개념 이해, 코드 분석, 설계 트레이드오프, 개선 방향까지 하나의 보고서로 학습합니다. simon-brain-query로 사전 지식을 조회하고, 결과는 simon-brain-update로 지식베이스에 저장할 수 있습니다.
+**simon-study** — 구체적인 문제에서 출발하여 관련 개념 이해, 코드 분석, 설계 트레이드오프, 개선 방향까지 하나의 보고서로 학습합니다. 학습 주제가 특정 기능이면 entry condition(적용 조건/예외 케이스)을 명시적으로 추출하여 전제를 데이터·코드로 검증합니다. simon-brain-query로 사전 지식을 조회하고, 결과는 simon-brain-update로 지식베이스에 저장할 수 있습니다.
 
 **simon-sync** — simon-* 스킬 파일의 변경사항을 `~/simon-skills` 오픈소스 레포에 동기화합니다. PostToolUse 훅이 `~/.claude/skills/simon-*` 파일 변경을 감지하면 Stop 훅이 자동 트리거하며, 10분 쿨다운으로 연속 수정 시 불필요한 반복을 방지합니다. 수동 호출(`/simon-sync`)도 가능합니다.
 
 **simon-sessions** — 여러 Claude Code 세션에 걸친 worktree 기반 작업을 관리합니다: `list` | `search <keyword>` | `info <branch>` | `resume <branch>` | `delete <branch>` | `pr <branch>`. search 명령으로 키워드 기반 세션 검색(브랜치명, 커밋 메시지, CONTEXT.md)이 가능합니다. resume 시 상태 기반 Recommended Action을 제시합니다.
 
-**simon-web-search** — 기술 주제 딥 리서치 스킬. 질문을 서브토픽으로 분해하고 멀티패스 병렬 검색으로 정보를 수집한 뒤, 소스 교차검증과 `[미확인]`/`[추정]` 신뢰도 표시 체계로 구조화 보고서를 생성합니다. quick(단일 패스) / standard(2-3 라운드) / deep(3-5 라운드) 깊이 옵션을 지원하며, 모든 주장은 URL과 신뢰도(HIGH/MEDIUM/LOW)를 명시합니다.
+**simon-web-search** — 기술 주제 딥 리서치 스킬. 자율주행모드로 여러 Agent를 병행하여 질문을 서브토픽으로 분해하고 멀티패스 병렬 검색으로 정보를 수집한 뒤, 소스 교차검증과 `[미확인]`/`[추정]` 신뢰도 표시 체계로 구조화 보고서를 생성합니다. quick(단일 패스) / standard(2-3 라운드) / deep(3-5 라운드) 깊이 옵션을 지원하며, 모든 주장은 URL과 신뢰도(HIGH/MEDIUM/LOW)를 명시합니다.
 </details>
 
 <details>

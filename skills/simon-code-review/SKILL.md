@@ -108,11 +108,17 @@ For detailed instructions, read [standalone-analysis.md](references/standalone-a
 4. Report 파일 확인:
    - `.claude/reports/{feature-name}-report.md` 존재 → `--body-file`로 사용
    - 미존재 → review-sequence.md 기반으로 간략 요약 생성하여 사용
+4-B. **PR body 스타일 변환** — report.md 또는 자체 생성 요약을 `--body-file`로 사용하기 전에 아래 기준으로 문서를 변환한다:
+   - **고유명사 최소화 (단, 사내 공용 도메인 용어는 예외)**: 외부에서 의미를 모를 수 있는 약어·라이브러리·고유 프로젝트명·이전 PR 식별자만 풀어 쓴다. 사내 모든 팀이 같은 단어로 부르는 도메인 핵심 용어(예: `lineitem`, `biddersvc`)는 풀어 쓰지 않고 그대로 둔다. 판단이 애매하면 사용자에게 확인한다. (예: "ZQPR PR(1f1239ce)" → "이전에 머지된 비슷한 작업"; "biddersvc의 lineitem"은 그대로)
+   - **전문 용어 한국어 풀이**: 영문 약어(DFC, RPI 등 신규 프로젝트 약어), proto/optional 등 일반적 기술 용어를 의미 중심으로 설명 (예: "proto optional 필드" → "값이 없을 수도 있는 선택적 항목")
+   - **존대 사용**: "~이다", "~함" 대신 "~입니다", "~합니다"
+   - **코드 식별자 유지**: 필드명·파일 경로·타입명·함수명은 코드 리뷰어 정확성을 위해 원문 그대로 유지
+   변환 결과를 임시 파일(`{SESSION_DIR}/memory/pr-body-draft.md`)에 저장한 뒤 `--body-file`로 사용한다.
 5. **Draft PR 생성** — `--draft` 플래그는 **필수**다. 일반 PR로 생성하면 안 된다:
    ```bash
    gh pr create --draft \
      --title "{type}: {feature summary}" \
-     --body-file {report-path}
+     --body-file {SESSION_DIR}/memory/pr-body-draft.md
    ```
 6. **[GATE — Draft 상태 검증]** PR 생성 직후 Draft 상태를 확인한다. Draft가 아니면 즉시 전환한다:
    ```bash

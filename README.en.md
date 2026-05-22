@@ -83,7 +83,7 @@ Then in Claude Code:
 | `/simon-pm` | Project manager — PRD-driven planning, distributes tasks to simon instances |
 | `/simon-code-review` | PR-based code review — Draft PR creation, inline review comments, CI Watch, feedback loop |
 | `/simon-sessions` | List, resume, or clean up worktree-based work sessions |
-| `/simon-report` | Analysis documents (RFC, status report) via expert discussion — no code changes. Integrates graphify knowledge graph for exploration scope optimization |
+| `/simon-report` | Analysis documents (RFC, status report) via expert discussion — no code changes. Auto-detects audience (developer/non-developer/executive) and publication platform to apply reader-independence checks before publishing. Integrates graphify knowledge graph for exploration scope optimization |
 | `/simon-auto-boost` | Auto web search skill improvement — searches latest AI coding agent best practices and auto-improves skills |
 | `/simon-boost` | Read external resources and improve simon's own skills |
 | `/simon-boost-capture` | Background capture of skill improvements — record insights without interrupting workflow |
@@ -188,7 +188,7 @@ Past feedback is stored in `.claude/memory/retrospective.md` and automatically r
 
 Handles PR creation and code review after work is complete:
 
-- **Draft PR creation** — auto-generates PR based on change analysis with Review Guide section
+- **Draft PR creation** — auto-generates PR based on change analysis with Review Guide section. PR body is automatically transformed before posting: proprietary abbreviations minimized, technical terms explained, and formal tone applied for reader accessibility
 - **Blind-First 2-Pass review** — analyzes diff independently before consulting review-sequence.md to avoid anchoring bias. Independent severity assessment with `[SEVERITY-DISPUTED]` tagging when assessments diverge
 - **Existing pattern scan** — proactively searches the codebase for existing alternatives to newly introduced patterns
 - **Official docs verification** — fact-checks used APIs/patterns against official docs (context7 MCP, WebSearch) to pre-identify deprecated APIs and anti-patterns
@@ -244,7 +244,7 @@ Runs finished apps with a Playwright headed browser for interactive live demonst
 <details>
 <summary><strong>Brain Family (brain-query / brain-update)</strong></summary>
 
-**simon-brain-query** — Dynamically detects Obsidian wiki vaults via `~/Obsidian/*-wiki/` glob pattern and performs unified search. Combines fast INDEX.md/TAGS.md matching with ripgrep deep search. Cross-vault connections are explicitly surfaced. Other skills (simon-oncall, simon-study, etc.) use the same search logic to access prior knowledge.
+**simon-brain-query** — Dynamically detects Obsidian wiki vaults via `~/Obsidian/*-wiki/` glob pattern and performs unified search. Combines fast INDEX.md/TAGS.md matching with ripgrep deep search. Cross-vault connections are explicitly surfaced. When a question involves feature behavior or coverage, explicitly extracts entry conditions (applicable targets, prerequisites, exceptions) from documents — unconfirmed items are marked `[UNCONFIRMED]`. Other skills (simon-oncall, simon-study, etc.) use the same search logic to access prior knowledge.
 
 **simon-brain-update** — Reads each vault's CLAUDE.md to understand its domain, then classifies incoming MD files into the right vault and category. Detects conflicts with existing wiki content and asks for user guidance. Indexing (INDEX.md, TAGS.md, GRAPH.md) is handled automatically by a Python script to ensure accuracy.
 
@@ -282,7 +282,7 @@ Takes a Slack message URL and related repositories, deeply analyzes the on-call 
 - Recommended solutions with supporting evidence
 - Draft Slack response ready to send
 
-**Multi-path hypothesis exploration**: Even when the first hypothesis looks convincing, the skill deliberately searches for alternative hypotheses and a second processing path in code. **Flow Verification Expert**: For hypotheses involving DI/dependency injection, an independent expert Agent cross-validates by attempting to refute the conclusion. **Confidence tagging**: Analysis conclusions are tagged as `[Verified — code+data]`, `[Verified — code only]`, `[Inferred — hypothesis]`, or `[Single hypothesis — alternatives unexplored]`, and the report and Slack draft tone are automatically adjusted to match confidence level.
+**Multi-path hypothesis exploration**: Even when the first hypothesis looks convincing, the skill deliberately searches for alternative hypotheses and a second processing path in code. **Flow Verification Expert**: For hypotheses involving DI/dependency injection, an independent expert Agent cross-validates by attempting to refute the conclusion. **Confidence labels**: Analysis conclusions are rated 🟢 HIGH (verified) / 🟡 MEDIUM (partially confirmed) / 🔴 LOW (high ambiguity), and an **Investigation Map** explicitly lists confirmed vs. unconfirmed evidence. Slack draft responses are written in a self-contained format readable without the original thread context.
 
 </details>
 
@@ -295,6 +295,7 @@ Publishes finalized Markdown files to Confluence personal workspace:
 - **Existing category detection** — searches workspace for existing parent pages before creating new ones
 - **Duplicate handling** — detects same-title pages and offers update or new-with-date-suffix options
 - **Confluence-compatible formatting** — converts custom MD blocks to Confluence storage format before publishing
+- **Reader independence check** — before publishing, reviews the document for session-context references, editing history traces, and relative comparisons that a first-time reader might misinterpret
 
 </details>
 
@@ -307,6 +308,7 @@ Problem-based deep learning skill. Starting from a concrete problem or question:
 - Analyzes relevant code in the codebase
 - Explains underlying concepts and design trade-offs
 - Suggests improvement directions
+- When the topic is a specific feature, explicitly extracts entry conditions (when and under what conditions it applies, prerequisites, exceptions) and validates user assumptions against code/data before treating them as fact
 - Produces a single structured learning report that can be saved to the knowledge base via simon-brain-update
 
 </details>
