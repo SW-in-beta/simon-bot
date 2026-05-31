@@ -314,10 +314,12 @@ Startup 단계는 순서 의존성이 있으므로 순차 실행한다.
 3-F. **Startup Completion Gate** — Deterministic Gate Principle 적용. bash로 필수 파일 존재와 monitor 실행을 확인한 후에만 Phase A 진입. 상세 bash 스크립트는 [startup-bootstrap.md](references/startup-bootstrap.md)의 "Startup Completion Gate" 섹션 참조.
    필수: workflow-state.json + session-meta.json 존재. 선택: Monitor URL 통보 완료, workflow_start 이벤트 발신 시도 완료. FAIL 시 해당 단계로 돌아가 재수행.
 4. **Handoff Manifest 처리** (P-009): `.claude/memory/handoff-manifest.json`이 존재하면:
-   - `context_files`를 자동 로딩하여 컨텍스트 복원
-   - `skip_steps`에 명시된 Step은 건너뛰기
+   - `transfer_files`(별칭 `context_files` 호환)를 자동 로딩하여 컨텍스트 복원. `block_files`는 로딩하지 않음 (Cognitive Independence 보호)
+   - `distilled_brief`를 먼저 처리하여 `what_was_done`, `key_decisions`, `critical_constraints`, `do_not_retry`, `recommended_entry`로 방향 설정 (transfer_files 읽기 전)
+   - `skip_steps`에 명시된 Step은 건너뛰기 (`completed_steps`로 표시하고 다음 Step으로 진행)
    - `failure_context`가 있으면 `failure-log.md` 초기값으로 설정
    - `force_path`가 있으면 Step 0 Scope Challenge를 skip하고 해당 경로로 직행 (단, `config.yaml`의 `high_impact_paths`에 매칭되는 파일이 포함되면 STANDARD 이상을 강제)
+   - **`from_skill == "simon-plan"` 케이스** (Phase A 완전 위임): simon-plan이 Phase A 전체(Scope/Plan/Review/Expert Review)를 인터뷰 형식으로 이미 완료했으므로, `skip_steps`가 `A/0`~`A/Calibration`을 포함하면 **Phase A 전체를 건너뛰고 Phase B Pre-Phase부터 시작한다**. transfer_files에 포함된 `plan-summary.md`, `codebase-health.md`, `requirements.md`, `code-design-analysis.md`, `expert-plan-concerns.md`, `verify-commands.md`, `env-context.md`는 Phase A 산출물과 동일 역할이므로 그대로 `step_outputs`에 등록한다. Linear 이슈 동기화는 simon-plan이 이미 수행했으므로 중복 업데이트하지 않는다 — distilled_brief의 `linear_issue` 필드만 참조하여 PR description 링크 등에 활용.
 5. **Context Completeness Assessment**: SESSION_DIR 초기화 후 핵심 memory 파일의 존재/유효성을 평가한다.
    - 검증 대상: `config.yaml`, `workflow-state.json`, `session-meta.json`, `handoff-manifest.json` (있으면), `retrospective.md` (있으면)
    - 판정 기준:
