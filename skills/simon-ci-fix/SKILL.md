@@ -197,6 +197,7 @@ gh run view {run_id} --log-failed 2>&1 | tail -200
    - **수정 파일**: {file1}, {file2}"
    ```
 5. 사이클 카운터 확인:
+   - 직전 사이클과 실패 체크·에러 시그니처(같은 체크, 같은 에러 메시지 핵심부)가 동일하면 → 같은 수정의 반복은 무의미하므로 조기 중단하고 결과 보고 (최종 상태: NO_PROGRESS — 시도한 접근과 필요한 다른 접근을 명시). 사이클별 기록 테이블의 직전 행과 비교한다
    - cycle < 5 → Step 1로 복귀 (CI 재확인)
    - cycle >= 5 → 결과 보고
 
@@ -209,7 +210,7 @@ CI 수정 작업의 최종 결과를 기록한다.
 ```markdown
 ## CI Fix Result
 - **총 사이클**: {N}회
-- **최종 상태**: ALL_PASS / PARTIAL_FIX / ENV_ONLY / MAX_CYCLES_REACHED
+- **최종 상태**: ALL_PASS / PARTIAL_FIX / ENV_ONLY / MAX_CYCLES_REACHED / NO_PROGRESS
 - **수정된 체크**: {check1}, {check2}
 - **미해결 체크**: {check3 (ENV)}, ...
 - **수정 커밋**: {commit_hash1}, {commit_hash2}

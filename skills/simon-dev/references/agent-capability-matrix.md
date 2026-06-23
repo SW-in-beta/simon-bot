@@ -53,6 +53,25 @@ Tools FORBIDDEN: [{금지 목록}] — 금지 도구 사용 시 결과를 무효
 
 XML 태그로 구조화하면 compaction 후에도 역할/맥락/지시가 분리되어 유지된다. `<instructions>` 시작 부분에 핵심 지시를 배치하여 손실을 방지한다.
 
+### VERIFICATION 모드 Rubric (필수)
+
+VERIFICATION 모드로 spawn하는 모든 검증 역할(verifier, alignment-checker, production-readiness-auditor 등)에는 `<instructions>` 앞에 `<rubric>` 블록을 필수로 포함한다. rubric 항목은 plan-summary.md의 Done-When 체크리스트에서 가져온다:
+
+```
+<rubric>
+다음 체크 항목 각각에 대해 PASS / FAIL + 근거(file:line)를 판정한다:
+- [ ] {done_when_check_1}
+- [ ] {done_when_check_2}
+- ...
+판정 규칙:
+- 하나라도 FAIL이면 전체 verdict는 FAIL
+- 전 항목 PASS 확인 전에는 통과 보고 금지
+- 항목별 판정 없는 종합 인상 평가("대체로 양호")는 무효
+</rubric>
+```
+
+Why: 채점표 없이 spawn된 verifier는 종합 인상 평가로 빠지기 쉽다 — 단일 에이전트는 평범한 결과도 자신 있게 통과시키는 경향이 있다. 독립 평가자에게 명시적 채점 기준을 주는 것이 생성자를 자기비판적으로 만드는 것보다 효과적이며, 이것이 maker/checker 분리가 실제로 작동하기 위한 전제 조건이다.
+
 ## Subagent 반환 Status Prefix
 
 subagent가 결과를 반환할 때 다음 prefix를 사용한다:
@@ -87,5 +106,7 @@ subagent가 결과를 반환할 때 다음 prefix를 사용한다:
 | comment-watcher | sonnet | PR 댓글 폴링 + 분류, 기계적 폴링 |
 | internal-researcher | sonnet | Confluence/Slack 검색 스크립트 실행 + 결과 요약, 도구 중심 |
 | data-researcher | sonnet | 데이터 스킬 호출 + SQL 실행, 도구 중심 |
+
+**Fable 5 옵션** (2026-06 등재): Agent 도구는 `fable` 모델(claude-fable-5, 1M 컨텍스트)을 지원한다. 고추론 역할(verifier, devil-advocate, production-readiness-auditor 등)에서 opus 결과가 반복적으로 불충분할 때 개별 판단으로 fable을 선택할 수 있다. 주의: (1) 비용 상위 모델이므로 기본값으로 두지 않는다 — 위 테이블의 권장 모델이 기본이다. (2) fable은 안전 분류기 refusal(stop_reason: "refusal")이 발생할 수 있으므로, refusal 시 같은 작업을 opus로 재시도한다.
 
 **Override 조건**: `config.yaml`의 `model_override` 설정이 있으면 위 기본값을 덮어쓴다. 비용 제한이 있으면 모든 역할을 sonnet으로 통일할 수 있다.

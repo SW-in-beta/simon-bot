@@ -80,7 +80,7 @@ Agent Team 운영 중 오케스트레이터는 TaskList를 주기적으로 확�
 
 ### Auto-Verification Hook (P-001)
 
-모든 소스코드 수정 후 빌드/린트를 즉시 실행한다. 실패 시 Stop-and-Fix Gate 적용. Forbidden Rules는 `forbidden-guard.sh` (PreToolUse), 빌드 검증은 `auto-verify.sh` (PostToolUse)로 구조적 강제. 구현 일단락 시점에서 `/simplify` 실행. 상세 동작과 settings.json 등록은 [cross-cutting-protocols.md](references/cross-cutting-protocols.md) 참조.
+모든 소스코드 수정 후 빌드/린트를 즉시 실행한다. 실패 시 Stop-and-Fix Gate 적용. Forbidden Rules는 `forbidden-guard.sh` (PreToolUse), 빌드 검증은 `auto-verify.sh` (PostToolUse)로 구조적 강제. 구현 완료 후 Integration Stage에서 `/simplify` 스킬을 **필수 게이트로 1회 실행**한다(skip 불가, [integration-and-review.md](references/integration-and-review.md)). 상세 동작과 settings.json 등록은 [cross-cutting-protocols.md](references/cross-cutting-protocols.md) 참조.
 
 ### Deterministic Gate Principle
 
@@ -109,10 +109,15 @@ Phase 전환 시 `[######....] Step {current}/{total} ({percent}%)` 형식으로
 
 ENV_INFRA로 테스트 실행 자체가 불가능한 경우, 사용자 명시적 승인 후에만 테스트를 SKIP할 수 있으며, 이때도 build + typecheck는 반드시 통과해야 한다.
 
+### Autonomous Step Progression (Narration-Trap 방지)
+
+자율 완주 구간에서 Step 완료를 턴 경계로 취급하지 않는다. 하위 단계(subagent/Agent 반환, 스킬 호출 복귀, SendMessage 토큰, 검증 명령 종료)가 반환된 직후, 같은 턴에서 **다음 Step의 첫 tool call을 가장 먼저 emit**한다 (tool-call-first). `"Step N 완료. 다음은 …"` 같은 종료 내레이션을 emit하고 턴을 끝내는 것은 금지 — 모델이 턴 종료 리듬에 self-conditioning되어 파이프라인이 멈추고 사용자가 "계속"을 입력해야 재개된다. 상태 보고가 필요하면 다음 Step의 tool call을 먼저 호출한 뒤 1줄 경량 보고를 덧붙인다.
+
+턴 종료는 **Interaction Mode의 "확인이 필요한 핵심 판단점"(AskUserQuestion), 워크플로 최종 완료, 자동 복구 불가 차단 상태**에서만 허용된다. "자율 완주 범위"(커밋·푸시·PR Draft·Integration merge·재시도·session 갱신 등)에서는 내레이션으로 턴을 닫지 않는다. 정본은 `~/.claude/skills/_shared/preamble.md`의 "Autonomous Progression Invariant" 참조.
 
 ### Reference Loading Policy (컨텍스트 효율)
 
-각 Phase 진입 시 해당 Phase의 레퍼런스 파일만 읽는다. **Tier 1 파일은 256K 토큰 이내에 로딩되어야 한다** — Opus 4.6의 정확도가 256K 이후 ~70%로 하락하므로, 핵심 규칙은 초기에 로딩하여 높은 정확도 영역에 배치한다.
+각 Phase 진입 시 해당 Phase의 레퍼런스 파일만 읽는다. **Tier 1 파일은 컨텍스트 초반부(보수적 기준 256K 이내)에 로딩되어야 한다** — 긴 컨텍스트 후반부의 정확도 하락에 대비해 핵심 규칙을 초기에 배치한다 (측정 근거: Opus 4.6 기준 256K 이후 ~70%로 하락. Fable 5는 1M 컨텍스트이나 정확도 커브 미공개 — 모델 변경 시 재검토).
 
 | 트리거 | 읽을 파일 | Tier | 비고 |
 |--------|----------|------|------|
@@ -135,22 +140,7 @@ ENV_INFRA로 테스트 실행 자체가 불가능한 경우, 사용자 명시적
 | 코드 탐색 시 (`graphify-out/` 존재 시) | `~/.claude/skills/_shared/graphify-context.md` | 3 | on-demand, 그래프 없으면 skip |
 | Startup (3-E 단계) | `~/.claude/skills/_shared/monitor-protocol.md` | 2 | Startup 필수. emit.sh 실패는 허용하되 발신 시도 자체는 건너뛰지 않음 |
 
-**Tier 정의:**
-- **Tier 1 (Early Load)**: 256K 이내에 반드시 로딩. compaction 후에도 최우선 재로딩
-- **Tier 2 (Phase Load)**: 해당 Phase 진입 시 로딩. compaction 후 현재 Phase의 Tier 2만 재로딩
-- **Tier 3 (On-Demand)**: 필요 시점에만 로딩. compaction 후 재로딩 불필요 (on-demand 트리거로 자연스럽게 재로딩)
-
-**Phase 전환 시 Tier 2 Unload 규칙**:
-
-Phase 전환이 완료되면 (workflow-state.json의 `current_phase` 갱신 후), 이전 Phase에서만 사용된 Tier 2 파일은 컨텍스트 attention 영역에서 해제한다. "해제"는 파일을 삭제하는 것이 아니라, 이후 스텝에서 해당 파일의 내용을 참조하지 않음을 의미한다 — 파일은 SESSION_DIR에 영구 보존된다.
-
-| Phase 전환 | 언로드 대상 (Tier 2) | 이유 |
-|-----------|---------------------|------|
-| Phase A → Phase B 진입 | `phase-a-review.md`, `context-separation.md`(Step 6 전까지), `review-rubric.md`(Step 6 전까지) | Phase B 구현 단계에서 Phase A 검토 지침은 불필요 |
-| Step 5 완료 → Step 6 진입 | `phase-b-implementation.md`의 TDD 섹션 상세 | Step 6부터는 검증 중심으로 전환 |
-| Integration 단계 진입 | `phase-b-verification.md`, `phase-b-implementation.md` 등 Phase B 전용 Tier 2 | Integration은 별도 컨텍스트 필요 |
-
-**컨텍스트 활용률 45% 이상일 때 Phase 전환 시**: 즉시 `/compact`를 실행하며 이전 Phase Tier 2를 보존 프롬프트에서 명시적으로 제외한다. 구체적인 compact hint는 `cross-cutting-protocols.md`의 Phase별 Compact Hint 테이블을 참조한다.
+> **Tier 정의와 Phase 전환 시 Tier 2 Unload 규칙**(언로드 대상 테이블, 45%+ 전환 시 compact 지침 포함)은 [cross-cutting-protocols.md](references/cross-cutting-protocols.md)의 "Reference Tier 운용" 섹션 참조 — Startup Tier 1로 항상 로딩되므로 세션 내내 유효하다.
 
 ### Subagent 사용 기준
 
@@ -259,6 +249,25 @@ For AskUserQuestion format, read [generation-style-guide.md](references/generati
 라이브러리·DB·프레임워크·외부 서비스 사용 시 공식 문서를 먼저 조회한다.
 For detailed protocol (적용 기준, 도구 우선순위, 조회 불가 시 대응), read [docs-first-protocol.md](references/docs-first-protocol.md).
 
+### OpenSpec Spec Capture (조건부)
+
+대상 레포에 `openspec/` 디렉토리가 초기화되어 있으면, 구현 결과를 레포에 커밋되는 **행위계약 스펙(behavior contract)**으로 남긴다. simon-dev의 `plan-summary.md`는 SESSION_DIR에 저장되는 개인·임시 기록인 반면, openspec 스펙은 레포에 커밋되어 팀이 공유하는 영속 산출물이다. 스펙 통일성을 위해 직접 작성하지 않고 **openspec 스킬을 호출**한다 (stock 스킬은 `~/.claude/skills/openspec-propose`·`openspec-archive-change`에 전역 설치됨. 레포에 자체 버전이 있으면 project-level이 우선).
+
+**활성 조건 (gate)**: `[ -d "$(git rev-parse --show-toplevel)/openspec" ] && command -v openspec`. 둘 중 하나라도 없으면 이 프로토콜 전체를 skip하고 1줄 통보(`[OpenSpec] openspec/ 미초기화 — 스펙 캡처 건너뜀`). `openspec init`은 자동 실행하지 않는다.
+
+**스펙 저장 위치 (모두 대상 레포 안):**
+- 작업 중 → `openspec/changes/<branch-name>/` (proposal.md, design.md, tasks.md, specs/ 델타)
+- archive 후 → `openspec/specs/<capability>/spec.md`에 델타 병합 + `openspec/changes/archive/YYYY-MM-DD-<branch-name>/`로 이동
+
+**두 시점에서 openspec 스킬 호출:**
+
+1. **Propose** (Phase A Calibration 통과 직후): plan-summary.md를 입력으로 `openspec-propose` 스킬을 호출한다 — 중복 작성을 피하려고 plan을 그대로 매핑한다 (End State[Behavior Changes]→spec 델타, Files Changed→design.md, Done-When→tasks.md). change 이름은 branch-name과 일치시킨다. behavior-contract 원칙 준수: spec.md에는 외부 관찰 가능 행위만, 타입/함수/필드명·공식·패키지 경로는 design.md로 (레포 `openspec/AGENTS.md` 규칙을 따른다). 생성된 `openspec/changes/<name>/` 파일은 Integration Stage에서 코드와 함께 커밋된다.
+
+2. **Archive** (Integration Stage 통과 후, Step 18 직전): tasks.md 완료 항목을 `- [x]`로 갱신한 뒤 `openspec-archive-change` 스킬을 호출하여 델타를 `openspec/specs/`로 병합하고 change를 archive로 이동한다. 이 변경은 후속 커밋으로 PR에 포함되어, PR 하나에 코드 + 최종 스펙이 함께 리뷰된다.
+   - **머지 후 archive를 선호하면**: 이 단계를 skip하고 `changes/<name>/` 델타만 PR에 포함시킨다(델타 자체가 리뷰 산출물이며, 머지 후 `openspec archive`를 수동 실행). config `interaction_mode: ship`은 자동 archive, 그 외에는 델타-only가 안전하다.
+
+**openspec-apply-change는 호출하지 않는다** — 구현은 Phase B가 소유한다. openspec은 스펙 기록 용도로만 쓴다. 본 프로토콜은 Narration-Trap 방지 불변식의 적용 대상이다 (스킬 호출 복귀 후 다음 단계 tool call을 먼저 emit).
+
 ### Interaction Mode
 
 config.yaml의 `interaction_mode` 설정에 따라 사용자 인터랙션 수준을 조절한다:
@@ -283,11 +292,7 @@ Startup 단계는 순서 의존성이 있으므로 순차 실행한다.
    - `.claude/memory/retrospective.md` (있으면)
    - `.claude/project-memory.json` (있으면 Read — 이전 세션에서 학습된 빌드 에러 패턴, 테스트 환경 quirk, 기각된 접근법 포함)
    - `.claude/memory/handoff-manifest.json` (있으면 — P-009 Handoff 감지)
-2-B. **Prior Context Brief** (P-001): 사용자 요청에서 키워드를 추출하고, `~/.claude/projects/{slug}/state/decisions.jsonl`에서 관련 결정사항을 검색하여 Prior Context Brief를 합성한다.
-   ```bash
-   # 키워드 추출 후 jq로 decisions.jsonl 검색
-   jq -s --arg kw "{keyword}" '[.[] | select(.decision | ascii_downcase | contains($kw | ascii_downcase))] | sort_by(.timestamp) | reverse | .[0:5]' decisions.jsonl
-   ```
+2-B. **Prior Context Brief** (P-001): 사용자 요청에서 키워드를 추출하고, `~/.claude/projects/{slug}/state/decisions.jsonl`에서 관련 결정사항을 검색하여 Prior Context Brief를 합성한다. 검색 명령 상세는 [startup-bootstrap.md](references/startup-bootstrap.md)의 "Prior Context Brief 검색" 섹션 참조.
    - 매칭 결정이 있으면: `{SESSION_DIR}/memory/prior-context-brief.md`에 요약 저장 — 각 결정의 decision, rationale, rejected_alternatives를 1줄씩 요약
    - 매칭 결정이 없으면: skip (빈 파일 생성하지 않음)
    - Phase A Step 1에서 Prior Context Brief를 architect에게 전달하여 이전 결정과 일관된 계획 수립을 유도한다
@@ -379,6 +384,8 @@ For detailed step instructions, read [phase-a-planning.md](references/phase-a-pl
 
 **Phase A Calibration Checklist** — 7개 항목 자동 검증 후 Phase B 진입.
 
+**Spec Capture — Propose** (조건부): Calibration 통과 후, 레포에 `openspec/`가 있으면 `openspec-propose` 스킬을 호출하여 plan-summary.md를 `openspec/changes/<branch-name>/`로 캡처한다. gate·매핑 규칙은 "OpenSpec Spec Capture (조건부)" 프로토콜 참조. openspec/ 없으면 skip.
+
 ## Phase B-E: Implementation & Verification
 
 For detailed step instructions, read [phase-b-implementation.md](references/phase-b-implementation.md).
@@ -420,7 +427,7 @@ Each Unit: isolated git worktree. Independent Units: parallel.
 
 **Step 8-B Subagent 원칙**: importers grep 및 영향 파일 분석은 subagent에 위임하고, "영향 파일 목록 + 조치 필요 여부" 결론만 반환받는다. grep 출력 원문이 메인 컨텍스트에 축적되는 것을 방지한다.
 
-**Step 17: Production Readiness** — `architect` + `security-reviewer` 최종 검증 + Finding Acceptance Summary 산출 (도메인별 수용률)
+**Step 17: Production Readiness** — `architect` + `security-reviewer` 최종 검증 + Finding Acceptance Summary 산출 (도메인별 수용률). NEEDS-HUMAN-REVIEW 판정 발생 시 gate-definitions.md의 처리 경로를 따른다 — 사람 확인 없이 Step 18 진입 금지.
 
 ## Integration & Review
 
@@ -429,6 +436,8 @@ Each Unit: isolated git worktree. Independent Units: parallel.
 For detailed instructions, read [integration-and-review.md](references/integration-and-review.md).
 
 **Integration Stage** — 모든 Unit 완료 후 브랜치 커밋, 충돌 해결, build + test 검증
+
+**Spec Capture — Archive** (조건부): Integration build+test 통과 후 Step 18 진입 전, Propose 단계가 실행됐던 경우(openspec/ 존재) `openspec-archive-change` 스킬을 호출하여 델타를 `openspec/specs/`로 병합한다. 상세·머지 후 archive 대안은 "OpenSpec Spec Capture (조건부)" 프로토콜 참조.
 
 **Step 18: Work Report + Review Sequence**
 - 18-A: writer subagent: Before/After 다이어그램, 트레이드오프, 리스크 보고서
@@ -467,6 +476,7 @@ For detailed instructions, read [integration-and-review.md](references/integrati
 - [ ] 미해결 결정사항 문서화됨
 - [ ] CONTEXT.md 최종 상태 갱신됨
 - [ ] retrospective.md 기록됨
+- [ ] (openspec/ 있는 레포) 스펙 캡처/아카이브 완료 — `openspec/specs/` 갱신 또는 `changes/<name>/` 델타 PR 포함
 
 검증 시점: Step 17 (기술적 항목), Step 19-C (전체 최종 검증), Step 20 (스킬 개선)
 

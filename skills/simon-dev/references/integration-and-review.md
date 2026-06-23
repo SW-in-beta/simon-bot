@@ -21,7 +21,7 @@
 3. If conflict: `architect` analyzes + `executor` resolves
 4. Full build + test pass verification
 5. **Working Example 재실행 (P-007)**: Step 6-B에서 정의한 Working Example 시나리오를 통합 환경에서 재실행하여 "테스트 통과 ≠ 실제 동작" 문제를 포착한다. `.claude/memory/unit-{name}/working-example.md`의 시나리오 참조. 실패 시 executor 수정 → 재검증 (max 3회).
-6. `/simplify` 스킬 실행: 통합된 전체 변경 코드의 재사용성, 품질, 효율성 검토
+6. **[GATE — 필수, skip 불가] `/simplify` 스킬 실행**: 통합된 전체 변경 diff를 대상으로 재사용성·품질·효율성, 그리고 불필요한 주석 노이즈(주석 최소화 원칙 위반분)를 정리한다. 이 게이트는 모든 경로에서 구현 완료 후 **반드시 1회** 실행한다 — simplify는 변경 diff 전체를 보는 도구이므로, 모든 Unit이 병합된 이 시점이 권위 있는 단일 실행 지점이다. Phase B Step 5의 Post-Implementation Simplicity Check(per-unit 경량 자기 검증)와 달리, 여기서는 실제 `/simplify` 스킬을 호출한다.
 7. Save: `.claude/memory/integration-result.md`
 8. Update: `CONTEXT.md` — Integration 완료 표시, 성공 기준 중간 갱신
 9. **Integration Retrospective Checkpoint**: **Phase-End Auto-Retrospective** 프로토콜을 실행한다 (SKILL.md Cross-Cutting Protocol 참조). Phase B-E 전체에서 축적된 사용자 피드백에서 반복 패턴을 탐지하고, 필요 시 boost-capture를 백그라운드로 트리거한다.

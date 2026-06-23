@@ -35,6 +35,7 @@ grind 전용 파일(`failure-log.md`, `checkpoints.md`, `assumptions-registry.md
 - `progress-detect.sh <failure-log>` — 최근 2건 재시도 비교 → `PROGRESS`/`STALL`/`REGRESS` JSON 출력. Stall detection의 판정 근거로 사용.
 - `budget-tracker.sh <failure-log> [budget]` — 잔여 예산 JSON 출력. 70%+ 소비 시 `warning: true`. 매 재시도 시작 전에 실행하여 예산 상태를 확인한다.
 - `checkpoint.sh <step> <attempt> <checkpoints-md>` — `git tag checkpoint-step{N}-attempt{M}` + checkpoints.md 원자적 갱신. 전략 전환 전에 반드시 실행한다.
+- `done-when-eval.sh <plan-summary> <verify-commands> [unit]` — Mechanical Done-When Checks 자동 평가 → `exit_loop` JSON 출력. 매 attempt 완료 시 실행하여 `exit_loop=true`면 해당 Step 루프를 조기 탈출한다. 성공 기준이 이미 충족됐는데 모르고 재시도하는 budget 낭비를 방지한다 (Behavioral Checks는 LLM 평가 유지).
 
 ## Grind Config Overrides
 
@@ -197,6 +198,10 @@ simon-dev의 Phase-End Auto-Retrospective 프로토콜을 상속한다. 동일 �
 
 simon-dev의 Docs-First Protocol을 상속한다 (`~/.claude/skills/simon-dev/references/docs-first-protocol.md` 참조). 재시도 맥락에서 특히 중요: 학습 데이터 기반 기억으로 구현했다가 실패한 경우, 재시도 전에 반드시 공식 문서를 조회하여 정확한 API/설정을 확인한다.
 
+## Cross-Cutting: OpenSpec Spec Capture
+
+simon-dev의 "OpenSpec Spec Capture (조건부)" 프로토콜을 상속한다 (gate: 레포에 `openspec/` 존재). Propose 시점(Phase A Calibration 후)은 동일하다. **grind 특이사항**: 재시도 루프로 구현이 여러 번 바뀌므로 `openspec-archive-change` 호출은 **retry 루프가 수렴한 뒤(done-when 충족 + 리뷰 통과)에만** 1회 실행한다 — 중간 attempt마다 archive하면 미수렴 상태가 `specs/`에 병합되어 오염된다.
+
 ## Cross-Cutting: Cognitive Independence
 
 simon-dev의 Cognitive Independence 프로토콜을 상속한다. 검증 에이전트의 독립성은 grind에서 특히 중요하다 — 10회 재시도 압력 하에서 검증 에이전트가 "이번에는 봐주자"는 태도를 가지면 품질이 급격히 저하된다.
@@ -240,6 +245,8 @@ For per-step override details, read [grind-phase-b.md](references/grind-phase-b.
 - 중기(4-6): 실패 패턴을 분석하여 근본 원인을 파악한 뒤 수정한다.
 - 후기(7-9): 접근 방식 자체를 변경한다. checkpoint로 안전망을 확보한 뒤 대안을 시도한다.
 - 최종(10): 사용 가능한 모든 정보를 종합하여 최후 시도한다.
+- 매 attempt 종료 시 `scripts/done-when-eval.sh`를 실행한다 — Mechanical Done-When이 전부 통과(`exit_loop=true`)면 불필요한 재시도 없이 해당 Step 루프를 종료한다 (Behavioral Checks는 LLM이 평가).
+- **Narration-Trap 방지 (자율 루프 핵심)**: 매 attempt 완료 후 — `progress-detect.sh`/`done-when-eval.sh` 실행, 검증 명령 종료, subagent 반환 직후 — `"재시도 N 완료"`, `"다음 시도로 넘어갑니다"` 같은 종료 내레이션으로 턴을 끝내지 않는다. 다음 행동(다음 attempt의 첫 tool call, 또는 `exit_loop=true` 시 다음 Step의 tool call)을 **같은 턴에서 먼저 emit**한다. grind는 사람 개입을 최소화하는 자율 루프이므로, 종료 내레이션 후 턴을 닫으면 루프가 멈춰 "끝까지 물고 늘어진다"는 grind의 핵심 가치가 깨진다. 턴 종료는 사용자 escalation(예산 소진·핵심 판단점)과 최종 완료에서만 허용. 정본: `~/.claude/skills/_shared/preamble.md`의 "Autonomous Progression Invariant".
 
 각 Step에서 "근본 원인 분석"과 "접근 방식 변경"의 구체적 의미는 Step 성격에 따라 다르다 — Step 5(빌드 실패)의 전략 전환과 Step 12(코드 리뷰)의 전략 전환은 완전히 다른 행동이기 때문이다. 상세는 grind-phase-b.md 참조.
 

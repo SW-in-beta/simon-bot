@@ -6,6 +6,7 @@
 - [Composable CLI Script Toolkit](#composable-cli-script-toolkit)
 - [Docs-First Protocol](#docs-first-protocol)
 - [Confusion Management Protocol](#confusion-management-protocol)
+- [Reference Tier 운용](#reference-tier-운용)
 - [Context Window Management](#context-window-management)
 
 ## Clean Working Tree Check
@@ -192,13 +193,34 @@ Step 완료 시 workflow-state.json에 해당 Step의 결과를 구조화하여 
 
 Step 전환 시 오케스트레이터는 `step_results[이전 Step].status`를 확인하여 라우팅을 결정한다. `PARTIAL`이면 재시도 여부를, `ERROR`이면 에러 복구 전략을 판단한다.
 
+## Reference Tier 운용
+
+simon-dev SKILL.md의 Reference Loading Policy 테이블(트리거→파일 매핑)이 참조하는 Tier 체계의 정의와 운용 규칙이다.
+
+**Tier 정의:**
+- **Tier 1 (Early Load)**: 256K 이내에 반드시 로딩. compaction 후에도 최우선 재로딩
+- **Tier 2 (Phase Load)**: 해당 Phase 진입 시 로딩. compaction 후 현재 Phase의 Tier 2만 재로딩
+- **Tier 3 (On-Demand)**: 필요 시점에만 로딩. compaction 후 재로딩 불필요 (on-demand 트리거로 자연스럽게 재로딩)
+
+**Phase 전환 시 Tier 2 Unload 규칙**:
+
+Phase 전환이 완료되면 (workflow-state.json의 `current_phase` 갱신 후), 이전 Phase에서만 사용된 Tier 2 파일은 컨텍스트 attention 영역에서 해제한다. "해제"는 파일을 삭제하는 것이 아니라, 이후 스텝에서 해당 파일의 내용을 참조하지 않음을 의미한다 — 파일은 SESSION_DIR에 영구 보존된다.
+
+| Phase 전환 | 언로드 대상 (Tier 2) | 이유 |
+|-----------|---------------------|------|
+| Phase A → Phase B 진입 | `phase-a-review.md`, `context-separation.md`(Step 6 전까지), `review-rubric.md`(Step 6 전까지) | Phase B 구현 단계에서 Phase A 검토 지침은 불필요 |
+| Step 5 완료 → Step 6 진입 | `phase-b-implementation.md`의 TDD 섹션 상세 | Step 6부터는 검증 중심으로 전환 |
+| Integration 단계 진입 | `phase-b-verification.md`, `phase-b-implementation.md` 등 Phase B 전용 Tier 2 | Integration은 별도 컨텍스트 필요 |
+
+**컨텍스트 활용률 45% 이상일 때 Phase 전환 시**: 즉시 `/compact`를 실행하며 이전 Phase Tier 2를 보존 프롬프트에서 명시적으로 제외한다. 구체적인 compact hint는 아래 "Phase별 Compact Hint" 테이블을 참조한다.
+
 ## Context Window Management
 
 자동 압축(AUTOCOMPACT)은 비활성화되어 있다. compaction은 항상 수동으로 실행하며, 보존 대상을 `/compact <프롬프트>`로 명시적으로 지정한다. 이를 통해 256K 고정확도 영역에 핵심 정보를 배치할 수 있다. 압축이 발생해도 `.claude/memory/`에 상태가 저장되어 있으므로 작업을 계속 진행한다.
 
 ### Compaction Preservation Priority
 
-compaction 전 memory 파일 저장과 compaction 후 재로딩 시, 다음 우선순위를 적용한다. Opus 4.6은 256K 토큰 이내에서 ~90% 정확도를 보이고 이후 ~70%로 하락하므로, P0-P1이 256K 이내에 위치하도록 재로딩 순서를 관리한다.
+compaction 전 memory 파일 저장과 compaction 후 재로딩 시, 다음 우선순위를 적용한다. 긴 컨텍스트 후반부에서 모델 정확도가 하락하는 경향에 대비해, P0-P1이 컨텍스트 초반(보수적 기준 256K 이내)에 위치하도록 재로딩 순서를 관리한다 (측정 근거: Opus 4.6 기준 256K 이내 ~90% → 이후 ~70%. Fable 5는 1M 컨텍스트이나 정확도 커브 미공개 — 모델 변경 시 재검토).
 
 | 우선순위 | 분류 | 내용 | 저장 위치 | 근거 |
 |---------|------|------|----------|------|

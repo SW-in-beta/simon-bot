@@ -1,5 +1,14 @@
 # Startup Bootstrap — Monitor & Completion Gate
 
+## Prior Context Brief 검색 (Startup 2-B)
+
+사용자 요청에서 추출한 키워드로 `~/.claude/projects/{slug}/state/decisions.jsonl`에서 관련 결정사항을 검색한다:
+
+```bash
+# 키워드 추출 후 jq로 decisions.jsonl 검색
+jq -s --arg kw "{keyword}" '[.[] | select(.decision | ascii_downcase | contains($kw | ascii_downcase))] | sort_by(.timestamp) | reverse | .[0:5]' decisions.jsonl
+```
+
 ## Monitor 자동 시작 + 주소 통보
 
 simon-monitor는 **단일 공유 서버**로 운영한다. 세션마다 별도 서버를 띄울 필요가 없으며, 포트 충돌은 3847→3857 폴백으로 해결한다.

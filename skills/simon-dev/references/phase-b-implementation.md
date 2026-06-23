@@ -187,6 +187,7 @@ plan-summary.md의 Files Changed 테이블과 code-design-analysis.md가 아래 
   4. 같은 커밋/작성자가 if와 else에 다른 패턴을 사용했다면 → 의도적 설계로 가정, 수정 전 decision-journal에 근거 기록 후 사용자에게 확인
   이 게이트는 리뷰 중 발견된 패턴 불일치(if vs else, A 함수 vs B 함수 등)에 필수 적용한다.
 - **일반적 해결책 우선**: 모든 유효한 입력에 대해 올바르게 동작하는 일반적 해결책을 구현한다. 특정 테스트 입력에 맞춘 하드코딩은 해당 테스트만 통과시키고 실제 문제를 숨기기 때문이다.
+- **주석 최소화 (Comment Minimization)**: 기본값은 주석 없음이다 — 코드가 네이밍과 구조로 스스로 설명하게 한다. **반드시 작성해야 하는 경우만** 예외로 허용한다: (1) 임시 코드 표시(TODO/FIXME/HACK + 추적 정보), (2) 언어·도구가 요구하는 지시 주석(`//nolint`, `# type: ignore`, build tag, pragma 등), (3) 회귀 테스트 attribution comment([phase-b-verification.md](phase-b-verification.md)의 Reproducibility Gate 의무), (4) 코드로 표현 불가능한 "왜"(의도적 우회, 비직관적 제약, 호환성·규제 사유). 코드가 "무엇을 하는지" 자연어로 재서술하는 설명 주석은 금지한다 — diff 노이즈를 늘리고, 코드와 주석이 따로 노는 유지보수 부채를 만들기 때문이다. (Decision Authority의 "코드 내 주석/구조 정리" 자율권은 이 최소화 원칙 안에서만 행사한다.)
 - **Auto-Verification Hook**: 소스코드 파일 수정(Edit/Write) 후 `verify-commands.md`의 빌드/린트 명령을 즉시 실행한다. 실패 시 **Stop-and-Fix Gate 적용** — 수정 완료 전까지 다음 작업 진행 금지. `.md`, `.json` 등 비소스코드는 제외. (SKILL.md Cross-Cutting Protocol 참조)
 - **Step Transition Gate**: Step N에서 Step N+1로 진입하기 전에 `verify-commands.md`의 빌드/린트/테스트를 실행하여 전부 통과해야 한다. 이전 Step의 미수정 실패를 다음 Step으로 넘기면 디버깅이 기하급수적으로 어려워진다. 실패 시 Stop-and-Fix Gate가 자동 발동된다. (모든 경로에서 적용)
 - **Plan Immutability**: Phase A에서 확정된 `plan-summary.md`는 Phase B 이후 암묵적으로 변경할 수 없다. 변경이 필요한 경우 다음 절차를 따른다: (1) 변경 사유를 `.claude/memory/plan-amendments.md`에 기록, (2) 영향받는 Unit/Step 식별, (3) 사용자에게 변경 승인 요청 (AskUserQuestion), (4) 승인 후 plan-summary.md와 관련 memory 파일 일괄 갱신. 이 절차 없이 계획을 조용히 변경하면 Acceptance Criteria와 실제 구현이 괴리되어 Step 17에서 대규모 재작업이 발생한다.
@@ -398,6 +399,8 @@ Step 5 구현 완료 후, Self-correction 진입 전에 복잡도를 자기 검�
 - 가설적 미래 요구사항이 아닌 현재 요구사항을 구현했는가?
 
 해당 사항 발견 시 즉시 리팩토링한다. 테스트가 통과하는 상태를 유지하면서 단순화한다.
+
+이 체크는 per-unit 경량 자기 검증이다 — 여기서 `/simplify` 스킬을 호출하지 않는다. 권위 있는 `/simplify` 스킬 호출은 모든 Unit 병합 후 Integration Stage에서 전체 diff를 대상으로 1회 수행한다([integration-and-review.md](integration-and-review.md)의 필수 게이트). per-unit 중복 호출은 병렬 Unit마다 반복 실행되어 비효율적이므로 금지한다.
 
 ### Step 5 Common Rationalizations
 

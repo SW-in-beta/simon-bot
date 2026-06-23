@@ -134,6 +134,14 @@ simon 워크플로에서 사용되는 모든 게이트의 정의. 각 게이트�
 - Major FAIL → 관련 Phase로 회귀
 - Critical FAIL → Step 1-B 회귀
 
+**NEEDS-HUMAN-REVIEW 시**:
+
+NEEDS-HUMAN-REVIEW 판정이 1건 이상 존재하면 사람의 확인 없이 Step 18로 진입할 수 없다. "AI가 판단 불가"는 "통과"와 동치가 아니기 때문이다.
+
+1. **guided/interactive 모드**: AskUserQuestion으로 판정 항목과 판단 불가 사유를 제시하고 사용자 확인(LGTM / 수정 지시)을 받는다. LGTM 받은 항목은 PASS로 전환하여 기록한다.
+2. **ship 모드**: 판정 항목 + 사유를 텍스트로 통보하고 사용자 응답을 대기한다. ship 모드의 다른 자동 진행과 달리, 이 항목은 정지 조건이다.
+3. **세션 종료 시 미확인 항목 잔존**: workflow-state.json에 `"status": "PAUSED"`와 `needs_human_review: [{항목, 사유}]`를 기록한다. 다음 resume 시 최우선으로 표시한다.
+
 ## Deterministic Gate Principle
 
 게이트 검증에서 파일 존재 확인, 빌드/린트/테스트 실행, 패턴 매칭, 카운터 비교 등 결정론적으로 수행 가능한 작업은 bash 스크립트를 우선 사용한다. LLM은 스크립트 실행 결과(PASS/FAIL + 실패 항목)만 받아 후속 판단(수정 방향, 전략 전환)에 집중한다.

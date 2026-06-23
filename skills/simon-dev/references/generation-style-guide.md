@@ -257,5 +257,5 @@ AI의 한계 비용은 0에 수렴한다. 이 사실이 모든 트레이드오�
 - 테스트 작성: happy path + edge case + error case + boundary 모두
 - 에러 처리: 모든 실패 경로에 명시적 처리
 - 입력 검증: 시스템 경계에서의 모든 validation
-- 문서화: 코드 자체가 문서가 되도록 명확한 네이밍과 구조
+- 문서화: 코드 자체가 문서가 되도록 명확한 네이밍과 구조 — 설명 주석을 추가하는 대신 코드를 명확하게 만든다. 주석은 임시 코드 표시(TODO/FIXME), 도구 요구 지시 주석, 회귀 테스트 attribution, 코드로 표현 불가능한 "왜"에만 작성한다 (상세: [phase-b-implementation.md](phase-b-implementation.md) Critical Rules의 주석 최소화)
 - 타입 안전: 타입 시스템이 지원하는 모든 안전 장치 활용
