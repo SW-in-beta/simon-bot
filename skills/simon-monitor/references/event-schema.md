@@ -98,7 +98,7 @@ simon-pm은 Phase 번호 사용:
   "step": "A/1-A",
   "title": "프로젝트 분석 + 코드 설계 분석",
   "data": {
-    "description": "프로젝트 구조 스캔, graphify 그래프 참조, Code Design Team 분석"
+    "description": "프로젝트 구조 스캔, Code Design Team 분석"
   }
 }
 ```

@@ -240,7 +240,7 @@ STANDALONE 모드에서는 3개 Agent Team(architect, writer, impact-analyzer)�
 <summary><strong>기타 스킬 상세 (report / boost 패밀리 / brain 패밀리 / sessions / 기타)</strong></summary>
 <br>
 
-**simon-report** — 코드 변경 없이 구현 전 분석 문서(RFC, 현황 분석, 커스텀 포맷)를 생성합니다. simon과 동일한 5개 도메인 전문가 팀 토론 구조를 사용하며, git 이력 기반 **Codebase Health Assessment**(고churn 파일, bug hotspot, firefighting 빈도 등 정량 진단)를 포함하여 의사결정 근거를 강화합니다. **graphify 통합**: `graphify-out/` 그래프가 존재하면 god nodes/communities로 전체 구조를 선파악하고 분석 범위를 최적화합니다. **대상 독자/게시 플랫폼 감지**: 문서 용도에 따라 대상 독자(개발자/비개발자/경영 보고)와 플랫폼을 자동 추론하여 용어 정의·고유명사 추상화·플랫폼 독립적 출처 등 독자 독립성 체크를 수행합니다. 리뷰 후 simon / simon-pm으로 원활하게 핸드오프할 수 있습니다.
+**simon-report** — 코드 변경 없이 구현 전 분석 문서(RFC, 현황 분석, 커스텀 포맷)를 생성합니다. simon과 동일한 5개 도메인 전문가 팀 토론 구조를 사용하며, git 이력 기반 **Codebase Health Assessment**(고churn 파일, bug hotspot, firefighting 빈도 등 정량 진단)를 포함하여 의사결정 근거를 강화합니다. **대상 독자/게시 플랫폼 감지**: 문서 용도에 따라 대상 독자(개발자/비개발자/경영 보고)와 플랫폼을 자동 추론하여 용어 정의·고유명사 추상화·플랫폼 독립적 출처 등 독자 독립성 체크를 수행합니다. 리뷰 후 simon / simon-pm으로 원활하게 핸드오프할 수 있습니다.
 
 **simon-auto-boost** — Claude Code 공식 문서, Hacker News, Medium, YouTube 등에서 최신 AI 코딩 에이전트 best practices를 자동 검색하고, 6인 전문가 패널 분석 → 사용자 승인 → 적용 → 스킬 가이드라인 검증 → 스모크 테스트까지 수행합니다. 마지막 검색 시점을 기록하여 이후 콘텐츠만 처리합니다.
 

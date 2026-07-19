@@ -83,7 +83,7 @@ Then in Claude Code:
 | `/simon-pm` | Project manager — PRD-driven planning, distributes tasks to simon instances |
 | `/simon-code-review` | PR-based code review — Draft PR creation, inline review comments, CI Watch, feedback loop |
 | `/simon-sessions` | List, resume, or clean up worktree-based work sessions |
-| `/simon-report` | Analysis documents (RFC, status report) via expert discussion — no code changes. Auto-detects audience (developer/non-developer/executive) and publication platform to apply reader-independence checks before publishing. Integrates graphify knowledge graph for exploration scope optimization |
+| `/simon-report` | Analysis documents (RFC, status report) via expert discussion — no code changes. Auto-detects audience (developer/non-developer/executive) and publication platform to apply reader-independence checks before publishing |
 | `/simon-auto-boost` | Auto web search skill improvement — searches latest AI coding agent best practices and auto-improves skills |
 | `/simon-boost` | Read external resources and improve simon's own skills |
 | `/simon-boost-capture` | Background capture of skill improvements — record insights without interrupting workflow |

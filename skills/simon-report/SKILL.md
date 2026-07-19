@@ -46,7 +46,6 @@ settings.json에 등록하여 report 세션 동안만 활성화한다. simon의 
 
 | 트리거 | 읽을 파일 |
 |--------|----------|
-| Step 1 진입 시 (`graphify-out/` 존재 시) | `~/.claude/skills/_shared/graphify-context.md` — 그래프 없으면 skip |
 | Step 3 Domain Expert 진입 | `references/domain-teams.md` |
 | Step 4-B Document Generation 진입 | `references/examples.md` |
 
@@ -80,10 +79,6 @@ settings.json에 등록하여 report 세션 동안만 활성화한다. simon의 
 ### Step 1: Codebase Exploration
 
 **목적:** 분석 주제와 관련된 코드를 탐색하여 컨텍스트 확보
-
-**1-0-pre: Graphify Context (탐색 범위 최적화)**
-- `graphify-out/GRAPH_REPORT.md` 존재 시: `~/.claude/skills/_shared/graphify-context.md` 읽기 → god nodes/communities로 전체 구조 선파악 후 분석 주제와 관련된 community를 식별하여 탐색 범위 축소
-- 그래프 없으면 skip
 
 **1-0: Report Memory (이전 보고서 + 개인 지식 베이스 참조)**
 - `~/claude-reports/` 디렉토리의 기존 보고서 목록을 스캔한다

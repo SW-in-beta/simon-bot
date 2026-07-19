@@ -106,10 +106,9 @@ loop_limits:
 |--------|----------|
 | Startup | grind SKILL.md + simon-dev의 workflow-state.json 스키마 및 Reference Loading Policy 테이블만 참조 (전체 SKILL.md 로딩은 Phase 진입 시) |
 | Phase A 진입 | grind-phase-a.md + simon-dev phase-a-planning.md |
-| Phase B-E 진입 | grind-phase-b.md + simon-dev phase-b-implementation.md |
+| Phase B-E 진입 | grind-phase-b.md + simon-dev phase-b-implementation.md + `~/.claude/skills/_shared/lazy-output-discipline.md` (Economy of Means) |
 | 에러 발생 시 | grind-error-resilience.md |
 | Cross-cutting 참조 시 | grind-cross-cutting.md |
-| 코드 탐색 시 (graphify-out/ 존재 시) | `~/.claude/skills/_shared/graphify-context.md` — 그래프 기반 탐색으로 진입점·영향범위 파악 효율화 |
 | Startup (workflow-state.json 초기화 후) | `~/.claude/skills/_shared/monitor-protocol.md` | on-demand, monitor 미실행 시 skip |
 
 > **Note**: 초기 로딩을 경량화하여 grind의 재시도 집약적 특성에서 컨텍스트를 절약한다.

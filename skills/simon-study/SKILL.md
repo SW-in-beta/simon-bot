@@ -57,19 +57,6 @@ compatibility:
 - 웹 검색 — 핵심 원리, 베스트 프랙티스, 알려진 함정
 
 **코드 리서치** (직접 실행 — Grep/Read 결과는 선택적 로딩 가능):
-- **그래프 컨텍스트** — graphify Knowledge Graph가 있으면 탐색 효율을 높임:
-  > **Reference Loading** (선택적): `~/.claude/skills/_shared/graphify-context.md` 참조
-  - graphify-out/GRAPH_REPORT.md가 존재하면 읽고, god nodes와 communities로 전체 구조를 먼저 파악
-  - 탐색 대상 모듈에 `graphify explain`을 실행하여 연결 관계를 확인한 후, 필요한 파일만 Read
-  - 그래프가 없으면 이 단계를 건너뛰고 기존 Grep/Read 방식으로 진행
-- **크로스-서비스 그래프** — ~/buzzvil/ 환경에서 개념이 2개 이상 서비스에 걸칠 때:
-  코드 리서치 중 동일 개념(함수명, 타입명, proto 메시지, Kafka 토픽 등)이 ~/buzzvil/ 하위의 서로 다른 레포 2개 이상에서 발견되면, 개별 레포 그래프만으로는 서비스 간 연결을 볼 수 없다. 이 경우 `/graphify-connect --concept {핵심키워드}`를 **백그라운드 Agent**로 실행하여 크로스-서비스 semantic 그래프를 빌드한다. 빌드가 완료되면 ~/buzzvil/graphify-out/GRAPH_REPORT.md에서 Surprising Connections와 Hyperedges를 읽어 보고서에 반영한다.
-  ```
-  감지 기준: Grep 결과에서 동일 키워드가 ~/buzzvil/{서비스A}/와 ~/buzzvil/{서비스B}/ 양쪽에서 발견
-  실행: Agent(run_in_background=true) → Skill("graphify-connect", args="--concept {키워드}")
-  활용: 완료 후 ~/buzzvil/graphify-out/GRAPH_REPORT.md의 크로스-서비스 연결을 보고서에 포함
-  ```
-  이미 ~/buzzvil/graphify-out/graph.json이 최근에 생성되었고(7일 이내), 해당 개념의 서비스들이 포함되어 있으면 재빌드를 건너뛴다.
 - **변동성 진단** — 학습 대상 코드의 git 이력 건강도를 먼저 파악:
   > **Reference Loading** (선택적): `~/.claude/skills/_shared/codebase-health-prescan.md`의 명령 1, 2 참조
   - churn 분석 (해당 모듈/디렉토리 범위): 자주 변경되는 파일은 설계 문제 또는 핵심 로직일 가능성

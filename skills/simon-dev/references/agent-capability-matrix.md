@@ -103,7 +103,6 @@ subagent가 결과를 반환할 때 다음 prefix를 사용한다:
 | fact-checker | sonnet | 공식 문서 조회 + 사실 대조, 도구 중심 작업 |
 | spec-validator | sonnet | 기술 AC → 사용자 시나리오 변환, 기계적 변환 |
 | ci-watch | sonnet | CI 폴링 + 에러 분류 + 코드 수정, 패턴 매칭 기반 |
-| comment-watcher | sonnet | PR 댓글 폴링 + 분류, 기계적 폴링 |
 | internal-researcher | sonnet | Confluence/Slack 검색 스크립트 실행 + 결과 요약, 도구 중심 |
 | data-researcher | sonnet | 데이터 스킬 호출 + SQL 실행, 도구 중심 |
 

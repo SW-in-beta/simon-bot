@@ -115,7 +115,6 @@ Agent 도구로 서브에이전트를 생성하고, 아래 내용을 프롬프�
 ~/buzzvil/{repo_name} (현재 최신 master/main 체크아웃 완료)
 
 ## 분석 요청사항
-- graphify-out/GRAPH_REPORT.md가 존재하면 먼저 읽고, god nodes와 communities를 탐색 컨텍스트로 활용한다. `graphify query`로 에러 관련 모듈을 탐색하고 `graphify path`로 장애 전파 경로를 추적한다 (상세: `~/.claude/skills/_shared/graphify-context.md`)
 - 관련 코드 경로와 동작 원리를 file:line 형식으로 구체적으로
 - **사용 흐름 전체 검증 (필수 원칙)**: 함수/심볼의 동작을 분석할 때 바디 한 군데만 보고 단정하지 않는다. 해당 심볼이 **실제로 어떻게 생성·주입·호출·사용되는지 사용 흐름 전체**를 검증한다. DI 체인(생성자 파라미터·wiring)이 끊긴 채 silent fallback으로 wrong value가 표출되는 버그는 함수 바디만 봐서는 잡히지 않는다.
   1. **구현체 위치 확인**: 인터페이스 → 실제 struct 구현체 grep

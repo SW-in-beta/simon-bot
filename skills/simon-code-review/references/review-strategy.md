@@ -95,6 +95,7 @@ CONNECTED 모드에서는 구현자(simon)가 생성한 review-sequence.md의 �
 6. **Magic Numbers & String Coupling**: 하드코딩된 값, 문자열 기반 분기
 7. **Dead Code & Consistency**: 사용되지 않는 코드, import, 불일치 패턴
 8. **Test Gaps**: 새 코드 경로에 테스트가 없는 부분
+9. **Over-engineering & Economy of Means**: 새 추상화 레이어·파일·패턴·인터페이스가 도입되었는가? 기존 코드/표준 라이브러리/네이티브 기능으로 동일 목적을 더 적은 코드로 달성 가능했는가? (단, 테스트·검증·에러처리는 판정 대상 아님 — 줄이라는 신호로 쓰지 않는다)
 
 **Pre-Landing Review Checklist (Pass 1 CRITICAL)는 리뷰 모드(CONNECTED/STANDALONE)와 무관하게 예외 없이 전체 적용한다.**
 

@@ -71,8 +71,6 @@ Step 5: 마무리
 
 ## Step 0: Standalone 분석 (STANDALONE 모드만)
 
-> **Reference Loading** (선택적): graphify-out/GRAPH_REPORT.md가 존재하면 `~/.claude/skills/_shared/graphify-context.md`를 참조한다. 변경 파일이 god node에 해당하면 "이 파일은 N개 모듈이 의존하는 핵심 파일입니다" 경고를 리뷰 코멘트에 포함하고, 변경이 여러 community에 걸치면 cross-community 영향 경고를 추가한다.
-
 STANDALONE 모드에서는 simon-dev의 Step 18-A/B에 해당하는 분석을 자체적으로 수행한다. simon-dev이 전문가 패널을 거쳐 생성하는 review-sequence와 동등한 품질을 위해 agent team을 구성한다.
 
 For detailed instructions, read [standalone-analysis.md](references/standalone-analysis.md).
@@ -188,89 +186,21 @@ Agent(run_in_background=true, model="sonnet"):
 CI Watch 시작 후, 사용자에게 알림:
 > "Draft PR에 코드 리뷰를 작성했습니다: {PR_URL}
 > PR에서 리뷰를 확인하시고, 궁금한 점이나 수정 요청을 코멘트로 남겨주세요.
-> 댓글을 달면 1분 내로 자동 감지하여 반영합니다.
+> 코멘트를 남기신 뒤 알려주시면 반영합니다.
 > (CI도 모니터링하고 있습니다 — 실패하면 자동으로 수정합니다.)"
 
-### Comment Auto-Watch (Background Agent)
+### 피드백 기준 시점 저장
 
-리뷰 안내 직후, CI Watch와 동일한 패턴으로 background agent를 시작하여 PR 댓글을 폴링한다. CronCreate는 실제 실행 환경에서 안정적으로 동작하지 않으므로, `Agent(run_in_background=true)` + 내부 polling loop 패턴을 사용한다.
-
-**마지막 확인 시점 초기화:**
-Step 2 리뷰 제출 직후의 타임스탬프를 `{SESSION_DIR}/memory/last-comment-check.md`에 저장한다:
+Step 4에서 새 댓글만 수집할 수 있도록, Step 2 리뷰 제출 직후의 타임스탬프를 `{SESSION_DIR}/memory/last-comment-check.md`에 저장한다:
 ```bash
 date -u +"%Y-%m-%dT%H:%M:%SZ" > {SESSION_DIR}/memory/last-comment-check.md
 ```
 
-**Background Agent 시작:**
-```
-Agent(run_in_background=true, model="sonnet")
-```
-
-Agent에 전달할 컨텍스트:
-- PR 번호, owner, repo (`.claude/memory/pr-info.md`)
-- SESSION_DIR 경로
-- 리뷰 사이클 카운터 파일 경로: `{SESSION_DIR}/memory/review-cycle-counter.md`
-- 전문가 검증 프로토콜: `~/.claude/skills/simon-code-review/references/expert-comment-review.md`
-- 인라인 리뷰 양식: `~/.claude/skills/simon-code-review/references/inline-review-format.md`
-
-**댓글 감지 폴링 루프 (60초 간격, 종료 조건 충족까지 반복):**
-
-1. `{SESSION_DIR}/memory/last-comment-check.md`의 시점 읽기
-2. gh api로 PR 댓글(인라인 + 일반) 수집, 해당 시점 이후 새 사용자 댓글만 필터링 (AI 작성 댓글 제외):
-   ```bash
-   SINCE=$(cat {SESSION_DIR}/memory/last-comment-check.md)
-   # 인라인 리뷰 코멘트
-   gh api repos/{owner}/{repo}/pulls/{pr_number}/comments --paginate \
-     --jq "[.[] | select(.created_at > \"${SINCE}\") | select(.user.type != \"Bot\") | {
-       id: .id,
-       body: .body,
-       path: .path,
-       line: .line,
-       start_line: .start_line,
-       diff_hunk: .diff_hunk,
-       created_at: .created_at
-     }]"
-   # 일반 PR 코멘트
-   gh api repos/{owner}/{repo}/issues/{pr_number}/comments --paginate \
-     --jq "[.[] | select(.created_at > \"${SINCE}\") | select(.user.type != \"Bot\")]"
-   ```
-3. 새 댓글 없으면 → 60초 대기 후 1번으로 복귀
-4. 새 댓글 있으면:
-   a. `{SESSION_DIR}/memory/review-cycle-counter.md`의 값을 +1 (현재 리뷰 사이클 R{N})
-   b. 코멘트를 질문/수정요청/승인으로 분류
-   c. 승인/OK → resolve 처리
-   d. 질문 또는 수정 요청 → 반드시 아래 순서를 따른다:
-      i.  코멘트의 도메인 식별 (아키텍처/성능/보안/테스트/비즈니스로직/코드스타일 등)
-      ii. `Agent(subagent_type='general-purpose')`로 해당 도메인 전문가를 spawn하여 검증.
-          전문가에게 다음을 반드시 전달한다:
-          - 코멘트 원문 (body)
-          - diff_hunk 전문 (선택된 코드 블록)
-          - 파일 경로 + 라인 범위 (path, start_line~line)
-          - diff_hunk에서 추출한 수정 스코프 식별자 목록
-          - PR 맥락
-          **[규칙]** 수정 스코프 식별자는 body에서 추론하지 말고 diff_hunk에서 직접 추출한다.
-          전문가 프로토콜 상세: `~/.claude/skills/simon-code-review/references/expert-comment-review.md`
-      iii. 전문가 verdict를 `{SESSION_DIR}/memory/expert-verdicts/{comment_id}.md`에 저장
-      **[컨텍스트 격리]** 전문가 Agent는 verdict 전문을 파일에 저장하고, 반환값은 경량 형식으로 제한한다:
-      `{AGREE|PARTIAL|COUNTER}: {1줄 사유} [verdict: {SESSION_DIR}/memory/expert-verdicts/{comment_id}.md]`
-      이유: 대형 PR(20+ 코멘트)에서 per-comment verdict 전문이 메인 컨텍스트에 누적되면 수만 토큰을 소비한다.
-      상세 근거가 필요하면 verdict 파일을 선택적으로 Read한다.
-      iv. verdict(AGREE/PARTIAL/COUNTER)에 따라:
-           - AGREE → 코드 수정 → 커밋 → 푸시 → `[R{N}]` Before/After 포함 대댓글
-           - PARTIAL → 수정된 방식으로 변경 → `[R{N}]` Before/After + 이유 대댓글
-           - COUNTER → 코드 변경 없이 `[R{N}]` 전문가 근거로 반론 대댓글
-      **[GATE]** 전문가 Agent 호출 없이 직접 수정하거나 답변하는 것은 금지.
-   e. 수정된 부분에 `[R{N}]` 접두사로 인라인 리뷰 재작성
-      (양식: `~/.claude/skills/simon-code-review/references/inline-review-format.md`)
-   f. **[코드 변경 시] CI Watch 재시작** — AGREE/PARTIAL로 코드를 수정 + push한 경우, simon-ci-fix를 background agent로 위임하여 CI Watch를 재시작한다 (Step 4-D 절차 참조). COUNTER의 경우 생략.
-   g. 사용자에게 수정 완료 안내
-   g. `last-comment-check.md`를 현재 시점으로 갱신
-5. **종료 조건 확인**: 새 댓글 중 "LGTM" / "approve" / "승인" 패턴이 있으면 → 폴링 종료, Step 5로 진행 안내
-6. 종료 조건 미충족 → 60초 대기 후 1번으로 복귀
+리뷰 안내 후 PR 댓글을 폴링하지 않는다. 피드백 처리는 사용자의 알림을 트리거로 Step 4에서 수행한다.
 
 ## Step 4: 피드백 루프
 
-Comment Auto-Watch가 새 댓글을 감지하면 자동으로 4-A~4-E를 실행한다. 사용자가 직접 "피드백 준비됐어"라고 말해도 동일하게 실행된다.
+사용자가 "피드백 준비됐어", "코멘트 달았어" 등으로 피드백 완료를 알리면 4-A~4-E를 실행한다.
 
 ### 4-A: 피드백 수집
 
@@ -390,13 +320,11 @@ ASK 항목만 Step 4-B의 전문가 검증 파이프라인으로 전달.
 사용자에게 수정 내용 요약 보고:
 > "피드백 반영 완료했습니다: {수정 요약}
 > PR에서 확인해주세요: {PR_URL}
-> (댓글 자동 감지 + CI 모니터링 계속 중입니다.)"
+> (CI 모니터링은 계속 중입니다. 추가 코멘트를 남기시면 알려주세요.)"
 
 ### 종료 조건
 
-사용자가 "LGTM" / "approve" / "승인" / PR ready 전환을 요청하면:
-1. Comment Auto-Watch background agent가 자동 종료 (종료 조건 감지)
-2. Step 5로 진행
+사용자가 "LGTM" / "approve" / "승인" / PR ready 전환을 요청하면 Step 5로 진행한다.
 
 ## Step 5: 마무리
 

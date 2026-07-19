@@ -62,7 +62,7 @@ reference 파일의 내용이 구조화되고 적정 크기를 유지하는지 �
 - **Script 참조 정합성**: reference 파일 내에서 참조하는 스크립트 경로가 실제 존재하는가 (2-C와 동일 기준)
 
 #### 2-E: Shared Protocols 검증
-- **Preamble 참조**: `_shared/preamble.md` 참조가 있는가 (simon, grind, review, pm, report, sessions, company에 필수)
+- **Preamble 참조**: `_shared/preamble.md` 참조가 있는가 (필수: simon-dev, simon-grind, simon-code-review, simon-pm, simon-report, simon-sessions, simon-company, simon-ci-fix, simon-plan, simon-loop). **`simon`(라우터)은 제외** — `compatibility.tools`가 `[Skill, AskUserQuestion]`뿐이라 preamble이 규율하는 런타임 격리·파일조작·Agent Teams·코드생성을 수행하지 않고 즉시 위임한다. preamble은 위임받은 작업 스킬이 로드한다.
 - **Expert Panel 참조**: boost 계열 스킬에 `_shared/expert-panel-boost.md` 참조가 있는가
 
 ### Step 3: 대시보드 출력

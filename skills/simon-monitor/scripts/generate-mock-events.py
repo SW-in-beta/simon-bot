@@ -108,7 +108,7 @@ def make_events():
 
     # Step 1-A: Project Analysis + Code Design
     add("A/1-A", "step_start", "프로젝트 분석 + 코드 설계 분석", {
-        "description": "프로젝트 구조 스캔, graphify 그래프 참조, Code Design Team 분석"
+        "description": "프로젝트 구조 스캔, Code Design Team 분석"
     })
     add("A/1-A", "subagent_spawn", "구조 탐색 에이전트 시작", {
         "agent_name": "project-analyzer", "agent_type": "Explore",
