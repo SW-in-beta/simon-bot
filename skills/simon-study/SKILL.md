@@ -10,6 +10,7 @@ compatibility:
 문제 기반 심층 학습 스킬. 구체적인 문제에서 출발하여, 개념 이해 → 멘탈 모델 추출 → 설계 트레이드오프 → 개선 방향을 **하나의 보고서**로 정리합니다.
 
 > **자율주행모드 ON 입니다.** 여러 Agent와 병행하여 딥하게 조사해주세요.
+> 이 선언은 CLAUDE.md의 모호성 확인 규칙보다 우선한다 — 분석 진행 중 세부 모호함은 스스로 판단해 진행한다. 단, 분석 대상 자체(코드/레포/질문)가 특정되지 않는 수준의 모호함은 시작 전 1회만 확인한다.
 
 ## Why this exists
 
@@ -20,6 +21,8 @@ compatibility:
 이 스킬은 그 사고 흐름을 따라 개념과 코드를 엮어 보고서를 만듭니다.
 
 ## Instructions
+
+**진행 체크포인트**: 각 Phase 경계에서 1줄 진행 보고를 출력한다 — `[Phase N 완료] {핵심 결과 요약} — Phase N+1 시작` 형식. 장시간 무응답 구간에서 사용자가 진행 상태를 알 수 있게 한다 (AskUserQuestion 아님, 단순 텍스트).
 
 ### Phase 1: 문제 정의
 
@@ -44,7 +47,7 @@ compatibility:
 
 ### Phase 2: 리서치 — 개념과 코드를 동시에
 
-**병렬로** 수집합니다. **컨텍스트 격리 원칙**: 외부 데이터를 가져오는 리서치 채널(사내 자료, 데이터)은 Agent 서브에이전트로 위임하여, raw 결과가 메인 컨텍스트에 직접 유입되지 않도록 한다. 서브에이전트는 raw를 파일에 저장하고 요약만 반환한다. 이유: 4개 채널의 raw 데이터가 모두 메인 컨텍스트에 들어오면 Phase 3 보고서 작성 시점에 256K 토큰 경계를 넘어 정확도가 하락한다.
+**병렬로** 수집합니다. **컨텍스트 격리 원칙**: 외부 데이터를 가져오는 리서치 채널(사내 자료, 데이터)은 Agent 서브에이전트로 위임한다. 반환 계약은 `_shared/preamble.md`의 Subagent Result-Only Contract를 따른다 (반환 형식: `STATUS: PASS/FAIL, 발견 {N}건, 저장: {경로}`). 이유: 4개 채널의 raw 데이터가 모두 메인 컨텍스트에 들어오면 Phase 3 보고서 작성 시점에 256K 토큰 경계(측정 기준 모델의 수치 — 모델 변경 시 재검토)를 넘어 정확도가 하락한다.
 
 **개인 지식 베이스 조회** (직접 실행 — 다른 리서치 채널과 병렬):
 - `simon-brain-query`의 검색 로직으로 Obsidian wiki vault(`~/Obsidian/*-wiki/`)에서 학습 주제 관련 기존 지식을 검색한다
@@ -77,23 +80,7 @@ compatibility:
 
 코드만으로 "왜 이렇게 만들었는지" 파악이 어려울 때, **Agent 서브에이전트**를 통해 Confluence와 Slack에서 관련 자료를 검색한다.
 
-```
-Agent(subagent_type="general-purpose", model="sonnet"):
-  "다음 스크립트로 사내 자료를 검색하고, 결과를 파일에 저장한 뒤 요약만 반환하라.
-
-   검색 실행:
-   - Confluence: ~/.claude/skills/buzzvil-confluence/scripts/search.sh -q '{검색어}' -s {space} -f
-   - Slack: ~/.claude/skills/buzzvil-slack/scripts/search.sh -q '{검색어}' -c {channel}
-   - Slack 스레드: ~/.claude/skills/buzzvil-slack/scripts/fetch_thread.sh '{URL}'
-
-   결과 저장: {SESSION_DIR}/raw/internal-research-$(date +%s).txt
-
-   반환 형식 (요약만):
-   - Confluence: 발견된 문서 수, 각 문서의 제목 + URL + 핵심 내용 1-2문장
-   - Slack: 관련 스레드 수, 각 스레드의 핵심 논점 + permalink
-   - 설계 의도/의사결정에 관한 핵심 발견 3줄 이내
-   - raw 파일 경로"
-```
+> **Reference Loading**: 사내 자료 검색 Agent는 `~/.claude/skills/_shared/internal-research-agent.md`의 템플릿으로 spawn한다.
 
 검색 기준:
 - 코드에서 발견된 핵심 키워드 (기능명, 모듈명, 패턴명)
@@ -229,6 +216,7 @@ codebase-mental-model처럼, 단순 개념 나열이 아니라 **"전문가는 �
 - **시각화 적극 활용**: 복잡한 흐름이나 관계는 mermaid 다이어그램으로. 텍스트만으로 설명이 어려울 때 즉시 다이어그램 삽입
 - **데이터 투명성**: 데이터를 인용할 때 반드시 조회 출처(테이블, 쿼리, 기간)를 명시. "데이터에 따르면"만으로는 불충분 — 사용자가 동일 쿼리로 재현할 수 있어야 함
 - **정직함**: 웹 검색 결과가 부실하면 솔직히 말하고, 확인 가능한 범위에서 진행
+- **분량 캘리브레이션**: 문제가 단순하면 보고서도 간결하게 — 템플릿의 섹션 수·항목 수(멘탈 모델 3-5개, 트레이드오프 2-3개 등)는 상한이지 목표치가 아니다. 질문에 실질적으로 답하지 않는 filler 섹션, 같은 내용의 반복 요약, 보일러플레이트 문구를 추가하지 않는다. 분량이 아니라 정확도가 중요하다
 - **한국어**: 한국어로 작성하되, 기술 용어는 영어 병기
 - **Obsidian callout 활용**: 보고서에서 강조나 구분이 필요한 블록은 Obsidian callout 문법을 사용한다.
   - 정보성 박스 → `> [!info]`
@@ -242,6 +230,10 @@ codebase-mental-model처럼, 단순 개념 나열이 아니라 **"전문가는 �
   - 지표/수치 강조 → **볼드 텍스트**
   - 인용 → `> [!quote] 출처`
 
+### 이해도 자가진단 (선택)
+
+보고서의 핵심 멘탈 모델 각각에서 1문항씩(3-5문항) 만들어 "이해도를 확인해볼까요?"라고 제안한다. 원래의 문제 상황과 연결된 응용형 질문("당신의 문제에 이 모델이 왜 적용되는가")으로 구성하고, 답변 후 정답 근거를 file:line과 함께 즉시 확인시킨다. 강제가 아니다 — 학습 도구이지 승인 게이트가 아니다.
+
 ### Phase 4: 보고서 저장
 
 보고서 마크다운 출력 직후, 파일로 저장한다.
@@ -252,8 +244,4 @@ REPORT_FILE=~/claude-reports/study-$(date +%Y%m%d-%H%M%S).md
 # 보고서 내용을 REPORT_FILE에 저장
 ```
 
-저장 완료 후 사용자에게 안내한다:
-
-> 보고서가 `~/claude-reports/` 에 저장되었습니다.
-> - Obsidian에서 리뷰하려면 `/simon-md-reviewer`를 호출하세요.
-> - 개인 지식 베이스(wiki)에 저장하려면 `/simon-brain-update`를 호출하세요.
+보고서 저장 후 AskUserQuestion으로 다음 행동을 묻는다 — 옵션: "Obsidian/Orca 리뷰 (simon-md-reviewer)", "wiki 저장 (simon-brain-update)", "여기서 종료". 사용자가 선택하면 해당 스킬을 그 자리에서 Skill 도구로 즉시 호출한다 (경로 자동 전달 — 사용자가 경로를 복사/타이핑하지 않게 한다).

@@ -78,7 +78,7 @@ Agent(
 내용:
 ---
 status: pending
-severity: HIGH | MEDIUM | LOW
+severity: CRITICAL | HIGH | MEDIUM | LOW  # 판정 기준: _shared/expert-panel-boost.md의 Proposal Severity Rubric
 target_skill: {skill_name}
 target_section: {step/section}
 captured_at: {ISO datetime}

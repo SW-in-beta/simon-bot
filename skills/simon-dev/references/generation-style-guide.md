@@ -2,6 +2,17 @@
 
 simon이 생성하는 주요 산출물의 스타일, 구조, 품질 기준.
 
+## 목차
+
+- [1. plan-summary.md 스타일 가이드](#1-plan-summarymd-스타일-가이드)
+  - [Files Changed 테이블](#files-changed-테이블)
+  - [AskUserQuestion Standard Format](#askuserquestion-standard-format)
+- [2. Work Report (Step 18-A) 스타일 가이드](#2-work-report-step-18-a-스타일-가이드)
+- [3. simon-report 산출물 품질 기준](#3-simon-report-산출물-품질-기준)
+- [4. Completeness Principle (Boil the Lake)](#4-completeness-principle-boil-the-lake)
+  - [직접 진술 우선 (은유·차용 용어 금지)](#직접-진술-우선-은유차용-용어-금지)
+- [5. Economy of Means (절제된 산출 — 코드의 형태)](#5-economy-of-means-절제된-산출--코드의-형태)
+
 ## 1. plan-summary.md 스타일 가이드
 
 ### Situation 섹션
@@ -72,6 +83,17 @@ simon이 생성하는 주요 산출물의 스타일, 구조, 품질 기준.
 | internal/pacing/service.go | 신규 | 서비스 구현 |
 | internal/handler/campaign.go | 수정 | 수정 |
 ```
+
+**신규 public 인터페이스가 있으면 호출자를 함께 적는다.** 새로 추가하는 export/public 함수·메서드마다 "이 PR 안에서 누가 호출하는가"를 명시한다 — 호출자를 적을 수 없으면 그 함수는 이번 범위에 필요하지 않다는 신호다. Over-engineering Check(Step 4)가 정성적 토론만 반복하지 않도록, grep으로 확인 가능한 사실을 계획 단계에 미리 넣는다.
+
+```markdown
+| File | Action | Summary | Callers (신규 public만) |
+|------|--------|---------|------------------------|
+| internal/pacing/service.go | 신규 | 시간대별 예산 분배 비율 계산 | `handler/campaign.go:CreateCampaign` |
+| internal/pacing/cache.go | 신규 | 분배 결과 캐시 | **없음 — 차후 PR 예정** (승인 필요) |
+```
+
+호출자가 "없음"인 항목은 사용자 승인 없이 진행하지 않는다. 프레임워크가 호출하는 핸들러(HTTP route, gRPC 구현체, 이벤트 리스너 등록)는 그 등록 지점을 호출자로 적는다.
 
 ### NOT in scope
 
@@ -225,6 +247,7 @@ graph LR
 - **길이**: 간결함 우선. 같은 정보를 더 짧게 전달할 수 있으면 짧게
 - **코드 스니펫**: 핵심 변경만 발췌. 전체 파일 복사 금지
 - **중복 금지**: report와 review-sequence에서 동일 내용 반복하지 않음. 상호 참조 사용
+- **섹션 스코프 고정**: 위 표에 정의된 섹션만 작성한다. Executive Summary·목차·"정리하며" 류 마무리 섹션 등 템플릿에 없는 섹션을 임의로 추가하지 않으며, 이미 다른 섹션에서 다룬 내용을 다시 요약하는 별도 섹션도 금지한다 — 개별 섹션 길이 상한만으로는 섹션 개수를 늘리는 방식의 문서 비대화를 막지 못하기 때문이다
 - **Mermaid 호환**: GitHub에서 렌더링 가능한 문법만 사용 (`graph`, `sequenceDiagram`, `flowchart`)
 
 ## 4. Completeness Principle (Boil the Lake)
@@ -259,8 +282,21 @@ AI의 한계 비용은 0에 수렴한다. 이 사실이 모든 트레이드오�
 - 테스트 작성: happy path + edge case + error case + boundary 모두
 - 에러 처리: 모든 실패 경로에 명시적 처리
 - 입력 검증: 시스템 경계에서의 모든 validation
-- 문서화: 코드 자체가 문서가 되도록 명확한 네이밍과 구조 — 설명 주석을 추가하는 대신 코드를 명확하게 만든다. 주석은 임시 코드 표시(TODO/FIXME), 도구 요구 지시 주석, 회귀 테스트 attribution, 코드로 표현 불가능한 "왜"에만 작성한다 (상세: [phase-b-implementation.md](phase-b-implementation.md) Critical Rules의 주석 최소화)
+- 문서화: 코드 자체가 문서가 되도록 명확한 네이밍과 구조 — 설명 주석을 추가하는 대신 코드를 명확하게 만든다. 주석 작성 기준은 [phase-b-implementation.md](phase-b-implementation.md) Critical Rules의 **주석 최소화 원칙(SSoT)** 을 따른다. 허용 예외 목록을 여기 복제하지 않는다 — 두 곳에 같은 목록을 두면 한쪽만 개정되어 drift한다
 - 타입 안전: 타입 시스템이 지원하는 모든 안전 장치 활용
+
+### 직접 진술 우선 (은유·차용 용어 금지)
+
+데이터 구조·알고리즘·데이터 흐름을 **다른 도메인의 용어로 압축 설명하지 않는다**. 은유는 그 도메인에 익숙한 독자에게만 통하고, 실제로 무엇이 어떻게 되는지는 독자가 여전히 추론해야 한다. 평범한 문장으로 직접 진술한다.
+
+- BAD: "LEFT JOIN 시맨틱 — 원본 컬럼은 전부, 우리 필드는 이 피드가 적재하는 것만"
+- GOOD: "source_columns는 원본 파일의 모든 컬럼(사용 여부 무관), assignments는 이 피드가 실제로 값을 채우는 필드만 — source_columns 쪽이 더 많거나 같다"
+- BAD: "fan-in 가능, undefined_sources 포함, INFILE 관점"
+- GOOD: "원본 컬럼 하나가 우리 필드 여러 개로 연결될 수 있다. 어디에도 연결되지 않은 원본 컬럼도 목록에 포함한다"
+
+적용 대상은 **레포·팀이 공유하지 않는 새 도메인에서 끌어온 은유**다. 업계 표준 명칭(N+1 쿼리, race condition, idempotency 등)은 은유가 아니므로 이 규칙의 대상이 아니다.
+
+이 규칙은 **코드 주석과 리뷰 코멘트 양쪽에 동일하게 적용한다** — 같은 압축 습관이 두 산출물에서 동시에 "이해하기 어렵다"는 지적을 받은 실사례가 있다. 리뷰 코멘트 쪽 적용은 `simon-code-review/references/inline-review-format.md`가 참조한다.
 
 ## 5. Economy of Means (절제된 산출 — 코드의 형태)
 

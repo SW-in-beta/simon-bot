@@ -94,7 +94,6 @@ Then in Claude Code:
 | `/simon-company` | Full-stack software company — multi-team collaboration from planning to deployment & ops |
 | `/simon-healthcheck` | Skill health dashboard — validate structural quality across the entire simon skill family |
 | `/simon-md-reviewer` | Open a Markdown file in a browser HTML viewer and run an inline-comment review loop |
-| `/simon-monitor` | Workflow real-time visualization — track every stage of simon/grind/pm pipelines via web dashboard |
 | `/simon-oncall` | On-call inquiry analysis — deep analysis of Slack messages + related repos to diagnose root cause and draft responses |
 | `/simon-presenter` | Live demo presenter — run apps with Playwright for interactive demonstrations |
 | `/simon-publish` | Confluence auto-publish — classify MD files into the right category and publish to personal workspace |
@@ -121,7 +120,6 @@ Then in Claude Code:
 | Auto-fix CI failures (PR checks failing) | `/simon-ci-fix` |
 | Validate skill quality after edits | `/simon-healthcheck` |
 | Review a Markdown file with inline browser comments | `/simon-md-reviewer` |
-| Watch a simon workflow in real time | `/simon-monitor` |
 | Diagnose an on-call inquiry and draft a response | `/simon-oncall` |
 | Demo a finished app with live browser interaction | `/simon-presenter` |
 | Publish an analysis report to Confluence | `/simon-publish` |
@@ -254,22 +252,6 @@ Runs finished apps with a Playwright headed browser for interactive live demonst
 <summary><strong>simon-healthcheck</strong></summary>
 
 Validates the structural quality of the entire simon skill family and outputs a dashboard. Use after applying boost improvements or modifying skill files to verify integrity.
-
-</details>
-
-<details>
-<summary><strong>simon-monitor</strong></summary>
-
-Real-time web dashboard (port 3847) for simon/grind/pm workflow execution:
-
-- **Live step tracking** — pending → running → completed/failed/skipped per step
-- **Expert panel opinions** — shows each team's discussion and consensus
-- **Sub-agent activity** — spawn events, task descriptions, and returned results
-- **Decision log** — what was decided, why, and what alternatives were considered
-- **Gate history** — pass/fail for each verification gate
-- **Session history** — replay completed sessions for retrospectives
-
-Emits events via `{SESSION_DIR}/events.jsonl`. Falls back to polling `workflow-state.json` for basic step timeline even without explicit instrumentation.
 
 </details>
 

@@ -27,11 +27,14 @@ ls -d ~/.claude/skills/simon*/  ~/.claude/skills/simon-company/ ~/.claude/skills
 - **YAML frontmatter**: name, description 필드가 존재하는가
 - **줄 수**: 500줄 이내인가 (경계: 450-500줄이면 WARNING)
 - **description 트리거**: "Use when:" 패턴이 포함되어 있는가
+- **라우터 Registry 대조** (전역 1회 — 스킬별 총점 아닌 "전역 검증" 섹션에 보고): `ls ~/.claude/skills/simon*/SKILL.md` 결과(SKILL.md 없는 workspace 디렉토리 제외)와 simon/SKILL.md Registry 표의 스킬명을 대조 — 스킬이 있는데 Registry에 없으면 FAIL (라우터 도달 불가 스킬)
+- **CLAUDE.md 참조 실존** (전역 1회 — "전역 검증" 섹션에 보고): `~/.claude/CLAUDE.md`가 언급하는 simon-* 스킬명이 실제 디렉토리에 존재하는지 대조 — 유령 참조 발견 시 FAIL
 
 #### 2-B: Reference 검증
 - **참조 경로**: SKILL.md의 **실제 Markdown 링크** `[text](references/file.md)` 또는 명시적 read 지시문(`read references/file.md`)에서 참조하는 경로가 실제로 존재하는가. **오탐 제외 규칙**: ① 코드블록(` ``` `) 내부의 예시 경로, ② 타 스킬 절대경로(`~/.claude/skills/다른스킬/references/...`), ③ 예시 텍스트 내 언급 — 이 세 가지는 검증 대상에서 제외한다.
 - **300줄 초과 TOC**: 300줄 초과 reference 파일에 TOC(`## 목차` 또는 `## Table of Contents`)가 있는가
 - **미참조 파일**: references/ 디렉토리에 있지만 SKILL.md에서 Markdown 링크로 한 번도 참조하지 않는 파일이 있는가
+- **인라인 프롬프트 길이**: SKILL.md 본문 내 subagent spawn 프롬프트 블록이 20줄을 초과하면 references/ 분리 권장 (WARN)
 
 #### 2-C: Script/Asset 경로 검증
 
@@ -72,11 +75,11 @@ reference 파일의 내용이 구조화되고 적정 크기를 유지하는지 �
 ```
 === Simon-Bot Skill Health Dashboard ===
 
-| 스킬 | SKILL.md | 줄 수 | Frontmatter | Description | Ref 경로 | TOC | Script 경로 | Ref 품질 | Preamble | 총점 |
-|------|----------|-------|-------------|-------------|----------|-----|------------|---------|----------|------|
-| simon | OK | 499 ⚠ | OK | OK | OK | OK | OK | ⚠ 1 | OK | 8/9 |
-| simon-grind | OK | 211 | OK | OK | OK | OK | OK | OK | OK | 9/9 |
-| ... | | | | | | | | | | |
+| 스킬 | SKILL.md | 줄 수 | Frontmatter | Description | Ref 경로 | TOC | Script 경로 | Ref 품질 | Preamble | 인라인 | 총점 |
+|------|----------|-------|-------------|-------------|----------|-----|------------|---------|----------|--------|------|
+| simon-dev | OK | 498 ⚠ | OK | OK | OK | OK | OK | ⚠ 1 | OK | OK | 9/10 |
+| simon-grind | OK | 211 | OK | OK | OK | OK | OK | OK | OK | OK | 10/10 |
+| ... | | | | | | | | | | | |
 
 === Script/Asset 상세 ===
 | 스킬 | 참조 경로 | 존재 | 실행권한 |
@@ -96,13 +99,20 @@ reference 파일의 내용이 구조화되고 적정 크기를 유지하는지 �
 | _shared/preamble.md | OK | 42 | 7 |
 | _shared/expert-panel-boost.md | OK | 80 | 2 |
 
+=== 전역 검증 (스킬별 총점과 별개) ===
+| 항목 | 결과 | 비고 |
+|------|------|------|
+| 라우터 Registry 대조 | OK | 누락 스킬 0건 |
+| CLAUDE.md 참조 실존 | OK | 유령 참조 0건 |
+
 === Summary ===
-Total: {N} skills | PASS: {N} | WARNING: {N} | FAIL: {N}
+Total: {N} skills | PASS: {N} | WARNING: {N} | FAIL: {N} | 전역 검증: {PASS/FAIL}
 ```
 
 **점수 기준**:
-- 각 검증 항목 통과 시 1점 (총 9항목: SKILL.md 존재, 줄 수, Frontmatter, Description, Ref 경로, TOC, Script 경로, Ref 품질, Preamble)
-- 9/9 = PASS, 7-8/9 = WARNING, <7 = FAIL
+- 각 검증 항목 통과 시 1점 (총 10항목: SKILL.md 존재, 줄 수, Frontmatter, Description, Ref 경로, TOC, Script 경로, Ref 품질, Preamble, 인라인 프롬프트 길이)
+- 10/10 = PASS, 8-9/10 = WARNING, <8 = FAIL
+- 전역 검증 2건(Registry 대조, CLAUDE.md 참조)은 스킬별 총점이 아닌 "전역 검증" 섹션에 보고 — 1건이라도 FAIL이면 Summary에 FAIL 표기
 - 줄 수 450-500 = WARNING
 - 줄 수 >500 = FAIL
 - Script 경로: 1개라도 존재하지 않으면 FAIL, 실행 권한만 없으면 WARNING

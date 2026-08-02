@@ -88,9 +88,9 @@ plan-summary.md의 Files Changed 테이블과 code-design-analysis.md가 아래 
 - Files Changed 테이블에 명시된 파일 내의 구현 세부사항 (내부 함수 분할, 변수/상수 네이밍)
 - code-design-analysis.md 패턴 범위 내의 에러 처리 방식 선택
 - 테스트 헬퍼/픽스처 설계
-- 코드 내 주석/구조 정리
+- 코드 내 **불필요한 주석 삭제** / 구조 정리 (주석 **신규 작성**은 자율권 대상이 아니다 — 아래 "코드 생성 제약"의 주석 최소화가 우선한다)
 
-### 통보 후 진행 (decision-journal에 기록)
+### 통보 후 진행 (decision-journal에 기록) (= Deviations Log — Step 18-A "Deviations from Plan" 섹션의 데이터 소스)
 - Files Changed에 없는 파일 수정 (1-2개 이내)
 - 기존 함수의 시그니처 변경 (파라미터 추가/타입 변경)
 - 새 유틸리티 함수/상수 정의
@@ -101,10 +101,34 @@ plan-summary.md의 Files Changed 테이블과 code-design-analysis.md가 아래 
 - 다른 Unit의 파일 수정
 - plan-summary.md의 AC와 충돌하는 구현 방향
 - Done-When Checks를 달성할 수 없다고 판단될 때
+- CI·배포·전역 설정 파일 수정(`.github/workflows/*`, 전역 lint/CI 설정 등)이 Files Changed에 없는 경우 — 기능 PR에 범용 인프라를 끼워 넣으면 리뷰어가 "이번 배포에 꼭 포함되어야 하는가"를 되묻게 되고, 승인이 지연된다
+
+## 코드 생성 제약 (필수 준수)
+
+### 주석 최소화
+기본값은 **주석 없음**이다. 코드가 네이밍과 구조로 스스로 설명하게 한다. 아래 예외만 허용한다:
+1. 임시 코드 표시 (TODO/FIXME/HACK + 추적 정보)
+2. 언어·도구가 요구하는 지시 주석 (`//nolint`, `# type: ignore`, build tag, pragma 등)
+3. 회귀 테스트 attribution comment
+4. 코드로 표현 불가능한 "왜" — **아래 3개 테스트를 모두 통과할 때만**
+   - 로컬성: 이 코드 블록 자신의 동작을 설명하는가? 다른 함수의 보장·세션 문서의 결정 번호(`design.md Decision 1` 등)·버전 이력(`v12:`)을 근거로 삼으면 탈락
+   - 비검증가능성: 테스트로 대신 표현할 수 없는가? 회귀 방지 목적이면 테스트를 쓰고 예외 3으로 대체
+   - diff 관련성: 이번 커밋이 실제로 바꾼 동작에 대한 설명인가? 로직이 안 바뀐 라인에 주석만 추가하면 탈락
+   적용 전에 먼저 "이름/시그니처 변경으로 표현 가능한가?"를 자문하고, 가능하면 주석 대신 리네이밍한다.
+5. 형제 식별자·분기 간 모호성 해소 — 같은 함수·구조 안에 이름만으로 구분되지 않는 형제 필드/분기가 있고 차이를 알려면 소스를 끝까지 추적해야 하는 경우. "왜 이렇게 설계했는가"가 아니라 "이 식별자가 정확히 무엇을 가리키는가"만 답한다. 리네이밍으로 해소되면 리네이밍을 우선한다.
+
+금지: 코드가 "무엇을 하는지" 자연어로 재서술하는 설명 주석, 변경 이력·이관 경과 서술, 검증 과정·트레이드오프 서술. **한 판단의 근거를 3줄 이상 쓰고 있으면 그 자리는 코드가 아니다** — PR 설명과 커밋 메시지에 쓴다. 테스트의 `# Given:`/`# When:`/`# Then:` 마커는 유지하되 뒤에 테스트명·시나리오 재설명을 붙이지 않는다(`test-case-summary.md`가 이미 담당).
+
+### 그 외
+- 기존 코드를 제거·단순화·"버그"로 판단하기 전에 `git blame` → `git show` → 커밋 의도 확인 (Intent-Before-Fix)
+- 특정 테스트 입력에 맞춘 하드코딩 금지 — 모든 유효 입력에 대해 동작하는 일반적 해결책
+- 테스트는 mock/stub으로 외부 의존성 격리 — 실제 DB·외부 API 호출 금지
 
 ## 참고 컨텍스트
 {code-design-analysis.md에서 해당 파일/모듈의 컨벤션 발췌}
 ```
+
+Runbook에 위 "코드 생성 제약"을 **본문으로 인라인**한다 — executor는 오케스트레이터의 컨텍스트를 물려받지 않으므로 `phase-b-implementation.md` 경로만 남기면 규칙이 전달되지 않는다 (`agent-capability-matrix.md`의 `<constraints>` 작성 규칙과 동일 원리).
 
 ### CONTEXT.md 생성
 
@@ -187,10 +211,21 @@ plan-summary.md의 Files Changed 테이블과 code-design-analysis.md가 아래 
   4. 같은 커밋/작성자가 if와 else에 다른 패턴을 사용했다면 → 의도적 설계로 가정, 수정 전 decision-journal에 근거 기록 후 사용자에게 확인
   이 게이트는 리뷰 중 발견된 패턴 불일치(if vs else, A 함수 vs B 함수 등)에 필수 적용한다.
 - **일반적 해결책 우선**: 모든 유효한 입력에 대해 올바르게 동작하는 일반적 해결책을 구현한다. 특정 테스트 입력에 맞춘 하드코딩은 해당 테스트만 통과시키고 실제 문제를 숨기기 때문이다.
-- **주석 최소화 (Comment Minimization)**: 기본값은 주석 없음이다 — 코드가 네이밍과 구조로 스스로 설명하게 한다. **반드시 작성해야 하는 경우만** 예외로 허용한다: (1) 임시 코드 표시(TODO/FIXME/HACK + 추적 정보), (2) 언어·도구가 요구하는 지시 주석(`//nolint`, `# type: ignore`, build tag, pragma 등), (3) 회귀 테스트 attribution comment([phase-b-verification.md](phase-b-verification.md)의 Reproducibility Gate 의무), (4) 코드로 표현 불가능한 "왜"(의도적 우회, 비직관적 제약, 호환성·규제 사유). 코드가 "무엇을 하는지" 자연어로 재서술하는 설명 주석은 금지한다 — diff 노이즈를 늘리고, 코드와 주석이 따로 노는 유지보수 부채를 만들기 때문이다. (Decision Authority의 "코드 내 주석/구조 정리" 자율권은 이 최소화 원칙 안에서만 행사한다.)
+- **주석 최소화 (Comment Minimization)** — 이 규칙은 executor spawn 시 `<constraints>`와 Unit Runbook "코드 생성 제약"에 **본문을 인라인**해야 효력이 있다(경로 참조만으로는 전달되지 않는다). 기본값은 주석 없음이다 — 코드가 네이밍과 구조로 스스로 설명하게 한다. 아래 예외만 허용한다:
+
+  - [ ] **(1) 임시 코드 표시** — TODO/FIXME/HACK + 추적 정보
+  - [ ] **(2) 도구가 요구하는 지시 주석** — `//nolint`, `# type: ignore`, build tag, pragma 등
+  - [ ] **(3) 회귀 테스트 attribution** — [phase-b-verification.md](phase-b-verification.md)의 Reproducibility Gate 의무
+  - [ ] **(4) 코드로 표현 불가능한 "왜"** — 의도적 우회, 비직관적 제약, 호환성·규제 사유. **적용 전 먼저 "이름/시그니처 변경으로 표현 가능한가?"를 자문하고, 가능하면 주석 대신 리네이밍한다**(`workflow/prompts/convention-expert.md`의 "이름 옆에 주석이 필요하다면 이름이 잘못된 것"과 동일 원칙). 리네이밍으로 해소되지 않으면 아래 3개 테스트를 **모두** 통과해야 작성할 수 있다:
+    - **로컬성**: 설명 대상이 이 코드 블록 자신의 동작인가? 다른 함수·호출자의 보장, 세션 산출물의 결정 번호(`design.md Decision 1`, `tasks 2.1` 등), 버전 이력(`v12:`, "이전엔 X였으나 이제는 Y")을 근거로 삼는 서술은 탈락한다 — 다른 함수의 동작은 그 함수 옆에, 설계 이력은 PR 설명에 남긴다. 이 파일만으로 검증할 수 없는 외부 권위를 인용하지 않는다.
+    - **비검증가능성**: 이 사실을 테스트로 대신 표현할 수 없는가? 회귀 방지가 목적이면 테스트를 작성하고 주석은 예외(3) 형태로 대체한다. 테스트 없는 "왜" 산문은 코드가 바뀌어도 갱신되지 않아 사실과 어긋난 채 리뷰를 통과할 수 있다.
+    - **diff 관련성**: 이 커밋이 실제로 바꾼 동작에 대한 설명인가? 로직이 바뀌지 않은 코드에 주석만 추가하면 내용이 정확해도 리뷰어에게는 무관한 노이즈로 보인다.
+  - [ ] **(5) 형제 식별자·분기 간 모호성 해소** — 같은 함수·데이터 구조 안에 이름만으로 구분되지 않는 형제 필드·분기가 있고, 그 차이를 알려면 소스를 끝까지 추적해야 하는 경우. 이 주석은 "왜 이렇게 설계했는가"가 아니라 **"이 식별자가 정확히 무엇을 가리키는가"만** 답한다. 은유·차용 용어(SQL의 `LEFT JOIN`, 그래프의 `fan-in` 등)로 압축하지 말고 평문으로 직접 진술한다. 리네이밍으로 차이를 흡수할 수 있으면 이 예외 대신 리네이밍을 우선한다.
+
+  위 5개에 해당하지 않으면 작성 금지다. 특히 금지: 코드가 "무엇을 하는지" 자연어로 재서술하는 설명 주석, **변경 이력·이관 경과 서술**, **검증 과정·트레이드오프 서술**. diff 노이즈를 늘리고, 코드와 주석이 따로 노는 유지보수 부채를 만들기 때문이다. **한 판단의 근거를 3줄 이상 쓰고 있으면 그 자리는 코드가 아니다** — PR 설명과 커밋 메시지에 쓴다. 테스트의 `# Given:`/`# When:`/`# Then:` 마커는 유지하되 뒤에 테스트명·시나리오 재설명을 붙이지 않는다(`test-case-summary.md`가 이미 담당하므로 중복이다). (Decision Authority의 주석 자율권은 **삭제**에만 적용되며, 신규 작성은 이 원칙이 우선한다.)
 - **Auto-Verification Hook**: 소스코드 파일 수정(Edit/Write) 후 `verify-commands.md`의 빌드/린트 명령을 즉시 실행한다. 실패 시 **Stop-and-Fix Gate 적용** — 수정 완료 전까지 다음 작업 진행 금지. `.md`, `.json` 등 비소스코드는 제외. (SKILL.md Cross-Cutting Protocol 참조)
 - **Step Transition Gate**: Step N에서 Step N+1로 진입하기 전에 `verify-commands.md`의 빌드/린트/테스트를 실행하여 전부 통과해야 한다. 이전 Step의 미수정 실패를 다음 Step으로 넘기면 디버깅이 기하급수적으로 어려워진다. 실패 시 Stop-and-Fix Gate가 자동 발동된다. (모든 경로에서 적용)
-- **Plan Immutability**: Phase A에서 확정된 `plan-summary.md`는 Phase B 이후 암묵적으로 변경할 수 없다. 변경이 필요한 경우 다음 절차를 따른다: (1) 변경 사유를 `.claude/memory/plan-amendments.md`에 기록, (2) 영향받는 Unit/Step 식별, (3) 사용자에게 변경 승인 요청 (AskUserQuestion), (4) 승인 후 plan-summary.md와 관련 memory 파일 일괄 갱신. 이 절차 없이 계획을 조용히 변경하면 Acceptance Criteria와 실제 구현이 괴리되어 Step 17에서 대규모 재작업이 발생한다.
+- **Plan Immutability**: Phase A에서 확정된 `plan-summary.md`는 Phase B 이후 암묵적으로 변경할 수 없다. 변경이 필요한 경우 다음 절차를 따른다: (1) 변경 사유를 `.claude/memory/plan-amendments.md`에 기록, (2) 영향받는 Unit/Step 식별, (3) 사용자에게 변경 승인 요청 (AskUserQuestion), (4) 승인 후 plan-summary.md와 관련 memory 파일 일괄 갱신. 이 절차 없이 계획을 조용히 변경하면 Acceptance Criteria와 실제 구현이 괴리되어 Step 17에서 대규모 재작업이 발생한다. 단, AC/스코프에 영향 없는 구현 세부 이탈은 이 절차 대상이 아니다 — Decision Authority의 3단 위임('통보 후 진행' 티어 = **Deviations Log**)을 따르며 AskUserQuestion이 필요 없다. plan-summary.md의 AC 자체를 변경할 때만 본 절차를 적용한다. ship 모드에서는 '통보 후 진행' 항목을 Decision Journal에 `[AUTO-DECIDED]`로 기록하고 계속 진행한다.
 - **Step Progress Pulse (P-007)**: 각 Step 완료 시 사용자에게 1줄 상태를 출력한다 (AskUserQuestion이 아닌 단순 텍스트 출력이므로 사용자를 중단시키지 않는다). 형식: `[Step {N}/{total}] {Step명} 완료 — {핵심 결과 요약}`. 예: `[Step 7/17] Expert Review 완료 — CRITICAL 0, HIGH 2, MEDIUM 5`. Phase B-E 시작 시 예상 Step 수를 안내한다: `{경로} 경로: Steps 5-{N} ({M} steps)`.
 
   **2-Tier Pulse (FAIL/HIGH+ 시 자동 확장)**:
@@ -273,7 +308,7 @@ TDD 사이클을 따르는 이유: 테스트를 먼저 작성하면 요구사항
 
 잘못된 이유 후보가 없으면 바로 GREEN으로 진행한다 — 분석 과부하를 방지한다.
 
-**GREEN 이후**: "이 테스트가 올바른 이유로 통과하고 있는가? 하드코딩이나 trivial implementation으로 통과한 것은 아닌가?"
+**GREEN 이후**: "이 테스트가 올바른 이유로 통과하고 있는가? 하드코딩이나 trivial implementation으로 통과한 것은 아닌가?" — 이 자문으로 실제 수정이 발생했으면 `implementation.md`에 `green_check_catches: {N}건`으로 기록한다 (발생 없으면 0건). 지속 0건이고 Step 6/7 독립 검증에서도 fake-pass가 검출되지 않았다면 `context-separation.md` A항에 따라 boost-review에 데이터와 함께 제거 후보로 보고한다.
 
 **GREEN 실패 재시도 시 (2회차부터) — Forced Reflection:**
 
@@ -385,9 +420,10 @@ AI 토큰 비용은 사실상 0이므로, 항상 완전한 구현을 해야 한�
 - BAD: "80% 커버리지면 충분하므로 error case 테스트 생략" → 최소 happy/edge/error 각 1개
 - BAD: "간단한 구현이므로 테스트 불필요" → TDD는 예외 없음
 - BAD: "TODO: 성능 최적화" → AC에 성능 기준이 있으면 지금 확인
-- BAD: "시간 절약을 위해 validation 생략" → boundary에서의 validation은 필수
+- BAD: "시간 절약을 위해 validation 생략" → **AC·Concerns에 명시된** boundary validation은 필수
 - BAD: "이 부분은 다음 iteration에서" → AC 범위 내이면 지금 구현
 - OK: "NOT in scope에 명시된 항목은 구현하지 않음" → plan-summary 참조
+- OK: "AC·Concerns에 없고 기존 동일 계층 코드에도 선례가 없는 방어 코드는 추가하지 않음" → 완전성은 **AC 범위 안에서의 완전성**이다. 계획에 없던 가드·timeout·query hint·정렬·계측을 자발적으로 얹는 것은 완전성이 아니라 스코프 확장이며, 리뷰어에게는 "이건 왜 필요한가"라는 되물음을 만든다. 필요하다고 판단되면 `unresolved-decisions.md`에 기록하고 1줄 통보한다 (판정 기준: [review-rubric.md](review-rubric.md) Economy of Means의 신규성 3중 테스트)
 
 ### Post-Implementation Simplicity Check
 
@@ -399,6 +435,8 @@ Step 5 구현 완료 후, Self-correction 진입 전에 복잡도를 자기 검�
 - 가설적 미래 요구사항이 아닌 현재 요구사항을 구현했는가?
 
 해당 사항 발견 시 즉시 리팩토링한다. 테스트가 통과하는 상태를 유지하면서 단순화한다.
+
+**효용 추적 (검증 지시 제거 판단 기준 연동)**: 이 체크로 실제 리팩토링이 발생했으면 `implementation.md`에 `simplicity_check_catches: {N}건`으로 기록한다 (발생 없으면 0건으로 기록). 같은 executor의 자기 재점검이라 모델 세대가 발전하면 native self-correction과 중복될 수 있는 후보다(`context-separation.md`의 "검증 지시 제거 판단 기준" A항). 5세션+ 누적으로 지속 0건이고 Integration Stage의 `/simplify` 필수 게이트에서도 해당 Unit 코드에 대한 단순화 지적이 없었다면 — 두 지표의 교차 확인 — boost-review에 데이터와 함께 제거 후보로 보고한다. 데이터 없이 제거하지 않는다.
 
 이 체크는 per-unit 경량 자기 검증이다 — 여기서 `/simplify` 스킬을 호출하지 않는다. 권위 있는 `/simplify` 스킬 호출은 모든 Unit 병합 후 Integration Stage에서 전체 diff를 대상으로 1회 수행한다([integration-and-review.md](integration-and-review.md)의 필수 게이트). per-unit 중복 호출은 병렬 Unit마다 반복 실행되어 비효율적이므로 금지한다.
 
@@ -414,12 +452,27 @@ Step 5 구현 완료 후, Self-correction 진입 전에 복잡도를 자기 검�
 ### Self-correction (Step 6 전 자가 검증)
 
 executor가 구현을 완료하면, Step 6으로 넘기기 전에 plan-summary.md의 Acceptance Criteria와 대조한다:
-1. **Code Changes** 목록의 각 항목이 구현되었는지 확인
+1. **Code Changes** 목록의 각 항목이 구현되었는지 확인. 이어서 **신규 export/public 함수·메서드마다 호출자가 존재하는지 `grep`으로 확인**한다 — diff 내부 또는 기존 코드 어디에도 호출부가 없으면 `[Unused-in-PR]`로 `unresolved-decisions.md`에 기록하고 1줄 통보한 뒤 계속 진행한다. 예외: 프레임워크가 호출하는 핸들러(HTTP route/gRPC 구현체/이벤트 리스너 등록), plan-summary.md에 "차후 PR 사용 예정"으로 명시 승인된 인터페이스 계약. Why: "이 함수를 실제로 호출하나요? 호출부가 관찰되지 않아 여쭤봅니다"는 리뷰어가 grep 한 줄로 확인하는 질문이며, 구현자가 먼저 답해두면 왕복이 사라진다
 2. **Tests** 목록의 테스트가 작성되었는지 확인하고, 각 검증 유형(happy path / edge case / error case)이 최소 1개 이상 존재하는지 확인한다. happy path만 있고 edge/error case가 없으면 보완한다
 3. **Quality Gates** 조건을 충족하는지 확인
 4. 누락 항목이 있으면 자체적으로 보완한 후 Step 6으로 진행
+5. plan-summary.md의 Behavior Changes 각 항목에 대해 "왜 이렇게 구현했는가"를 1문장으로 스스로 답해본다 — 답이 막히는 항목은 이해가 얕은 구현 신호이므로 해당 부분을 재검토한 후 Step 6으로 진행한다
 
 - Save: `.claude/memory/unit-{name}/implementation.md`
+
+`implementation.md`에는 아래 섹션을 필수로 포함한다 — P-013(기존 구현 참조)을 실행했다는 증거를 남길 곳이 없으면 실행 여부를 아무도 검사할 수 없고, 실제로 선례 조사가 사후 정당화로 뒤집힌 사례가 있었다:
+
+```markdown
+## 선례 조사 (P-013)
+- 탐색한 기존 구현: {file:function} × 2-3개 (또는 "재시도 2회 후 유사 구현 없음 확인")
+- 따른 패턴: {요약}
+- 코드베이스 최초 도입: {신규 도입한 라이브러리·동시성 프리미티브·명명 패턴이 있으면 "선례 0건"으로 명시, 없으면 "없음"}
+- 이탈한 경우 사유: {있으면}
+```
+
+이 섹션이 비어 있으면 Step 6의 Mechanical Checks에서 FAIL로 처리한다.
+
+**효용 추적 (검증 지시 제거 판단 기준 연동)**: 항목 1-4의 자가 검증에서 실제로 "누락 발견 → 보완"이 발생했으면 `implementation.md`에 `self_correction_catches: {N}건`으로 기록한다 (발생 없으면 0건으로 기록). 이 단계는 구현자 본인이 자기 산출물을 재확인하는 구조라서, 모델 세대가 발전하면 native self-correction과 중복될 수 있는 후보다(`context-separation.md`의 "검증 지시 제거 판단 기준" A항). 5세션+ 누적으로 이 값이 지속 0건이고 Step 6에서도 해당 항목 FAIL이 없었다면 — 두 지표의 교차 확인 — boost-review에 데이터와 함께 제거 후보로 보고한다. 데이터 없이 제거하지 않는다. 항목 5(자문형 이해도 진단)는 발견 건수로 측정되지 않는 정성적 장치이므로 측정 대상에서 제외한다.
 
 **Step Output Artifacts** (Step 6 진입 전 필요):
 - `memory/unit-{name}/test-case-summary.md` — TDD 테스트 케이스 분류 요약 (Happy Path / Edge Cases / Error Cases / Boundary)

@@ -1,6 +1,6 @@
 # Grind Phase A Enhancements
 
-> Base: `~/.claude/skills/simon/references/phase-a-planning.md`
+> Base: `~/.claude/skills/simon-dev/references/phase-a-planning.md`
 > 이 문서는 simon Phase A에 대한 grind 전용 추가/변경사항만 기술합니다.
 
 ## Batch Question Protocol (P-002)

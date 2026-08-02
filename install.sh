@@ -76,7 +76,6 @@ install_global() {
     install_skill "simon-grind"
     install_skill "simon-healthcheck"
     install_skill "simon-md-reviewer"
-    install_skill "simon-monitor"
     install_skill "simon-oncall"
     install_skill "simon-pm"
     install_skill "simon-presenter"

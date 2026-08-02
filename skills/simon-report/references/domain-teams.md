@@ -53,7 +53,7 @@ Step 3에서 사용하는 도메인 전문가 팀의 구성, 역할, 분석 항�
 - 분석/리뷰 에이전트: 허용(Read, Glob, Grep), 금지(Edit, Write, 변경성 Bash)
 - 각 전문가 spawn prompt에 "코드를 읽고 분석만 하세요. 수정하지 마세요."를 포함
 
-**Agent Teams Fallback**: Agent Teams가 비활성 상태이면 `~/.claude/skills/simon/references/agent-teams-fallback.md`의 subagent fallback을 적용한다.
+**Agent Teams Fallback**: Agent Teams가 비활성 상태이면 `~/.claude/skills/simon-dev/references/agent-teams.md`의 Fallback 섹션에 따라 subagent fallback을 적용한다.
 
 ## 도메인 서브그룹별 토론 프로세스 (3단계)
 

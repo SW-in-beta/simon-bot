@@ -195,25 +195,6 @@ high_impact_paths:
 
 **5) 팀 해산**: 모든 팀원에게 `SendMessage(type="shutdown_request")` → `TeamDelete()`
 
-**▶ EMIT** `expert_panel` @ `A/1-A` — Code Design Team 분석 결과 발신 (스텝 흐름의 일부, 생략 불가). `.pending-event.json` 작성 후 실행:
-```json
-{
-  "skill": "simon",
-  "step": "A/1-A",
-  "type": "expert_panel",
-  "title": "Code Design Team 분석",
-  "data": {
-    "panel_name": "Code Design Team",
-    "opinions": [각 전문가의 {"role":"...", "opinion":"...", "severity":"INFO|LOW|MEDIUM|HIGH|CRITICAL"}],
-    "consensus": "합의 내용",
-    "action_items": ["액션1", "액션2"]
-  }
-}
-```
-```bash
-bash ~/.claude/skills/simon-monitor/scripts/emit-event.sh --session "$SESSION_DIR" 2>/dev/null || true
-```
-
 ### 통합 검증 명령 탐지 (Feedback Loop 기반)
 
 프로젝트의 기존 빌드/린트/테스트 통합 검증 수단을 파악하여 이후 모든 단계에서 빠른 피드백 루프로 활용한다.
@@ -412,6 +393,10 @@ planner가 AI-First Draft를 생성한 직후, 사용자에게 제시하기 전�
 
 Step B의 항목이 타당하면 초안을 수정한 후 사용자에게 제시한다. 수정 후에도 해소되지 않으면 Concerns/Unresolved decisions에 포함한다. plan-summary.md에 `## Contrastive Anchors` 섹션으로 기록하여 Step 2 critic이 antipattern 대조 검증 시 활용한다.
 
+### Blind Spot Pass (Residual Interview에 통합)
+
+planner는 초안 완성 직후 "이 요청을 다르게 해석할 수 있는 대안 1-2개"(다른 스코프/우선순위/대상 사용자)를 스스로 도출한다. 모호성 신호(방법 불특정 "그냥 ~해줘", 여러 시스템을 지칭 가능한 명사)가 있으면 Residual Interview에 "이 계획은 A로 해석했습니다. 혹시 B를 의도하셨나요?"를 통합하여 한 번에 묻는다. 스코프가 명백하면 스킵하되, Decision Journal에 `[Blind Spot Pass] 실행/스킵 — {근거}`를 기록한다 (Calibration Checklist 검증 대상). 요청 자체가 심하게 막연하면 simon-resolve-unknowns로 발산 단계를 제안한다.
+
 ### Interview Guard
 
 - 코드를 먼저 충분히 탐색한 뒤, 코드에서 답할 수 있는 질문은 하지 않는다
@@ -487,6 +472,8 @@ Step B의 항목이 타당하면 초안을 수정한 후 사용자에게 제시�
 
   **Behavior Changes → Behavioral Checks 변환 규칙**: End State의 Behavior Changes(Before → After) 각 항목을 Behavioral Check 후보로 자동 변환한다. 모든 Behavior Change가 Behavioral Check가 되어야 하는 것은 아니지만, 변환 가능한 항목은 반드시 Done-When에 포함한다.
 
+  **Reference Spec Asset (선택)**: 사용자가 "이 테스트 스위트 통과가 곧 완료 조건" 또는 "이 폴더/함수를 포팅"처럼 코드 자산을 스펙으로 지정하면, 해당 경로만 기록하고 prose로 재서술하지 않는다. Phase B Step 5는 이 자산을 최우선 참조하며, 새 테스트 작성보다 기존 테스트 통과를 우선한다.
+
 **6. End State (최종 상태 명세)** — 구현 전에 "완료"의 모습을 구체적으로 정의:
 - **Files Changed 테이블**:
   ```
@@ -499,6 +486,8 @@ Step B의 항목이 타당하면 초안을 수정한 후 사용자에게 제시�
 - **Test Targets**: 테스트 대상 파일 패턴
 
 각 파일에 대해 구체적인 변경 내용을 한 문장으로 설명한다. "수정"이라고만 적지 않고 무엇을 수정하는지 명시한다 (예: `internal/handler/campaign.go | 수정 | POST /campaigns 핸들러에 PacingService 의존성 주입 추가`).
+
+**UI 목업 (조건부)**: plan-summary.md의 Files Changed에 UI 컴포넌트/페이지 파일이 포함되면, Calibration 전에 self-contained 정적 HTML 목업 1장(실제 프레임워크 코드 아님)을 생성해 Behavior Changes의 시각적 스케치로 제시한다. 기존 컴포넌트 재사용뿐이라 불필요하다고 판단하면 스킵하고 Decision Journal에 근거를 기록한다.
 
 #### Unit 파싱 마커
 

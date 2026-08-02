@@ -101,7 +101,6 @@ graph LR
 | `/simon-company` | 풀스택 소프트웨어 회사 — 다중 전문 팀 협업으로 기획부터 배포·운영까지 완성 |
 | `/simon-healthcheck` | 스킬 건강 상태 대시보드 — simon 패밀리 전체의 구조적 품질 검증 및 리포트 |
 | `/simon-md-reviewer` | 마크다운 파일을 HTML 뷰어로 열어 인라인 코멘트 기반 리뷰·수정 루프 실행 |
-| `/simon-monitor` | 워크플로 실시간 시각화 — simon/grind/pm 파이프라인의 모든 단계를 웹 대시보드로 추적 |
 | `/simon-oncall` | 온콜 문의 분석 — 슬랙 메시지와 관련 레포를 심층 분석하여 원인·해결책·답변 초안 제공 |
 | `/simon-presenter` | 라이브 데모 프레젠터 — Playwright로 앱을 실제 구동하며 인터랙티브 시연 |
 | `/simon-publish` | Confluence 자동 게시 — MD 파일을 개인 워크스페이스에 카테고리 자동 분류 후 게시 |
@@ -128,7 +127,6 @@ graph LR
 | CI 실패 자동 수정 (PR checks 실패) | `/simon-ci-fix` |
 | 스킬 파일 수정 후 품질 검증 | `/simon-healthcheck` |
 | MD 파일을 브라우저 뷰어로 리뷰 | `/simon-md-reviewer` |
-| simon 워크플로 진행 상황 실시간 확인 | `/simon-monitor` |
 | 온콜 문의 원인 파악 & 답변 작성 | `/simon-oncall` |
 | 완성된 앱 라이브 데모 시연 | `/simon-presenter` |
 | 분석 보고서를 Confluence에 게시 | `/simon-publish` |
@@ -259,8 +257,6 @@ STANDALONE 모드에서는 3개 Agent Team(architect, writer, impact-analyzer)�
 **simon-healthcheck** — simon 패밀리 전체 스킬의 구조적 품질을 검증하고 대시보드로 출력합니다. boost 적용 후 품질 확인, 스킬 파일 수정 후 무결성 검증에 사용합니다.
 
 **simon-md-reviewer** — 마크다운 파일을 HTML 뷰어로 브라우저에서 열고, 인라인 코멘트 기반 리뷰·수정 루프를 실행합니다. 확정 후 simon-publish로 Confluence 게시를 이어서 진행할 수 있습니다.
-
-**simon-monitor** — simon/grind/pm 워크플로의 실행 과정을 웹 대시보드(포트 3847)로 실시간 시각화합니다. 전문가 패널 의견, 서브에이전트 호출/결과, 의사결정 근거, 게이트 통과/실패를 시각적으로 확인합니다. 완료된 세션의 이력 리뷰도 지원합니다.
 
 **simon-oncall** — 슬랙 메시지 URL과 관련 레포를 입력받아 온콜 문의를 분석합니다. 코드·사내 자료를 심층 분석(simon-study 활용)하여 원인 진단, 해결책, 슬랙 답변 초안을 제공합니다. **복수 경로/가설 탐색**: 첫 번째 가설이 그럴듯해도 대안 가설과 제2 처리 경로를 의도적으로 탐색합니다. **Flow Verification Expert**: DI/의존성 주입 관련 가설은 독립 전문가 Agent가 반박 시도 관점에서 교차 검증합니다. **확신도 라벨**: 🟢 HIGH(검증됨) / 🟡 MEDIUM(부분 확인) / 🔴 LOW(모호함 큼) 3단계로 분석 결론의 신뢰도를 명시하고, Investigation Map으로 확인된·미확인 근거를 한눈에 정리합니다. 슬랙 답변은 원 스레드 없이도 판단 가능한 자기완결적 형식으로 작성됩니다.
 

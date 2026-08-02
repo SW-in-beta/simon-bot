@@ -126,7 +126,7 @@ For detailed introspection process → read [planning-design.md](planning-design
 
 ## Docs-First Protocol
 
-LLM의 학습 데이터에 의존하지 않고 공식 문서를 먼저 조회하는 원칙. 자세한 프로토콜은 `~/.claude/skills/simon/references/docs-first-protocol.md` 참조.
+LLM의 학습 데이터에 의존하지 않고 공식 문서를 먼저 조회하는 원칙. 자세한 프로토콜은 `~/.claude/skills/simon-dev/references/docs-first-protocol.md` 참조.
 
 **적용 시점:**
 - **Phase 2 (설계)**: 기술 스택 선택 시 공식 문서로 기능·제약·호환성을 확인한다.
@@ -145,7 +145,7 @@ LLM의 학습 데이터에 의존하지 않고 공식 문서를 먼저 조회하
 
 ## Error Resilience
 
-`~/.claude/skills/simon/references/error-resilience.md`의 프로토콜을 적용한다.
+`~/.claude/skills/simon-dev/references/error-resilience.md`의 프로토콜을 적용한다.
 추가: 팀 간 충돌 → CTO 중재 / TRP 교착 → CEO 스코프 축소 또는 사용자 에스컬레이션 / Bot 3회 실패 → simon-grind 자동 전환.
 
 For state management, artifact persistence, context window management → read [operational-protocols.md](operational-protocols.md)

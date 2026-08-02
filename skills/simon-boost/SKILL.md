@@ -3,7 +3,7 @@ name: simon-boost
 description: "외부 자료 분석 → simon-* 스킬 개선 제안 & 적용. 링크(블로그, GitHub, 논문, 아티클 등)를 받으면 전문가 패널이 내용을 분석하여 모든 simon-* 계열 스킬의 개선점을 찾아냅니다. Use when: (1) 링크를 주며 '이거 반영해줘', '이거 보고 스킬 개선해줘', (2) AI 에이전트 워크플로 관련 자료를 발견했을 때, (3) 다른 사람의 스킬/워크플로를 참고하고 싶을 때, (4) 새로운 기법이나 방법론을 simon에 녹이고 싶을 때. 링크를 전달받아 스킬을 개선하는 모든 상황에서 이 스킬을 사용하세요."
 compatibility:
   tools: [Agent, AskUserQuestion, WebFetch, TeamCreate, SendMessage]
-  skills: [simon, simon-grind, simon-pm, simon-report, simon-sessions, simon-company, simon-boost, simon-auto-boost, simon-boost-capture, simon-boost-review, simon-ci-fix, simon-healthcheck, simon-code-review, simon-sync, simon-oncall, simon-presenter, simon-study]
+  # 분석 대상 스킬은 _shared/boost-target-skills.md(디렉토리 스캔)가 SSoT — frontmatter에 열거하지 않음 (drift 방지)
 ---
 
 # simon-boost
@@ -18,29 +18,9 @@ You are executing **simon-boost**. 사용자가 제공한 링크의 내용을 �
 
 ## Target Skills
 
-분석 대상 스킬 목록 (항상 최신 내용을 읽어서 분석):
+> **Reference Loading**: 분석 대상 목록은 `~/.claude/skills/_shared/boost-target-skills.md`를 읽는다 — 실제 대상은 `ls ~/.claude/skills/simon*/SKILL.md` 스캔이 SSoT다 (SKILL.md 없는 workspace 디렉토리 제외, 수동 목록 drift 방지).
 
-| 스킬 | 경로 | 역할 |
-|------|------|------|
-| simon-dev | `~/.claude/skills/simon-dev/SKILL.md` | 19-step 딥 워크플로 (코어) |
-| simon-grind | `~/.claude/skills/simon-grind/SKILL.md` | 끈질긴 재시도 변형 |
-| simon-pm | `~/.claude/skills/simon-pm/SKILL.md` | 프로젝트 매니저 |
-| simon-report | `~/.claude/skills/simon-report/SKILL.md` | 사전 분석 보고서 |
-| simon-sessions | `~/.claude/skills/simon-sessions/SKILL.md` | 세션 관리 |
-| simon-code-review | `~/.claude/skills/simon-code-review/SKILL.md` | PR 기반 코드 리뷰 |
-| simon-ci-fix | `~/.claude/skills/simon-ci-fix/SKILL.md` | CI 실패 자동 수정 |
-| simon-sync | `~/.claude/skills/simon-sync/SKILL.md` | 스킬 파일 동기화 |
-| simon-boost | `~/.claude/skills/simon-boost/SKILL.md` | 외부 자료 → 스킬 개선 (자기 자신) |
-| simon-auto-boost | `~/.claude/skills/simon-auto-boost/SKILL.md` | 자동 웹 검색 기반 스킬 개선 |
-| simon-boost-capture | `~/.claude/skills/simon-boost-capture/SKILL.md` | 작업 중 스킬 개선점 캡처 |
-| simon-boost-review | `~/.claude/skills/simon-boost-review/SKILL.md` | 축적된 인사이트 리뷰 & 적용 |
-| simon-healthcheck | `~/.claude/skills/simon-healthcheck/SKILL.md` | 스킬 건강 상태 대시보드 |
-| simon-company | `~/.claude/skills/simon-company/SKILL.md` | 풀스택 소프트웨어 회사 (다중 팀 협업) |
-| simon-oncall | `~/.claude/skills/simon-oncall/SKILL.md` | 온콜 문의 분석 |
-| simon-presenter | `~/.claude/skills/simon-presenter/SKILL.md` | 라이브 데모 프레젠터 |
-| simon-study | `~/.claude/skills/simon-study/SKILL.md` | 문제 기반 심층 학습 |
-
-references/ 디렉토리의 하위 파일들도 분석 대상에 포함.
+references/ 디렉토리의 하위 파일들과 `_shared/*.md`도 분석 대상에 포함.
 
 ## Step 0: Input Collection
 
@@ -110,7 +90,7 @@ Step 1의 자료 요약에서 가장 관련성이 높은 스킬 1-3개를 식별
 
 **예시:**
 - 자료가 "에러 복구 전략"에 관한 것이면:
-  - simon SKILL.md + references/error-resilience.md
+  - simon-dev SKILL.md + references/error-resilience.md
   - simon-grind SKILL.md + references/grind-error-resilience.md
   - 나머지 스킬은 SKILL.md description만 참조
 
@@ -120,7 +100,7 @@ Step 1의 자료 요약에서 가장 관련성이 높은 스킬 1-3개를 식별
 
 > **Reference Loading**: `~/.claude/skills/_shared/expert-panel-boost.md` 읽기 — 6인 전문가 패널 구성, 분석 항목, 토론 프로토콜, Agent Teams Fallback 포함.
 
-5명의 전문가가 각자의 관점에서 자료를 분석하고, simon 스킬들의 개선점을 찾아냅니다. 전문가 구성과 토론 프로토콜은 위 공유 파일을 참조한다.
+전문가들이 각자의 관점에서 자료를 분석하고, simon 스킬들의 개선점을 찾아냅니다. 전문가 구성(인원·역할)과 토론 프로토콜은 위 공유 파일이 SSoT다 — 여기 복제하지 않는다.
 
 **Agent Team 해산**
 
@@ -171,17 +151,13 @@ Step 1의 자료 요약에서 가장 관련성이 높은 스킬 1-3개를 식별
 
 1. Save: `.claude/boost/report-{slug}.md`
 2. Executive Summary와 전체 제안 목록(P-001~P-00N 제목 + 심각도)을 사용자에게 출력하여 전체 그림을 제공한다
-3. **인터랙티브 개별 리뷰**: 각 제안을 하나씩 상세히 설명하고 판단을 요청한다. 10개+ 제안을 한 번에 판단하는 것은 사용자에게 과도한 부담이므로, 하나씩 맥락을 전달하고 즉시 판단을 받는다.
-
-각 제안 설명 시 반드시 포함:
-- **현재 상태**: 현재 코드/스킬이 어떻게 되어 있는지 구체적으로 (파일:줄 수준)
-- **문제 시나리오**: 현재 상태에서 어떤 상황에 문제가 발생하는지 구체적 예시
-- **제안 내용**: 무엇을 어떻게 바꾸는지 before/after 또는 추가 내용 예시
-- **변경 대상 파일**: 정확한 파일 경로와 수정 위치
-- **기대 효과와 비용**: 왜 이게 더 나은지 + 추가 비용이 있다면 무엇인지
-- **기존 메커니즘과의 관계**: 유사한 기존 기능이 있다면 어떻게 다른지/보완하는지
-
-설명 후 AskUserQuestion으로 판단 요청 (적용 / 보류 / 기각). 사용자가 질문이나 수정 요청을 하면 즉시 대응한 뒤 다음 제안으로 진행한다.
+3. **Severity 기반 배치 리뷰** (expert-panel-boost.md의 Proposal Severity Rubric 기준):
+   - **CRITICAL / HIGH / 전문가 간 이견 항목** → 하나씩 상세 설명 후 개별 확인. 설명에 반드시 포함: 현재 상태(파일:줄 수준 인용), 문제 시나리오, 제안 내용(before/after), 변경 대상 파일, 기대 효과와 비용, 기존 메커니즘과의 관계, 근거(자료의 어느 부분인지)
+   - **MEDIUM** → 클러스터(주제) 단위로 묶어 요약 설명 후 일괄 확인 — 클러스터 내 취사선택 가능
+   - **LOW + 전문가 전원 동의** → 자동 적용하고 최종 요약에서 사후 보고 (사용자가 이의 시 롤백)
+   - 사용자가 리뷰 방식을 직접 지정하면 그것이 우선한다
+   - 제안 20건 이상이면 severity/대상 스킬 필터가 있는 self-contained HTML 트리아지 뷰를 함께 생성하는 옵션을 제안한다
+   - 확인 질문은 AskUserQuestion을 사용하되, 직전 설명이 길면 질문 팝업이 본문을 가릴 수 있다 — 상세 설명 턴과 질문 턴을 분리하거나 텍스트 답변을 받는다
 
 ## Step 5: Apply Improvements
 
@@ -260,21 +236,21 @@ Save/Append: `.claude/boost/applied-log.md`
 ```
 | 파일 | frontmatter | 참조 경로 | 상호 참조 | 내용 반영 | 결과 |
 |------|-------------|-----------|-----------|-----------|------|
-| simon/SKILL.md | OK | OK | OK | OK | PASS |
-| simon/references/phase-b.md | N/A | OK | N/A | OK | PASS |
+| simon-dev/SKILL.md | OK | OK | OK | OK | PASS |
+| simon-dev/references/phase-b-implementation.md | N/A | OK | N/A | OK | PASS |
 ```
 
 FAIL 항목이 있으면 즉시 원인을 파악하고 수정안을 제시한다.
 
 **6-B: 형식 품질 검증 (Skill Craft Gate)**
 
-변경이 적용된 스킬 파일들에 대해 [skill-best-practices.md](references/skill-best-practices.md)의 6개 카테고리 전 항목을 명시적으로 실행한다. "대충 확인"이 아니라, 각 항목을 하나씩 체크하고 결과를 테이블로 보고한다 — 이전 세션에서 이 절차를 생략하여 TOC 누락 등의 문제를 사용자가 직접 지적해야 했던 사례가 있었다.
+변경이 적용된 스킬 파일들에 대해 [skill-best-practices.md](references/skill-best-practices.md)의 전 카테고리 전 항목을 명시적으로 실행한다 (카테고리 개수·목록은 원본 파일이 SSoT — 여기 복제하지 않는다). "대충 확인"이 아니라, 각 항목을 하나씩 체크하고 결과를 테이블로 보고한다 — 이전 세션에서 이 절차를 생략하여 TOC 누락 등의 문제를 사용자가 직접 지적해야 했던 사례가 있었다.
 
 > **Reference Loading**: [skill-best-practices.md](references/skill-best-practices.md)를 반드시 Read한다. Step 3 Expert 6이 이미 읽었더라도 다시 읽는다 — Step 3과 Step 6 사이에 파일 변경이 발생했을 수 있고, 검증 시점에 최신 체크리스트를 참조해야 정확한 검증이 가능하다.
 
 검증 절차:
 1. skill-best-practices.md를 Read
-2. 변경된 각 스킬 파일에 대해 6개 카테고리의 전 항목을 순회:
+2. 변경된 각 스킬 파일에 대해 전 카테고리의 전 항목을 순회:
    - **Progressive Disclosure**: SKILL.md 500줄 이내, 3단계 로딩 활용, reference 포인터 명확성, 로딩 시점 지시
    - **Skill Decomposition**: 독립 sub-workflow 묶임 여부, 컨텍스트 소진 징후, 순환 의존
    - **Description 트리거링**: "Use when:" 조건 존재, 인접 스킬 경계 구분, 실사용 키워드 포함
@@ -323,3 +299,4 @@ FAIL 항목이 있으면 즉시 원인을 파악하고 수정안을 제시한다
 - 기존 스킬의 Global Forbidden Rules는 절대 약화시키지 않음
 - 적용 기록(applied-log.md)은 항상 유지하여 변경 이력 추적 가능
 - 모든 중간/최종 결과물은 `.claude/boost/`에 저장
+- **진행 체크포인트**: 각 Step 경계에서 1줄 진행 보고를 출력한다 — `[Step N 완료] {핵심 결과 요약} — Step N+1 시작` 형식. 전문가 패널 분석처럼 수 분간 무응답인 구간에서 사용자가 진행 상태를 알 수 있게 한다 (AskUserQuestion 아님, 단순 텍스트)

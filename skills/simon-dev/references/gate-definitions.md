@@ -6,11 +6,12 @@ simon 워크플로에서 사용되는 모든 게이트의 정의. 각 게이트�
 
 | Gate ID | 트리거 시점 | 통과 조건 | 실패 시 조치 | 스크립트 |
 |---------|-----------|----------|------------|---------|
-| **G-CAL** | Phase A 종료 (Phase B 진입 전) | Calibration Checklist 9개 항목 전체 충족 | 미충족 항목의 해당 Step으로 회귀 후 자동 보완 | `calibration-check.sh` |
-| **G-STEP** | Step 전환 시 | verify-commands.md의 빌드/린트/테스트 통과 | 다음 Step 진입 차단 → 수정 후 재검증 | verify-commands.md 참조 |
-| **G-STOP** | Edit/Write 후 (소스코드) | 빌드 + 린트 + 타입체크 통과 | Stop-and-Fix → 수정 완료까지 다음 작업 차단 | `auto-verify.sh` |
-| **G-HOOK** | PostToolUse (Edit/Write) | auto-verify.sh exit 0 | exit 1 → Stop-and-Fix Gate 진입 | `auto-verify.sh` |
+| **G-CAL** | Phase A 종료 (Phase B 진입 전) | Calibration Checklist 9개 항목 전체 충족 | 미충족 항목의 해당 Step으로 회귀 후 자동 보완 | `calibration-check.sh` (7항목) + LLM (2항목) |
+| **G-STEP** | Step 전환 시 | verify-commands.md의 빌드/린트/테스트 통과 | 다음 Step 진입 차단 → 수정 후 재검증 | `verify-build.sh` / `typecheck.sh` / `run-tests.sh` 명시 호출 |
+| **G-STOP** | Edit/Write 후 (소스코드) | 빌드 + 린트 통과 (타입체크·테스트는 G-STEP 관할) | Stop-and-Fix → 수정 완료까지 다음 작업 차단 | `auto-verify.sh` (build+lint만) |
+| **G-HOOK** | PostToolUse (Edit/Write) | auto-verify.sh exit 0 | exit 1 → Stop-and-Fix Gate 진입 | `auto-verify.sh` (build+lint만) |
 | **G-PHASE-B** | Phase B 진입 시 | plan-summary.md 존재 + G-CAL 통과 | Phase A로 회귀 | — |
+| **G-CMT** | Integration Stage 6-A | `check-comment-noise.sh` exit 0 | FAIL 패턴은 AUTO-FIX 제거 후 재실행, WARN은 예외 1~5 대조 self-audit | `check-comment-noise.sh` |
 | **G-INT** | Integration Stage 진입 시 | 모든 Unit 완료 + 전체 빌드 + 전체 테스트 통과 | 미완료 Unit 실행 또는 실패 수정 | — |
 | **G-PROD** | Step 17 Production Readiness | 테스트 0 fail + 빌드 성공 + 보안 CRITICAL 0 + HIGH 우려 전부 반영 + 커버리지 ≥ 80% | Minor: auto-fix, Major: Phase 회귀, Critical: Step 1-B | — |
 
@@ -36,7 +37,11 @@ simon 워크플로에서 사용되는 모든 게이트의 정의. 각 게이트�
 
 **실패 시**: 사용자에게 보고하지 않고 해당 Step을 자동 재실행하여 보완. ship 모드에서는 자동 보정 시도 후 빌드/테스트 실패만 정지.
 
-**스크립트**: `calibration-check.sh` — 파일 존재 여부, 섹션 존재 여부 등 결정론적 검증을 수행.
+**스크립트**: `.claude/workflow/scripts/calibration-check.sh [memory-dir]` — 위 9개 중 **파일·섹션·형식의 존재로 판정 가능한 7개(1, 3~8)** 를 검증하고 exit 1로 FAIL을 알린다.
+
+**LLM 판정 항목 (스크립트 범위 밖)**: 항목 2(미해결 결정이 구현에 영향 없는지)와 항목 9(Behavior Changes의 검증 가능 항목이 Done-When에 실제로 대응하는지)는 의미 판단이 필요하므로 스크립트로 흉내내지 않는다. 이 두 항목은 오케스트레이터가 직접 확인한다 — 스크립트 exit 0은 "결정론적 항목 통과"일 뿐 G-CAL 전체 통과가 아니다.
+
+**handoff 세션 예외**: `handoff-manifest.json`이 있으면(simon-plan에서 인계된 세션) 항목 1의 탐색 산출물은 상류 plan 세션에 있으므로 WARN으로 낮춘다. 항목 3~8은 plan-summary.md 자체의 형식이라 예외를 주지 않는다.
 
 ### G-STEP: Step Transition Gate
 
@@ -51,6 +56,8 @@ simon 워크플로에서 사용되는 모든 게이트의 정의. 각 게이트�
 **트리거**: 소스코드 파일에 대한 Edit/Write 실행 후.
 
 **통과 조건**: 빌드, 린트, 타입체크, 테스트 중 하나라도 실패하면 미통과.
+
+> **실제 강제 범위 (혼동 주의)**: PostToolUse 훅 `auto-verify.sh`는 `verify-commands.md`에서 `build:`와 `lint:` 두 줄만 읽어 실행한다 — **타입체크와 테스트는 훅이 실행하지 않는다**. 따라서 타입체크·테스트는 G-STEP(Step 전환) 시점에 `typecheck.sh`/`run-tests.sh`를 **명시적으로 호출**해야 검증된다. 훅이 통과했다는 사실만으로 "4종 모두 통과"라고 판단하면 타입 에러·테스트 실패가 Step 경계를 넘어 누적된다.
 
 **핵심 규칙**:
 - 수정 완료 전까지 다음 파일 수정, 다음 Step 진입, 사용자 보고 등 **어떤 작업도 불가**

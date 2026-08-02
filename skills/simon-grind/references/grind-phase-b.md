@@ -18,7 +18,7 @@
 - [Grind Cross-Model Diagnosis (Tier 2+ 공통)](#grind-cross-model-diagnosis-tier-2-공통)
 - [Steps 18-20 Overrides](#steps-18-20-overrides)
 
-> Base: `~/.claude/skills/simon/references/phase-b-implementation.md`
+> Base: `~/.claude/skills/simon-dev/references/phase-b-implementation.md`
 > 이 문서는 각 Step의 grind 전용 변경사항(주로 retry 확장 + escalation ladder)만 기술합니다.
 
 ## Pre-Phase
@@ -54,8 +54,6 @@ CONTEXT.md 추가 항목:
      - fresh executor implements from checkpoint
    - **Attempt 10**: **Last Stand** — 완전 fresh context (최소 정보만 전달) architect + executor
      - Fails → `.claude/memory/escalation-report.md` + AskUserQuestion (skip Unit option)
-
-> **[MONITOR]** 재시도 시: 매 attempt 시작 시 `retry` 이벤트, 실패 시 `error` 이벤트, 전략 전환 시 `decision` 이벤트를 발신한다 (SKILL.md의 Monitor Protocol 참조).
 
 ## Step 6: Purpose Alignment (max 10: `step6_executor`)
 

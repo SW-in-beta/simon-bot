@@ -17,6 +17,7 @@ compatibility:
 **심층 분석(simon-study) → 원인/해결 방향 → 슬랙 답변 초안**까지 제공합니다.
 
 > **자율주행모드 ON 입니다.** 여러 Agent와 병행하여 딥하게 조사해주세요.
+> 이 선언은 CLAUDE.md의 모호성 확인 규칙보다 우선한다 — 분석 진행 중 세부 모호함은 스스로 판단해 진행한다. 단, 분석 대상 자체(코드/레포/질문)가 특정되지 않는 수준의 모호함은 시작 전 1회만 확인한다.
 
 ## Why this exists
 
@@ -35,6 +36,8 @@ compatibility:
 추천이 명확하지 않을 때만 사용자에게 확인합니다.
 
 ## Instructions
+
+**진행 체크포인트**: 각 Phase 경계에서 1줄 진행 보고를 출력한다 — `[Phase N 완료] {핵심 결과 요약} — Phase N+1 시작` 형식. 장시간 무응답 구간에서 사용자가 진행 상태를 알 수 있게 한다 (AskUserQuestion 아님, 단순 텍스트).
 
 ### Phase 1: 문의 파악
 
@@ -100,44 +103,7 @@ Obsidian wiki vault(`~/Obsidian/*-wiki/`)에서 문의 키워드, 레포명, 에
 
 **simon-study를 서브에이전트로 실행**하여 깊이 있는 분석을 수행합니다.
 
-Agent 도구로 서브에이전트를 생성하고, 아래 내용을 프롬프트로 전달합니다:
-
-```
-아래 문제를 simon-study 스킬(/simon-study)을 사용하여 분석해줘.
-
-## 문제
-{Phase 1에서 파악한 핵심 질문}
-
-## 맥락
-{슬랙 스레드에서 파악한 추가 맥락 — 문의자가 언급한 구체적 현상, 에러 메시지, 데이터 값 등}
-
-## 레포
-~/buzzvil/{repo_name} (현재 최신 master/main 체크아웃 완료)
-
-## 분석 요청사항
-- 관련 코드 경로와 동작 원리를 file:line 형식으로 구체적으로
-- **사용 흐름 전체 검증 (필수 원칙)**: 함수/심볼의 동작을 분석할 때 바디 한 군데만 보고 단정하지 않는다. 해당 심볼이 **실제로 어떻게 생성·주입·호출·사용되는지 사용 흐름 전체**를 검증한다. DI 체인(생성자 파라미터·wiring)이 끊긴 채 silent fallback으로 wrong value가 표출되는 버그는 함수 바디만 봐서는 잡히지 않는다.
-  1. **구현체 위치 확인**: 인터페이스 → 실제 struct 구현체 grep
-  2. **생성자 시그니처 직접 Read**: consumer의 `New` 함수 파라미터 목록에 해당 의존성이 포함되어 있는지 확인 (이름 유사성으로 추정 금지, 실제 Read 필수)
-  3. **caller/wrapper 반환값 추적**: 반환값이 타입 캐스팅·래핑·변환되며 최종 사용처까지 어떻게 전달되는지 grep
-  4. **silent fallback 확인**: `if p == nil { return default }` 패턴 — DI 누락이 런타임 에러 없이 0/nil/default로 표출되는 지점
-  5. **전수 호출부 검사**: consumer `New` / factory 호출부 전체를 grep으로 찾아 모든 위치에서 해당 의존성이 전달되는지 확인 (main.go, wire.go, factory.go 등 wiring 파일 포함)
-
-  트리거: Provider/Factory/DI/Dependency/wiring/주입 키워드 등장, 또는 특정 값이 항상 0·nil·default로 관찰되는 현상.
-- **복수 경로/가설 탐색 (필수 원칙)**: 가설은 절대 1개로 닫지 않는다. 코드 분석 결과가 그럴듯해 보여도 "이게 유일한 설명인가?"를 명시적으로 자문하고, 다음을 의도적으로 수행한다.
-  1. **대안 가설 최소 1개 탐색**: 동일 현상을 설명할 수 있는 다른 메커니즘을 최소 1개 더 떠올리고, 코드/문서에서 지지·반박 근거를 모두 수집
-  2. **제2 처리 경로 grep 의무**: "동일한 데이터/요청을 처리하는 다른 코드는 없는가?"를 명시적으로 검색 — 같은 도메인의 다른 모듈(예: tracker 종류별), middleware/후처리/wrapper 체인, third-party 통합 디렉토리(`thirdparty/`, `integrations/`, `vendors/` 등), 동일 키워드의 별도 디렉토리 grep 재실행
-  3. **가설 도출 직후 실측값 재확인**: 슬랙 스레드의 첨부 URL·로그·스크린샷에 가설과 대조 가능한 실측값이 있는지 다시 본다. 있다면 가설이 예측한 값과 일치하는지 명시적으로 비교
-  4. **단일 가설 종결 시 확신도 하향**: 끝까지 1개 가설만 남았다면 확신도를 LOW로 부착하고, 해결 방향에 "추가 탐색 필요" 항목을 포함
-
-  트리거: 모든 분석에 적용 (skip 조건 없음). "그럴듯한 가설 1개" 자체가 confirmation bias의 신호다.
-- **Feature Applicability/Entry Condition 검증 (CAPABILITY/LOGIC_INQUIRY 유형 필수)**: 문의가 "이게 가능한가?", "왜 이렇게 동작하나?"이면 해당 기능의 entry condition(적용 대상/조건/예외)을 코드/문서에서 명시적으로 추출. 문의자의 전제(예: "X면 Y가 기본 제공") 자체가 잘못일 가능성을 점검 — 가설을 받아들이지 말고 데이터/코드로 검증. 확인 안 되면 "[미확인]"으로 명시. 커버리지·범위 결론을 내리기 전 모집단 정의가 entry condition과 일치하는지 재검증.
-- Confluence에서 관련 RFC/설계 문서 검색
-- Slack에서 관련 이전 논의 검색
-- 설계 트레이드오프 (왜 이렇게 만들었는지)
-- 해결/개선 방향 2-3가지 (각각의 복잡도와 영향 범위 포함)
-- 문제가 데이터와 관련된 경우(DATA_ANOMALY, 수치 이상, 데이터 확인 필요), /buzzvil-data 스킬로 실제 데이터를 조회하여 현상을 검증. **반드시 prod 환경 테이블(prod_* prefix)을 사용** — 온콜 문의는 운영 환경 기준이므로 dev_ 테이블이 아닌 prod_ 테이블을 조회해야 한다. 조회한 테이블, SQL 쿼리, 기간, 건수를 투명하게 기록
-```
+> **Reference Loading**: Phase 3-B 진입 시 [deep-analysis-prompt.md](references/deep-analysis-prompt.md)를 읽고 그 템플릿으로 simon-study 분석을 spawn한다. 핵심: 사용 흐름 전체 검증, 복수 경로/가설 탐색, Feature Applicability/Entry Condition 검증.
 
 서브에이전트가 simon-study를 통해 수행하는 것:
 - 질문 체인 구성 → 개념/코드 병렬 리서치 → Confluence·Slack 검색 → 데이터 조회(해당 시) → 보고서 작성
@@ -292,10 +258,7 @@ REPORT_FILE="$HOME/claude-reports/oncall-$(date +%Y%m%d-%H%M%S).md"
 # 보고서 마크다운을 REPORT_FILE 경로에 저장
 ```
 
-저장 완료 후 사용자에게 안내한다:
-> "보고서가 `{REPORT_FILE}`에 저장되었습니다.
-> - Obsidian에서 리뷰하려면 `/simon-md-reviewer`를 호출하세요.
-> - 개인 지식 베이스(wiki)에 저장하려면 `/simon-brain-update`를 호출하세요."
+보고서 저장 후 AskUserQuestion으로 다음 행동을 묻는다 — 옵션: "Obsidian/Orca 리뷰 (simon-md-reviewer)", "wiki 저장 (simon-brain-update)", "여기서 종료". 사용자가 선택하면 해당 스킬을 그 자리에서 Skill 도구로 즉시 호출한다 (경로 자동 전달 — 사용자가 경로를 복사/타이핑하지 않게 한다).
 
 이후 터미널에 요약 + 슬랙 답변 초안을 출력한다.
 

@@ -49,72 +49,6 @@ compatibility:
 
 > **Shared Protocols**: `~/.claude/skills/_shared/preamble.md` 읽기 — Session Isolation, Error Resilience, Forbidden Rules, Agent Teams, Cognitive Independence 공통 프로토콜 포함.
 
-### Monitor Protocol (대시보드 연동)
-
-> **Shared Protocol**: `~/.claude/skills/_shared/monitor-protocol.md` 읽기.
-
-각 Phase 시작/완료 시 `step_start`/`step_complete` 이벤트를 발신한다. emit.sh가 SESSION_DIR과 skill을 자동 감지하므로 별도 인자 불필요. Step ID는 `{phase_num}/{step}` 형식 (예: `0/setup`, `1/1-A`, `4/exec`).
-
-**Phase 0 완료 시 workflow_start 발신:**
-```bash
-bash ~/.claude/skills/simon-monitor/scripts/emit.sh workflow_start "" "PM 워크플로 시작" '{"skill":"simon-pm","branch":"pm-session","task":"'"$PROJECT_NAME"'","scope":"PM","workflow_steps":[{"id":"0/setup","name":"Project Setup","phase":"0"},{"id":"1/1-A","name":"Vision Interview","phase":"1"},{"id":"1/1-B","name":"Feature Spec","phase":"1"},{"id":"1/1-C","name":"Technical Architecture","phase":"1"},{"id":"1/1-D","name":"PRD Assembly","phase":"1"},{"id":"1/1-E","name":"Spec Freeze","phase":"1"},{"id":"2/2-A","name":"Feature Decomposition","phase":"2"},{"id":"2/2-B","name":"Dependency Analysis","phase":"2"},{"id":"2/2-C","name":"Bot Assignment","phase":"2"},{"id":"2/2-D","name":"Execution Plan","phase":"2"},{"id":"3/setup","name":"Environment Setup","phase":"3"},{"id":"4/exec","name":"Feature Execution","phase":"4"},{"id":"5/verify","name":"Full Verification","phase":"5"},{"id":"6/delivery","name":"Delivery","phase":"6"}]}'
-```
-
-**Phase 1-C 완료 시 (CTO+Dev Lead 패널 후):**
-`.pending-event.json` 작성 후 emit:
-```json
-{
-  "skill": "simon-pm",
-  "step": "1/1-C",
-  "type": "expert_panel",
-  "title": "CTO + Dev Lead 기술 결정",
-  "data": {
-    "panel_name": "CTO + Dev Lead Panel",
-    "opinions": [각 전문가의 {"role":"...", "opinion":"...", "severity":"..."}],
-    "consensus": "기술 결정 합의",
-    "action_items": ["결정 사항"]
-  }
-}
-```
-```bash
-bash ~/.claude/skills/simon-monitor/scripts/emit.sh pending
-```
-
-**Phase 2-C 완료 시 (봇 할당 결정):**
-```bash
-bash ~/.claude/skills/simon-monitor/scripts/emit.sh decision "2/2-C" "봇 할당 결정" '{"decision":"Feature별 simon/grind 할당","rationale":"복잡도 기반 할당","alternatives":[]}'
-```
-
-**Phase 4 피처 위임 시:**
-```bash
-bash ~/.claude/skills/simon-monitor/scripts/emit.sh child_session "4/exec" "Feature N: 기능명 → simon-dev 위임" '{"child_session_id":"feat/xxx","delegated_skill":"simon-dev","feature":"기능명","force_path":"SMALL"}'
-```
-
-**Phase 5 검증 게이트:**
-`.pending-event.json` 작성 후 emit:
-```json
-{
-  "skill": "simon-pm",
-  "step": "5/verify",
-  "type": "gate_pass 또는 gate_fail",
-  "title": "Full Verification {통과|실패}",
-  "data": {
-    "gate_name": "Full Verification",
-    "checks": [{"name": "항목명", "passed": true/false}],
-    "passed_count": N,
-    "total_count": M
-  }
-}
-```
-```bash
-bash ~/.claude/skills/simon-monitor/scripts/emit.sh pending
-```
-
-**Phase 6 완료 시 workflow_complete:**
-```bash
-bash ~/.claude/skills/simon-monitor/scripts/emit.sh workflow_complete "" "PM 워크플로 완료" '{"status":"success","summary":"프로젝트 완료 요약"}'
-```
-
 ### Decision Trail
 
 주요 판단 지점에서 사용자에게 1줄 판단 근거를 함께 제시한다. PM이 왜 그렇게 결정했는지 투명하게 보여주어야 사용자가 방향을 교정할 수 있다.
@@ -176,7 +110,7 @@ echo "${SESSION_DIR}" > "${SESSION_DIR}/pm/session-path.txt"
 | PRD 기반 task 분해 (architect 에이전트 분석) | 중간 | Subagent spawn — tasks.json만 반환 |
 | 다른 서비스 코드베이스 요약 (기술 리서치) | 높음 | Subagent spawn — research.md 요약만 반환 |
 
-Subagent spawn prompt에는 반드시 "결론과 필수 액션만 반환, 중간 탐색 출력은 반환 금지" 문구를 포함한다 (simon-dev SKILL.md의 Result-Only 반환 원칙 참조).
+반환 계약은 `_shared/preamble.md`의 Subagent Result-Only Contract를 따른다.
 
 ### State Management
 
@@ -204,12 +138,7 @@ Subagent spawn prompt에는 반드시 "결론과 필수 액션만 반환, 중간
 
 > **Reference Loading**: Phase 0 진입 시 [project-setup.md](references/project-setup.md) 읽기
 
-> **[MONITOR]** Phase 0 시작 시: `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_start 0/setup "Project Setup"`
-
 프로젝트 유형(Greenfield/Existing)과 실행 모드(자동/승인)를 추론하여 한 번에 제시하고, 사용자 교정을 받은 뒤 초기 상태를 저장한다.
-
-> **[MONITOR]** Phase 0 완료 시 `workflow_start` 이벤트 발신 (Monitor Protocol 참조).
-> **[MONITOR]** Phase 0 완료 시: `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_complete 0/setup "완료"`
 
 <!-- Decomposition Note: Phase 0은 독립 실행 가능. 입력=사용자 요청, 출력=state.json. -->
 
@@ -224,21 +153,14 @@ Spec-Driven Development 기반 설계. WHAT(요구사항)과 HOW(기술 결정)�
 
 이 단계가 전체 프로젝트의 품질을 결정하므로, 충분한 대화와 분석을 통해 구체화한다.
 
-> **[MONITOR]** Phase 1 시작 시: `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_start 1/1-A "Vision Interview"`
-
 - **1-A: Vision Interview** — AI-First Draft Protocol로 인터뷰. 초안 제시 → 사용자 교정
-> **[MONITOR]** 1-A 완료 시: `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_complete 1/1-A "완료"` → `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_start 1/1-B "Feature Spec"`
 - **1-B: Feature Specification (WHAT)** — `planner` 에이전트가 Spec 작성. Save: `.claude/pm/spec.md`
-> **[MONITOR]** 1-B 완료 시: `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_complete 1/1-B "완료"` → `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_start 1/1-C "Technical Architecture"`
 - **1-C: Technical Architecture (HOW)** — CTO + Dev Lead 패널의 기술 결정. Research, Constitution, Plan 완성
 
-> **[MONITOR]** Phase 1-C 완료 시 `expert_panel` 이벤트 발신 (Monitor Protocol 참조).
-> **[MONITOR]** 1-C 완료 시: `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_complete 1/1-C "완료"` → `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_start 1/1-D "PRD Assembly"`
-
 - **1-D: PRD Assembly & Review** — Spec + Plan + Constitution 종합 → 사용자 승인
-> **[MONITOR]** 1-D 완료 시: `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_complete 1/1-D "완료"` → `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_start 1/1-E "Spec Freeze"`
 - **1-E: Spec Freeze** — 승인 후 Spec 동결. 이후 변경은 명시적 수정 절차 필수 (변경 요청 → 영향 분석 → 사용자 승인 → 문서 갱신). Spec drift 방지
-> **[MONITOR]** 1-E 완료 시: `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_complete 1/1-E "완료"`
+
+**HTML 목업 (UI 기능 포함 시, 선택)**: 텍스트 스펙과 별개로 핵심 화면 1-2개의 클릭 가능한 정적 HTML 목업을 생성해 사용자 반응을 받는다 (frontend-design 또는 buzzvil-design 스킬 재사용). 텍스트 wireframe보다 취향 불일치를 싸게 조기 발견한다 — 전체 앱이 아니라 핵심 화면으로 범위 제한.
 
 <!-- Decomposition Note: Phase 1은 독립 실행 가능. 입력=state.json+사용자 요청, 출력=spec.md/plan.md/constitution.md/research.md/prd.md. -->
 
@@ -250,19 +172,11 @@ Spec-Driven Development 기반 설계. WHAT(요구사항)과 HOW(기술 결정)�
 
 PRD를 구현 가능한 단위 작업(Feature)으로 분해한다.
 
-> **[MONITOR]** Phase 2 시작 시: `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_start 2/2-A "Feature Decomposition"`
-
 - **2-A: Feature Decomposition** — `architect`가 PRD 분석. 각 Feature는 파일 5-15개, 단일 관심사
-> **[MONITOR]** 2-A 완료 시: `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_complete 2/2-A "완료"` → `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_start 2/2-B "Dependency Analysis"`
 - **2-B: Dependency Analysis** — 의존성 그래프, 병렬/순차 그룹, Critical Path 최적화
-> **[MONITOR]** 2-B 완료 시: `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_complete 2/2-B "완료"` → `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_start 2/2-C "Bot Assignment"`
 - **2-C: Complexity Assessment & Bot Assignment** — simon vs simon-grind 자동 할당
 
-> **[MONITOR]** Phase 2-C 완료 시 `decision` 이벤트 발신 (Monitor Protocol 참조).
-> **[MONITOR]** 2-C 완료 시: `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_complete 2/2-C "완료"` → `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_start 2/2-D "Execution Plan"`
-
 - **2-D: Execution Plan 생성** — `tasks.json`에 저장
-> **[MONITOR]** 2-D 완료 시: `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_complete 2/2-D "완료"`
 - **2-E: 실행 계획 리뷰** — 사용자에게 시각적 제시 → 승인/수정/Bot 변경
 
 <!-- Decomposition Note: Phase 2는 Phase 1 출력에만 의존. 입력=prd.md+spec.md+constitution.md, 출력=tasks.json. -->
@@ -273,11 +187,7 @@ PRD를 구현 가능한 단위 작업(Feature)으로 분해한다.
 
 > **Reference Loading**: Phase 3 진입 시 [environment-setup.md](references/environment-setup.md) 읽기
 
-> **[MONITOR]** Phase 3 시작 시: `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_start 3/setup "Environment Setup"`
-
 기능 구현 전에 프로젝트 환경을 준비한다. Scaffolding → Dependencies → Git Setup → 환경 검증.
-
-> **[MONITOR]** Phase 3 완료 시: `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_complete 3/setup "완료"`
 
 <!-- Decomposition Note: Phase 3은 Phase 2와 독립적으로 실행 가능 (plan.md만 있으면 됨). Phase 2와 병렬 실행도 이론적으로 가능하나, tasks.json의 Feature 목록이 환경에 영향을 줄 수 있어 순차 실행 권장. -->
 
@@ -289,12 +199,7 @@ PRD를 구현 가능한 단위 작업(Feature)으로 분해한다.
 
 각 Feature를 simon 또는 simon-grind에게 위임하여 구현한다.
 
-> **[MONITOR]** Phase 4 시작 시: `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_start 4/exec "Feature Execution"`
-> **[MONITOR]** 각 Feature 위임 시 `child_session` 이벤트 발신 (Monitor Protocol 참조).
-
 `execution_groups` 순서대로 진행하며, 각 그룹 완료 후 통합 검증 + Re-planning Gate를 거친다. 진행 현황을 `.claude/pm/progress.md`에 유지한다.
-
-> **[MONITOR]** Phase 4 완료 시: `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_complete 4/exec "완료"`
 
 **Plan Reuse Protocol**: PM이 simon-dev에게 Feature를 위임할 때, simon-dev의 Handoff Manifest(P-009) 형식으로 컨텍스트를 전달한다:
 
@@ -322,16 +227,11 @@ Handoff Notification 형식: `[Handoff] PM → simon-dev (F{N}: {기능명}): PM
 
 > **Reference Loading**: Phase 5 진입 시 [full-verification.md](references/full-verification.md) 읽기
 
-> **[MONITOR]** Phase 5 시작 시: `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_start 5/verify "Full Verification"`
-
 모든 Feature 완료 후, 전체 프로젝트 수준에서 통합 검증을 수행한다.
 
 검증 단계: Integration(브랜치 통합) → Full Build & Test → Integration Testing(E2E) → Architecture Review → Security Review(OWASP) → Issue Resolution(CRITICAL/HIGH 즉시 수정, MEDIUM 사용자 판단, max 3 rounds) → Verification Report 작성.
 
 Save: `.claude/pm/verification.md`
-
-> **[MONITOR]** 검증 완료 시 `gate_pass`/`gate_fail` 이벤트 발신 (Monitor Protocol 참조).
-> **[MONITOR]** Phase 5 완료 시: `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_complete 5/verify "완료"`
 
 <!-- Decomposition Note: Phase 5는 독립 실행 가능. 입력=통합된 코드베이스+prd.md, 출력=verification.md. 외부 검증 도구와 연계 시 별도 스킬로 분리 가능. -->
 
@@ -341,12 +241,7 @@ Save: `.claude/pm/verification.md`
 
 > **Reference Loading**: Phase 6 진입 시 [delivery.md](references/delivery.md) 읽기
 
-> **[MONITOR]** Phase 6 시작 시: `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_start 6/delivery "Delivery"`
-
 Final Report → Guided Review → **Code Review (simon-code-review)** → Completion Summary → Finalization(커밋, PR 생성).
-
-> **[MONITOR]** 워크플로 종료 시 `workflow_complete` 이벤트 발신 (Monitor Protocol 참조).
-> **[MONITOR]** Phase 6 완료 시: `bash ~/.claude/skills/simon-monitor/scripts/emit.sh step_complete 6/delivery "완료"`
 
 > **INSTRUCTION (Draft PR 필수)**: PR 생성은 반드시 `simon-code-review` 스킬을 통해 수행한다. PM이 직접 `gh pr create`를 실행하는 것은 금지다. simon-code-review가 Draft PR 생성 + 인라인 코드 리뷰를 담당한다.
 
@@ -407,3 +302,14 @@ Phase 4 진입 시 PM은 Phase 1-3의 "과정"(인터뷰 대화, 패널 토론 �
 **Bot 위임 후** (Feature Execution 중): 완료된 Feature의 구현 세부사항은 compaction 대상이다. `tasks/{task-id}/result.md`에 저장되어 있으므로 컨텍스트에 유지할 필요 없다. Hint에 `drop completed feature implementation details, keep result file paths only`를 항상 포함한다.
 
 **ship 모드**: hint를 자동 적용. **guided 모드**: hint 확인 후 실행.
+
+---
+
+## Core Reminders (전 구간 상시 적용)
+
+파일 끝 배치는 의도적이다 — 긴 본문의 핵심 불변식을 세션 후반 시점에도 환기한다 (끝부분 리마인더 페어링 패턴):
+
+- **PR 생성은 simon-code-review를 통해서만** — PM이 직접 `gh pr create` 실행 금지 (Phase 6).
+- **Spec Freeze(1-E) 이후 변경은 명시적 수정 절차 필수** — 변경 요청 → 영향 분석 → 사용자 승인 → 문서 갱신.
+- **Feature 위임 시 Handoff Manifest로 컨텍스트 전달** — 기술 제약·gotchas 전달 누락 금지 (Phase 4).
+- **Success Criteria 전 항목 충족 전에는 완료 선언 금지** — Phase 5 검증·Phase 6 전달을 컨텍스트 소진으로 건너뛰지 않는다.

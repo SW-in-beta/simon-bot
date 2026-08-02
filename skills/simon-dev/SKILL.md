@@ -6,13 +6,15 @@ compatibility:
   skills: [simplify, git-commit]
 ---
 
-# simon
+# simon-dev
 
 Deep workflow skill with 19-step quality pipeline.
 
 ## Instructions
 
-You are executing the **simon** deep workflow. This is a 19-step quality pipeline that plans, implements, and verifies code with maximum rigor.
+You are executing the **simon-dev** deep workflow. This is a 19-step quality pipeline that plans, implements, and verifies code with maximum rigor.
+
+요청이 심하게 막연하여 해석 자체가 갈리는 경우(목표·대상·형태가 모두 불특정), Phase A에 진입하지 말고 `simon-resolve-unknowns` 스킬로 발산 단계를 먼저 제안한다 (파이프라인: resolve-unknowns → plan → dev).
 
 ## State-Driven Execution
 
@@ -91,12 +93,6 @@ Agent Team 운영 중 오케스트레이터는 TaskList를 주기적으로 확�
 `workflow/scripts/`의 스크립트는 구조화된 출력, 파이프 호환, 자기 문서화, 컨텍스트 전처리를 따른다.
 For detailed principles, read [cross-cutting-protocols.md](references/cross-cutting-protocols.md).
 
-### Monitor Protocol (대시보드 연동) — 필수
-
-> **Shared Protocol**: `~/.claude/skills/_shared/monitor-protocol.md` 읽기.
-
-**Step Lifecycle**: ① `step_start` 발신 → ② 본 작업 수행 → ③ 중간 이벤트 즉시 발신 → ④ `step_complete` 발신. 발신 명령: `bash ~/.claude/skills/simon-monitor/scripts/emit.sh <type> <step> <title> [data_json]`. Reference 파일의 `▶ EMIT` 마커 위치에서 해당 이벤트를 발신한다. 발신 실패는 워크플로를 중단하지 않지만, 발신 자체를 건너뛰는 것은 금지.
-
 ### Phase Progress Dashboard
 
 Phase 전환 시 `[######....] Step {current}/{total} ({percent}%)` 형식으로 진행 상황을 출력한다. 각 Step 완료 시 `[Progress] Step {N}/{total} 완료 — {Step명}` 1줄 경량 출력을 추가한다 (ship/guided 모드).
@@ -111,7 +107,7 @@ ENV_INFRA로 테스트 실행 자체가 불가능한 경우, 사용자 명시적
 
 ### Autonomous Step Progression (Narration-Trap 방지)
 
-자율 완주 구간에서 Step 완료를 턴 경계로 취급하지 않는다. 하위 단계(subagent/Agent 반환, 스킬 호출 복귀, SendMessage 토큰, 검증 명령 종료)가 반환된 직후, 같은 턴에서 **다음 Step의 첫 tool call을 가장 먼저 emit**한다 (tool-call-first). `"Step N 완료. 다음은 …"` 같은 종료 내레이션을 emit하고 턴을 끝내는 것은 금지 — 모델이 턴 종료 리듬에 self-conditioning되어 파이프라인이 멈추고 사용자가 "계속"을 입력해야 재개된다. 상태 보고가 필요하면 다음 Step의 tool call을 먼저 호출한 뒤 1줄 경량 보고를 덧붙인다.
+자율 완주 구간에서 Step 완료를 턴 경계로 취급하지 않는다. 하위 단계(subagent/Agent 반환, 스킬 호출 복귀, SendMessage 토큰, 검증 명령 종료)가 반환된 직후, 같은 턴에서 **다음 Step의 첫 tool call을 가장 먼저 emit**한다 (tool-call-first). 위반 판정은 어휘가 아닌 행동 기준이다 — 하위 작업 결과를 요약하는 문장(`"Step N 완료. 다음은 …"` 류, 이 표현에 국한되지 않음)이 다음 tool call보다 먼저 emit되고 턴이 닫히면 위반이다. 종료 내레이션으로 턴을 닫으면 모델이 턴 종료 리듬에 self-conditioning되어 파이프라인이 멈추고 사용자가 "계속"을 입력해야 재개된다. 상태 보고가 필요하면 다음 Step의 tool call을 먼저 호출한 뒤 1줄 경량 보고를 덧붙인다 (GOOD/BAD 예시는 preamble.md의 Autonomous Progression Invariant 참조).
 
 턴 종료는 **Interaction Mode의 "확인이 필요한 핵심 판단점"(AskUserQuestion), 워크플로 최종 완료, 자동 복구 불가 차단 상태**에서만 허용된다. "자율 완주 범위"(커밋·푸시·PR Draft·Integration merge·재시도·session 갱신 등)에서는 내레이션으로 턴을 닫지 않는다. 정본은 `~/.claude/skills/_shared/preamble.md`의 "Autonomous Progression Invariant" 참조.
 
@@ -131,6 +127,7 @@ ENV_INFRA로 테스트 실행 자체가 불가능한 경우, 사용자 명시적
 | Integration/Review 진입 | `integration-and-review.md` | 2 | 후반 단계 |
 | Step 6/7/17 검증 진입 시 | `context-separation.md` | 2 | 검증 시에만 필요 |
 | Step 6/7/17 검증 진입 시 | `review-rubric.md` | 2 | 검증 시에만 필요 |
+| Step 17 진입 | Tail Reminder (파일 아님 — 3-5줄 압축 재확인) | — | Forbidden Rules 활성 상태, Plan Immutability(G-WF-001), done_when_checks 미해결 시 통과 금지를 진입 직전에 재확인. 긴 검증 체인 끝에서 초반 규칙이 attention에서 소실되는 것을 방지 (Tier 2 Unload로 구현 규칙이 해제된 상태이기 때문) |
 | Agent Team 생성 시 | `agent-teams.md` | 3 | on-demand |
 | 에러 발생 시 | `error-resilience.md` | 3 | on-demand |
 | 전문가 팀 findings 작성 시 | `expert-output-schema.md` | 3 | on-demand |
@@ -138,7 +135,6 @@ ENV_INFRA로 테스트 실행 자체가 불가능한 경우, 사용자 명시적
 | 외부 라이브러리/서비스 사용 시 | `docs-first-protocol.md` | 3 | on-demand |
 | Gate 조건 참조 필요 시 | `gate-definitions.md` | 3 | on-demand |
 | 산출물 생성 시 (Step 1-B, 18) | `generation-style-guide.md` | 3 | on-demand |
-| Startup (3-E 단계) | `~/.claude/skills/_shared/monitor-protocol.md` | 2 | Startup 필수. emit.sh 실패는 허용하되 발신 시도 자체는 건너뛰지 않음 |
 
 > **Tier 정의와 Phase 전환 시 Tier 2 Unload 규칙**(언로드 대상 테이블, 45%+ 전환 시 compact 지침 포함)은 [cross-cutting-protocols.md](references/cross-cutting-protocols.md)의 "Reference Tier 운용" 섹션 참조 — Startup Tier 1로 항상 로딩되므로 세션 내내 유효하다.
 
@@ -155,27 +151,18 @@ subagent는 다음 경우에 사용한다:
    - 결정론적 검증(빌드, 테스트 실행)은 제외 — 코드 실행으로 확인 가능한 것에 subagent를 쓰지 않음
 5. 중간 출력이 대량인 작업 — spec 파일 대조 검증, git 변경 기반 문서 작성, 타 서비스 코드베이스 요약
 
-단일 파일 수정, 간단한 검색, 단순 명령 실행은 직접 수행한다. 불필요한 subagent 생성은 컨텍스트를 낭비한다.
+단일 파일 수정, 간단한 검색, 단순 명령 실행은 직접 수행한다. 불필요한 subagent 생성은 컨텍스트를 낭비한다. Spawn 직전 오케스트레이터는 위 5개 기준 중 어느 것에 해당하는지 1줄로 인용한다 (예: `[Spawn] 기준 3 — 대량 코드 탐색`) — 인용할 기준이 없으면 직접 수행한다. 이 규율은 토큰 절약이 아니라 신뢰성 목적이다: 근거 없는 subagent 증식은 `_shared/preamble.md`의 Inter-Agent Communication Gotchas(병렬 파일 충돌, 프롬프트 핵심 지시 소실, API Contract 불일치)의 발생 확률을 높인다.
 
-**Result-Only 반환 원칙** (오케스트레이터 컨텍스트 보호):
+**Result-Only 반환 원칙** (오케스트레이터 컨텍스트 보호): 반환 계약과 상세 표는 `_shared/preamble.md`의 Subagent Result-Only Contract를 따른다.
 
-Subagent spawn 전에 리트머스 테스트를 적용한 뒤, 아래 반환 규약을 준수한다.
-
-| 반환해야 하는 것 | 반환하지 말아야 하는 것 |
-|-----------------|------------------------|
-| PASS/FAIL 판정 + 근거 1~3줄 | 전체 빌드 로그 |
-| 발견된 이슈 목록 (severity + 파일경로) | grep 원본 결과 |
-| 권장 액션 (구체적) | 탐색 과정의 중간 파일 내용 |
-| 저장한 파일 경로 목록 | agent 내부 토론 기록 |
-
-**Spawn Prompt 필수 문구** (`full_output: true` 제외): `"결론과 필수 액션만 반환하라. 발견한 내용은 {파일경로}에 저장하고, 반환값은 'STATUS: PASS/FAIL, 발견 {N}건, 저장: {파일경로}'로 제한한다."`
+**Spawn 출력 계약** (`full_output: true` 제외): spawn 프롬프트는 반환 형식 `STATUS: PASS/FAIL, 발견 {N}건, 저장: {파일경로}`를 요구하고, 중간 탐색 출력은 반환하지 않도록 지시한다 — 감싸는 문구는 맥락에 맞게 표현한다. 오케스트레이터는 반환값의 `^STATUS: (PASS|FAIL)` 패턴을 확인한다.
 
 **역할별 도구 범위, maxTurns, 반환 규약:**
 Agent spawn 시 [agent-capability-matrix.md](references/agent-capability-matrix.md) 참조. Spawn Prompt Template과 Status Prefix 규약을 포함한다.
 
 ### Multi-Agent Saturation Guard
 
-multi-agent 구조(Agent Team, Devil's Advocate, Verification Layer)는 단일 에이전트로 달성 불가능한 품질을 제공하지만 overhead도 동반한다. 다음 조건에서 multi-agent를 축소하여 비용 대비 효과를 최적화한다:
+multi-agent 구조(Agent Team, Devil's Advocate, Verification Layer)는 단일 에이전트로 달성 불가능한 품질을 제공하지만 overhead도 동반한다. 축소/병합 후보 판단 전에 반드시 `context-separation.md`의 "검증 지시 제거 판단 기준"(A. 제거 후보 / B. 유지 대상)을 먼저 적용한다 — B 유형(Fresh Subagent/Blind-First/Cross-Model/결정론적 게이트)은 축소 논의 대상이 아니다. 다음 조건에서 multi-agent를 축소하여 비용 대비 효과를 최적화한다:
 
 **축소 조건** (하나라도 해당 시):
 - Step 4-B findings 5건 이하 + CRITICAL 0건 → Verification Layer를 single verifier로 축소 (Blind-First는 유지)
@@ -188,7 +175,7 @@ multi-agent 구조(Agent Team, Devil's Advocate, Verification Layer)는 단일 �
 
 ### Over-engineering 방지
 
-plan-summary.md에 명시된 변경만 구현한다. 범위 밖 개선(docstring, 주석, 타입 어노테이션 등)을 발견하면 `.claude/memory/unresolved-decisions.md`에 기록만 한다 — 범위 밖 수정은 리뷰어의 인지 부하를 높이고, 의도치 않은 동작 변경 위험이 있으며, PR의 변경 범위가 불명확해져 승인이 지연되기 때문이다.
+plan-summary.md에 명시된 변경만 구현한다. 범위 밖 개선(docstring, 주석, 타입 어노테이션 등)을 발견하면 `.claude/memory/unresolved-decisions.md`에 기록하고, 발견 즉시 1줄로 통보한 뒤 요청된 스코프대로 계속 진행한다: `[Scope] {한 줄 설명} 발견 — 계획 범위 밖이라 미적용, unresolved-decisions.md에 기록`. 통보는 정보 제공이지 턴 종료 사유가 아니다 (Autonomous Progression 유지). 범위 밖 수정을 하지 않는 이유: 리뷰어의 인지 부하를 높이고, 의도치 않은 동작 변경 위험이 있으며, PR의 변경 범위가 불명확해져 승인이 지연되기 때문이다.
 
 **Reference-Literal Rule**: 사용자가 특정 파일을 레퍼런스로 명시하면("X 파일 보고 해줘", "X 참고해서 추가해줘") 해당 파일의 구조·필드·스타일을 그대로 복사하는 것이 기본값이다. 타겟 환경의 기존 패턴이 레퍼런스와 달라도 사용자 지시가 우선한다. 리소스 타입을 결정하는 필드(`kind`, `schedule`, `suspend`, `tier` 등)는 절대 자의적으로 생략하지 않는다. 타겟 환경 기존 패턴과 레퍼런스가 충돌하면 Confusion Management Protocol을 적용하여 사용자에게 확인한다 — 자동 결정하지 않는다.
 
@@ -215,20 +202,14 @@ For Phase-End Auto-Retrospective protocol, read [cross-cutting-protocols.md](ref
 
 ### Handoff Notification
 
-스킬 전환(simon → simon-code-review 등) 시 사용자에게 1줄 통보를 출력한다. 갑작스러운 스킬 전환으로 인한 사용자 혼란을 방지한다.
+스킬 전환(simon-dev → simon-code-review 등) 시 사용자에게 1줄 통보를 출력한다. 갑작스러운 스킬 전환으로 인한 사용자 혼란을 방지한다.
 
 형식: `[Handoff] {현재 스킬} → {다음 스킬}: {목적 1줄 설명}`
-예시: `[Handoff] simon → simon-code-review: Draft PR 생성 및 코드 리뷰 진행합니다.`
+예시: `[Handoff] simon-dev → simon-code-review: Draft PR 생성 및 코드 리뷰 진행합니다.`
 
 ### On-Demand Session Hooks
-
-사용자가 세션 중간에 명시적으로 활성화하면 세션 종료까지 지속되는 동적 제약이다. `{SESSION_DIR}/memory/session-modifiers.json`에 기록되고, `forbidden-guard.sh`가 참조하여 추가 제약을 적용한다.
-
-- **`/careful`**: CONTEXT-SENSITIVE 규칙을 ABSOLUTE로 격상. git push, 외부 API, DB 명령 등이 모두 차단된다 — 프로덕션 인접 코드 작업 시 안전 수준을 높이기 위함이다.
-- **`/freeze <dir>`**: 지정된 디렉토리 외 파일의 Edit/Write를 차단한다 — 대규모 코드베이스에서 의도치 않은 파일 수정을 결정론적으로 방지한다.
-- **`/scope-lock`**: plan-summary.md의 NOT in scope 항목에 해당하는 파일 수정을 차단한다 — grind의 10회 재시도 중 scope creep을 사전에 방지한다.
-
-Startup에서 이전 세션의 `session-modifiers.json`을 복원하여 활성 hooks를 유지한다. 세션 종료 시 자동 해제되어 일반 작업에 불필요한 마찰을 주지 않는다.
+> ⚠ **미구현 — 설계만 존재**: session-modifiers.json을 읽는 hook 코드와 /scope-lock 스킬은 없다. 현존 /careful은 gstack 플러그인의 별개 스킬(경고 전용)이다.
+- 설계 항목: **`/careful`**(CONTEXT-SENSITIVE→ABSOLUTE 격상), **`/freeze <dir>`**(지정 디렉토리 수정 차단 — freeze 스킬은 실존, guard 연동만 미구현), **`/scope-lock`**(NOT in scope 파일 수정 차단)
 
 ### Handoff Manifest (Instruction)
 
@@ -267,11 +248,11 @@ Startup에서 `config.yaml`의 `interaction_mode`를 읽고, 없으면 `guided`�
 
 ## Startup
 
-> **HARD GATE**: Startup은 건너뛸 수 없다. 사용자가 즉시 구현을 요청하더라도, Startup이 완료되지 않은 상태에서 Phase A 또는 그 이후 단계에 진입하는 것은 절대 금지다. SESSION_DIR 초기화, workflow-state.json 생성, Monitor workflow_start 발신이 완료된 후에만 다음 단계로 진행한다. "이미 안다", "이번엔 급하니까"는 Startup 생략 사유가 되지 않는다.
+> **HARD GATE**: Startup 완료 여부는 3-E Startup Completion Gate가 결정론적으로 판정한다 — 이 판정 없이 Phase A로 진행하지 않는다 (SESSION_DIR 없이 진행하면 세션 상태·복구 능력이 유실되기 때문).
 
 Startup 단계는 순서 의존성이 있으므로 순차 실행한다.
 
-1. `.claude/workflow/` 존재 확인. 없으면: `bash ~/.claude/skills/simon/install.sh --project-only`
+1. `.claude/workflow/` 존재 확인. 없으면: `bash ~/.claude/skills/simon-dev/install.sh --project-only`
 2. 워크플로 파일 읽기 (parallel OK):
    - `.claude/workflow/config.yaml`
    - `.claude/memory/retrospective.md` (있으면)
@@ -299,10 +280,8 @@ Startup 단계는 순서 의존성이 있으므로 순차 실행한다.
    이후 모든 `.claude/memory/`, `.claude/reports/` 경로는 `{SESSION_DIR}` 기준으로 해석한다.
 3-C. **workflow-state.json 초기화**: `{SESSION_DIR}/memory/workflow-state.json`에 초기 스키마를 기록한다 (State-Driven Execution 섹션 참조). 이미 존재하면 기존 세션 복원으로 판단하고 덮어쓰지 않는다.
 3-D. **session-meta.json 초기화**: `{SESSION_DIR}/memory/session-meta.json`에 세션 메타데이터 생성 (필드: `branch`, `skill`, `current_phase`, `current_step`, `total_steps`, `status`, `last_activity`, `last_commit_hash`). 이미 존재하면 기존 세션 복원으로 판단하고 덮어쓰지 않는다. Phase/Step 전환 시 `current_phase`, `current_step`, `last_activity` 갱신. 커밋 생성 시 `last_commit_hash` 갱신.
-3-E. **Monitor 자동 시작 + 주소 통보 + workflow_start 발신**: 단일 공유 서버 설계 (세션마다 별도 서버 안 띄움, 포트 충돌은 3847→3857 폴백). 상세 bash 블록과 workflow_start 이벤트 스키마는 [startup-bootstrap.md](references/startup-bootstrap.md)의 "Monitor 자동 시작" 및 "workflow_start 발신" 섹션 참조.
-   - **통보 의무**: 실제 포트를 포함한 한 줄 통보 `[Monitor] {상태} — http://localhost:{포트}` 필수. 이 통보가 없으면 사용자가 대시보드에 접근 불가.
-3-F. **Startup Completion Gate** — Deterministic Gate Principle 적용. bash로 필수 파일 존재와 monitor 실행을 확인한 후에만 Phase A 진입. 상세 bash 스크립트는 [startup-bootstrap.md](references/startup-bootstrap.md)의 "Startup Completion Gate" 섹션 참조.
-   필수: workflow-state.json + session-meta.json 존재. 선택: Monitor URL 통보 완료, workflow_start 이벤트 발신 시도 완료. FAIL 시 해당 단계로 돌아가 재수행.
+3-E. **Startup Completion Gate** — Deterministic Gate Principle 적용. bash로 필수 파일 존재를 확인한 후에만 Phase A 진입. 상세 bash 스크립트는 [startup-bootstrap.md](references/startup-bootstrap.md)의 "Startup Completion Gate" 섹션 참조.
+   필수: workflow-state.json + session-meta.json 존재. FAIL 시 해당 단계로 돌아가 재수행.
 4. **Handoff Manifest 처리** (P-009): `.claude/memory/handoff-manifest.json`이 존재하면:
    - `transfer_files`(별칭 `context_files` 호환)를 자동 로딩하여 컨텍스트 복원. `block_files`는 로딩하지 않음 (Cognitive Independence 보호)
    - `distilled_brief`를 먼저 처리하여 `what_was_done`, `key_decisions`, `critical_constraints`, `do_not_retry`, `recommended_entry`로 방향 설정 (transfer_files 읽기 전)
@@ -327,6 +306,20 @@ Startup 단계는 순서 의존성이 있으므로 순차 실행한다.
 ## Phase A: Planning (Interactive with User)
 
 For detailed step instructions, read [phase-a-planning.md](references/phase-a-planning.md).
+
+**Unknowns Gate (Step 0 진입 전, 1분 이내 판단)**
+
+요청에 unknowns가 많은 상태로 Phase A를 진행하면 인터뷰가 겉돌고 plan이 추측 위에 세워진다. Step 0 진입 전에 모호성 신호를 평가한다:
+
+- 목표가 결과물 수준으로 기술되지 않음 ("뭔가 만들어줘", "대충", "알아서")
+- 사용자가 해당 영역이 낯설다고 밝힘 ("이 쪽 처음 봐", "잘 몰라")
+- 성공 조건/수용 기준을 요청에서 도출할 수 없음
+- 합리적 해석이 2개 이상으로 갈라져 서로 다른 구현이 나옴
+- "보면 안다" 성격의 기준(비주얼/UX/톤)이 작업의 핵심
+
+**신호 2개 이상이면** AskUserQuestion으로 제안한다: ① `simon-resolve-unknowns` 선실행 (권장 — 발산으로 unknowns 해소 후 브리프를 들고 복귀) ② 그대로 진행 (Phase A 인터뷰로 커버 가능한 수준) ③ 사용자가 즉석에서 보완 설명. 신호 1개 이하면 게이트를 통과하고 언급하지 않는다.
+
+**게이트 skip 조건**: `handoff-manifest.json`이 존재하면 (simon-resolve-unknowns 또는 simon-plan을 이미 거침) 이 게이트를 건너뛴다. ①을 선택받으면 Skill tool로 simon-resolve-unknowns를 호출하고, 그 산출물(refined-brief.md, unknowns-ledger.md, manifest)을 받아 Phase A를 재개한다 — ledger의 Resolved는 인터뷰 재질문 금지, Rejected는 do_not_retry로 취급.
 
 **Step 0: Scope Challenge**
 - `architect` agent: git history 분석, 최소 변경 결정, scope 판별
@@ -399,15 +392,8 @@ Each Unit: isolated git worktree. Independent Units: parallel.
 **Step 8-B: 경량 Cross-Impact 체크**
 변경된 파일의 importers를 grep으로 확인하여 영향받는 파일 목록을 파악한다. 예상 외 영향 파일이 발견되면 Step 17에서 architect에게 보고한다. "국소 최적화 — 한 곳 고치면 다른 곳이 깨짐" 패턴(G-WF 참조)을 구조적으로 감지한다.
 
-**Steps 9-16:**
-- Step 9: File/Function Splitting
-- Step 10: Integration/Reuse Review
-- Step 11: Side Effect Check — **subagent 위임**: 변경 파일의 caller 체인 탐색(Grep + Read) 결과를 요약만 반환. 중간 탐색 출력은 subagent 컨텍스트에서 소비
-- Step 12: Full Change Review (code-reviewer subagent)
-- Step 13: Dead Code Cleanup
-- Step 14: Code Quality Assessment
-- Step 15: Flow Verification
-- Step 16: MEDIUM Issue Resolution
+**Refinement Cycle (Step 8 완료 후 — 구 Steps 9-16 대체):**
+- Scan → Fix → Verify → Check 4단계 반복(max 3회), 품질 충족 시 조기 종료. 구 Steps 9-16의 개별 단계(파일/함수 분할, 재사용 리뷰, Side Effect Check, 전체 리뷰, 데드코드 정리, 품질 평가, 흐름 검증, MEDIUM 처리)는 이 사이클의 Scan 분류 항목으로 통합되었다. 상세와 Side Effect Check(구 Step 11)의 subagent 위임 원칙(caller 체인 탐색 → 요약만 반환) 정본은 [phase-b-verification.md](references/phase-b-verification.md)의 Refinement Cycle·"Side Effect Check" 섹션 참조
 
 **Step 8-B Subagent 원칙**: importers grep 및 영향 파일 분석은 subagent에 위임하고, "영향 파일 목록 + 조치 필요 여부" 결론만 반환받는다. grep 출력 원문이 메인 컨텍스트에 축적되는 것을 방지한다.
 
@@ -432,19 +418,21 @@ For detailed instructions, read [integration-and-review.md](references/integrati
 - simon-code-review가 Completion Summary 출력 및 최종 마무리(retrospective, CONTEXT.md 갱신) 처리
 - simon-code-review는 CONNECTED 모드로 자동 감지됨 (review-sequence.md 존재)
 
-> **분해 패턴**: Step 19는 원래 simon 내부에 인라인되어 있었으나, PR 리뷰가 독립적으로도 유용하여 `simon-code-review` 스킬로 추출되었다. 스킬이 비대해질 때 이 패턴(독립 호출 가능한 단계를 별도 스킬로 분리, 연결 모드/독립 모드 양립)을 참고하라.
+> **분해 패턴**: Step 19는 원래 simon-dev 내부에 인라인되어 있었으나, PR 리뷰가 독립적으로도 유용하여 `simon-code-review` 스킬로 추출되었다. 스킬이 비대해질 때 이 패턴(독립 호출 가능한 단계를 별도 스킬로 분리, 연결 모드/독립 모드 양립)을 참고하라.
 
 **Step 20: Self-Improvement (별도 세션 위임)**
 - Handoff Manifest를 통해 retrospective.md, user-feedback-log.md를 전달
 - 새 세션에서 워크플로 전반의 종합 패턴 분석 + evaluator tuning loop 데이터 수집
 - Phase-End Auto-Retrospective가 이미 Phase별 핵심 인사이트를 캡처하므로, Step 20 미실행 시에도 핵심 피드백은 보존됨
-- 실행: 사용자가 `/retro`를 호출하거나, simon 완료 시 자동 Handoff
+- 실행: 사용자가 `/retro`를 호출하거나, simon-dev 완료 시 자동 Handoff
 - **Standup Entry**: simon-code-review 완료 시점에 이미 기록됨 (Step 19). Step 20에서는 standup을 기록하지 않는다
 - **Gotcha 축적**: Phase-End Auto-Retrospective에서 이미 Phase별로 기록됨. Step 20은 Phase 간 교차 패턴에서 발견된 gotcha만 `~/.claude/projects/{slug}/state/gotchas.jsonl`에 추가로 기록한다 (중복 방지: 기존 파일을 읽어 동일 패턴이 없는 경우에만 append)
+- **자기 측정**: Harness Stress Test 데이터가 5세션 이상 누적되면 Step 20 자신을 '0건 발견 80%+ 병합 후보' 평가의 1순위 대상으로 삼는다 — 이미 Standup(Step 19)·Gotcha(Phase-End)가 선행 기록되므로, 데이터가 중복을 확인하면 Step 20을 Phase-End Auto-Retrospective로 흡수한다.
 
 ### Harness Stress Test (데이터 수집)
 
-각 Step 완료 시 workflow-state.json에 Step별 효용 데이터(발견 이슈 수, 소요 턴 수)를 기록한다. 5세션+ 누적 후 Step 20(또는 boost-review)에서 '0건 발견 80%+ Step'을 병합 후보로 제안한다 -- 모델 진화에 따라 불필요해진 Step을 데이터 기반으로 식별하기 위함이다.
+각 Step 완료 시 workflow-state.json에 Step별 효용 데이터(발견 이슈 수, 소요 턴 수, `context_tokens_at_step_start` 버킷: `<256K`/`256K-512K`/`>512K`)를 기록한다. 5세션+ 누적 후 Step 20(또는 boost-review)에서 '0건 발견 80%+ Step'을 병합 후보로 제안한다 -- 모델 진화에 따라 불필요해진 Step을 데이터 기반으로 식별하기 위함이다. context_tokens 버킷은 Tier 1 "256K 이내 배치" 규칙(Reference Loading Policy)의 실측 검증용이다 — 버킷별 게이트 FAIL율/재작업 빈도 비교로 임계값 재검토 근거를 쌓되, 임계값 자체는 실측 근거가 쌓이기 전까지 변경하지 않는다.
+단, `context-separation.md`의 Step × 원칙 매트릭스에서 Fresh Subagent/Blind-First가 표시된 Step(현재 Step 6, Step 7 Verification Layer, Step 17, Devil's Advocate)은 '0건 발견' 병합 후보 규칙에서 제외한다 — 이 Step들의 설계 목적은 새 이슈 발견이 아니라 독립 시행의 수렴으로 신뢰도를 높이는 것(Monte Carlo Verification Principle)이라, 잘 구현된 코드에서 0건 발견은 실패가 아니라 정상 동작이다. 유용성은 `[INDEPENDENT-CONFIRM]` 대 `[DISPUTED]` 비율로 별도 추적하고, 극단적 편향이 장기간 지속될 때만 사용자에게 근거와 함께 제시한다 — 자동 병합은 하지 않는다.
 
 ## Success Criteria
 
@@ -494,3 +482,10 @@ For full rule list and Runtime Guard (P-008), read [forbidden-rules.md](referenc
 ## Memory Persistence & Unresolved Decisions
 
 Step 완료·agent 전환·loop rollback·Unit 완료 시 기록. Step 시작 전 관련 memory 파일 읽기 (이전 판단 복원). 미해결 결정 → `.claude/memory/unresolved-decisions.md`, Step 18에 "may bite you later" warning 포함.
+
+## Core Reminders (전 구간 상시 적용 — 파일 끝 배치는 세션 후반 환기용, 끝부분 리마인더 페어링 패턴)
+
+- **Stop-and-Fix Gate**: 빌드/린트/타입체크/테스트 실패 상태로 다음 파일 수정·다음 Step 진입·사용자 보고를 하지 않는다.
+- **tool-call-first & 파이프라인 완주**: 하위 단계 반환 직후 같은 턴에 다음 Step의 tool call을 먼저 emit한다 (종료 내레이션으로 턴 닫기 금지). Integration → Step 18 → Step 19는 모든 경로에서 실행한다 — 인라인 코드 리뷰 누락 금지.
+- **Scope 고정**: plan-summary.md 명시 변경만 구현, 범위 밖 발견은 `[Scope]` 1줄 통보 + unresolved-decisions.md 기록.
+- **검증 구조 보호**: Fresh Subagent/Blind-First/Cross-Model/결정론적 게이트는 축소·병합 논의 대상이 아니다 (`context-separation.md`의 검증 지시 제거 판단 기준).

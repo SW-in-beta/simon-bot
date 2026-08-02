@@ -29,12 +29,14 @@ capture가 생성하는 리포트의 구조. 이 형식을 기준으로 파싱�
 ```yaml
 ---
 status: pending          # pending | applied | rejected | deferred
-severity: HIGH           # HIGH | MEDIUM | LOW
+severity: HIGH           # CRITICAL | HIGH | MEDIUM | LOW
 target_skill: simon  # 대상 스킬 이름
 target_section: Step 5   # 대상 단계/섹션
 captured_at: 2025-01-15T14:30:00+09:00
 ---
 ```
+
+severity 판정 기준: `~/.claude/skills/_shared/expert-panel-boost.md`의 Proposal Severity Rubric을 따른다.
 
 **본문 섹션**:
 
@@ -55,16 +57,9 @@ captured_at: 2025-01-15T14:30:00+09:00
 
 ## Target Skills
 
-| 스킬 | 경로 |
-|------|------|
-| simon-dev | `~/.claude/skills/simon-dev/SKILL.md` |
-| simon-grind | `~/.claude/skills/simon-grind/SKILL.md` |
-| simon-pm | `~/.claude/skills/simon-pm/SKILL.md` |
-| simon-report | `~/.claude/skills/simon-report/SKILL.md` |
-| simon-sessions | `~/.claude/skills/simon-sessions/SKILL.md` |
-| simon-company | `~/.claude/skills/simon-company/SKILL.md` |
+> **Reference Loading**: 분석 대상 목록은 `~/.claude/skills/_shared/boost-target-skills.md`를 읽는다 — 실제 대상은 `ls ~/.claude/skills/simon*/SKILL.md` 스캔이 SSoT다 (simon-boost/auto-boost와 동일, 수동 목록 drift 방지).
 
-references/ 디렉토리의 하위 파일들도 대상에 포함.
+references/ 디렉토리의 하위 파일들과 `_shared/*.md`도 대상에 포함.
 
 ## Step 1: Pending Insights 로딩
 
@@ -92,16 +87,17 @@ references/ 디렉토리의 하위 파일들도 대상에 포함.
 어떤 인사이트부터 검토할까요? (전체 순서대로 / 번호 선택 / 심각도 높은 순)
 ```
 
-## Step 3: Interactive Review
+## Step 3: Severity 기반 배치 리뷰
 
-각 인사이트를 하나씩 상세히 제시하고 판단을 요청한다.
+인사이트별로 **실시간 검증**을 먼저 수행한다: 대상 스킬 파일을 Read하여 리포트 작성 이후 변경이 있었는지 확인
+- 이미 수정되었으면 → 안내 후 자동 기각, 다음으로
+- 여전히 유효하면 → 아래 severity 기반 배치로 판단 요청
 
-**제시 내용:**
-
-1. 인사이트 리포트 전체 (관찰, 분석, 제안)
-2. **실시간 검증**: 대상 스킬 파일을 Read하여 리포트 작성 이후 변경이 있었는지 확인
-   - 이미 수정되었으면 → 안내 후 자동 기각, 다음으로
-   - 여전히 유효하면 → 사용자에게 판단 요청
+expert-panel-boost.md의 Proposal Severity Rubric 기준:
+- **CRITICAL / HIGH / 전문가 간 이견 항목** → 하나씩 인사이트 리포트 전체(관찰, 분석, 제안)를 상세히 제시하고 개별 확인
+- **MEDIUM** → 클러스터(주제) 단위로 묶어 요약 설명 후 일괄 확인 — 클러스터 내 취사선택 가능
+- **LOW + 전문가 전원 동의** → 자동 적용하고 최종 요약에서 사후 보고 (사용자가 이의 시 롤백)
+- 확인 질문은 AskUserQuestion으로 수행
 
 **판단 옵션:**
 - **적용**: 제안대로 (또는 수정 후) 적용

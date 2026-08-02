@@ -108,6 +108,15 @@ Cognitive Independence 적용은 추가 토큰을 소비한다. 다음 기준으
 | 결정론적 검증 (빌드, 테스트) | 미적용 | 직접 (subagent 없음) |
 | MEDIUM finding | 미적용 (Verification Layer에서도 CRITICAL/HIGH만) | 직접 (subagent 없음) |
 
+## 검증 지시 제거 판단 기준
+
+모델 세대가 진화하면 "명시적 검증 지시는 모델의 자체 검증(native self-correction)과 중첩되어 제거하라"는 권고가 모델별 프롬프팅 가이드에 주기적으로 등장한다. 이 권고를 simon에 적용할 때는 아래 분류를 먼저 거친다 — 분류 없이 "검증처럼 보이니 줄이자"는 직관적 판단을 금지한다:
+
+| 구분 | 판단 질문 | 예시 | 처리 |
+|---|---|---|---|
+| **A. 제거 후보** | 같은 에이전트가 자신이 방금 만든 결론을, 이미 접근 가능한 동일 정보만으로, 별도 구조 없이 "다시 봐라"는 지시만으로 재확인하는가? | "double-check your answer" 류의 범용 재확인 지시 | 모델의 native self-correction과 중첩될 수 있다. 단, 즉시 제거하지 않는다 — Harness Stress Test 등 실측 데이터로 무가치함(자가 발견 0건 + 후속 독립 게이트 FAIL 0건의 교차 확인)을 확인한 뒤 제거한다 |
+| **B. 유지 대상** | 다음 중 하나 이상에 해당하는가: (1) 다른 컨텍스트의 에이전트가 수행 (Fresh Subagent) (2) 이전 결론을 보지 못한 채 독립 수행 (Blind-First) (3) 다른 모델이 수행 (Cross-Model) (4) 결정론적 실행(빌드/테스트)으로 확정 (5) 되돌릴 수 없는 리스크(Forbidden Rules, CRITICAL 보안)를 다룸 | Step 6/17 Fresh Subagent, Step 7 Verification Layer(Blind-First), Cross-Model Verification, Stop-and-Fix Gate | **제거 권고의 대상이 아니다** — 구조적으로 다른 관측을 만들어내므로 모델 자체 행동과 "중복"이 아니다 (Monte Carlo Verification Principle). 제거 논의 자체를 금지한다 |
+
 ## Step × 원칙 적용 매트릭스
 
 어떤 Step에서 어떤 원칙이 적용되는지 빠르게 참조하기 위한 매트릭스:

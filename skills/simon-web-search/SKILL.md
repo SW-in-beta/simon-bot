@@ -18,6 +18,7 @@ compatibility:
 웹 딥 리서치 스킬. 질문 분해 → 반복 멀티소스 검색 → 소스 교차검증 → simon 스타일 보고서 생성.
 
 > **자율주행모드 ON 입니다.** 여러 Agent와 병행하여 딥하게 조사해주세요.
+> 이 선언은 CLAUDE.md의 모호성 확인 규칙보다 우선한다 — 분석 진행 중 세부 모호함은 스스로 판단해 진행한다. 단, 분석 대상 자체(코드/레포/질문)가 특정되지 않는 수준의 모호함은 시작 전 1회만 확인한다.
 
 ## Why this exists
 
@@ -42,6 +43,8 @@ compatibility:
 ---
 
 ## Instructions
+
+**진행 체크포인트**: 각 Phase 경계에서 1줄 진행 보고를 출력한다 — `[Phase N 완료] {핵심 결과 요약} — Phase N+1 시작` 형식. 장시간 무응답 구간에서 사용자가 진행 상태를 알 수 있게 한다 (AskUserQuestion 아님, 단순 텍스트).
 
 ### Phase 0: 의도 파악 (AI-First Draft)
 
@@ -256,7 +259,7 @@ REPORT_PATH="$HOME/claude-reports/simon-web-search-$(date +%s).md"
 # 보고서 내용을 해당 경로에 저장
 ```
 
-저장 완료 후 `/simon-md-reviewer {저장된 파일 경로}` 를 호출하여 Obsidian에서 리뷰할 수 있도록 안내한다.
+보고서 저장 후 AskUserQuestion으로 다음 행동을 묻는다 — 옵션: "Obsidian/Orca 리뷰 (simon-md-reviewer)", "wiki 저장 (simon-brain-update)", "여기서 종료". 사용자가 선택하면 해당 스킬을 그 자리에서 Skill 도구로 즉시 호출한다 (경로 자동 전달 — 사용자가 경로를 복사/타이핑하지 않게 한다).
 
 ---
 

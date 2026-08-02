@@ -44,6 +44,10 @@ Tools FORBIDDEN: [{금지 목록}] — 금지 도구 사용 시 결과를 무효
 - Prior findings: {이전 단계 결과 요약 또는 "없음"}
 </context>
 
+<constraints>
+{이 역할이 산출물을 만들 때 지켜야 하는 제약을 여기에 인라인한다 — reference 파일 경로만 주지 않는다}
+</constraints>
+
 <instructions>
 1. {구체적 수행 단계}
 2. Output: {출력 파일 경로} in {포맷}
@@ -52,6 +56,21 @@ Tools FORBIDDEN: [{금지 목록}] — 금지 도구 사용 시 결과를 무효
 ```
 
 XML 태그로 구조화하면 compaction 후에도 역할/맥락/지시가 분리되어 유지된다. `<instructions>` 시작 부분에 핵심 지시를 배치하여 손실을 방지한다.
+
+### `<constraints>` 작성 규칙 (필수)
+
+subagent는 오케스트레이터의 컨텍스트를 물려받지 않는다. 오케스트레이터가 읽은 reference 파일의 규칙은 subagent에게 **자동으로 전달되지 않으므로**, 산출물에 직접 적용되는 제약은 경로 참조가 아니라 **본문을 인라인**해야 한다. "상세는 X.md 참조"만 남기면 subagent는 그 파일을 읽지 않고 자기 기본값으로 진행한다.
+
+역할별로 반드시 인라인할 제약:
+
+| Role | `<constraints>`에 인라인할 것 |
+|------|------------------------------|
+| executor | `phase-b-implementation.md` Critical Rules 중 **코드 생성에 직접 적용되는 항목** — 주석 최소화(기본값 주석 없음 + 허용 예외 전문), Intent-Before-Fix Gate, 일반적 해결책 우선, 테스트 격리 |
+| planner/architect | Plan Immutability, 스코프 확장 금지, Files Changed 테이블 스펙 |
+| expert team member | 해당 도메인 체크리스트 항목 (`review-rubric.md`의 해당 도메인 절) |
+| verifier / alignment-checker | 위 `<rubric>` 블록이 이 역할을 대신한다 — 중복 작성하지 않는다 |
+
+Critical Rules 전체를 복사하지 않는다 — 그 역할의 산출물에 적용되지 않는 항목(병렬 Unit 파일 격리, Step Progress Pulse 등 오케스트레이터 관할)은 제외한다. 전체 복사는 Unit Runbook의 취지(컨텍스트 절약)와 충돌한다.
 
 ### VERIFICATION 모드 Rubric (필수)
 
@@ -107,5 +126,9 @@ subagent가 결과를 반환할 때 다음 prefix를 사용한다:
 | data-researcher | sonnet | 데이터 스킬 호출 + SQL 실행, 도구 중심 |
 
 **Fable 5 옵션** (2026-06 등재): Agent 도구는 `fable` 모델(claude-fable-5, 1M 컨텍스트)을 지원한다. 고추론 역할(verifier, devil-advocate, production-readiness-auditor 등)에서 opus 결과가 반복적으로 불충분할 때 개별 판단으로 fable을 선택할 수 있다. 주의: (1) 비용 상위 모델이므로 기본값으로 두지 않는다 — 위 테이블의 권장 모델이 기본이다. (2) fable은 안전 분류기 refusal(stop_reason: "refusal")이 발생할 수 있으므로, refusal 시 같은 작업을 opus로 재시도한다.
+
+> **재검토 조건 (모델 세대)**: 위 매핑은 opus를 현재 세대 최고 추론 모델로 가정한다. 신규 모델 등재 시 역할별 권장 모델 — 특히 "높은 추론 능력"을 근거로 opus를 지정한 verifier/alignment-checker/devil-advocate/security-reviewer/production-readiness-auditor — 을 재평가한다. 위 "Fable 5 옵션"(2026-06)이 이 재검토 트리거의 첫 적용 사례다.
+>
+> **Effort 파라미터**: Agent 도구가 향후 effort(추론 강도) 파라미터를 지원하게 되면, opus 지정 검증 역할부터 model+effort 조합 재측정 대상으로 우선 검토한다. 현재는 Agent 도구에 effort 파라미터가 노출되어 있지 않아 실행 불가 [2026-07 스키마 확인].
 
 **Override 조건**: `config.yaml`의 `model_override` 설정이 있으면 위 기본값을 덮어쓴다. 비용 제한이 있으면 모든 역할을 sonnet으로 통일할 수 있다.

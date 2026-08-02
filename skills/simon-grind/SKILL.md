@@ -71,6 +71,7 @@ loop_limits:
   step2_4_escalation: true
   step4b_interactive: true
   max_questions_per_round: 5
+  # 질문 정렬: 계획 구조를 바꿀 가능성이 큰 질문 우선. 상위 답변에 종속되는 질문은 같은 라운드에 묶지 않는다 (interview-protocol.md 번들 정렬 규칙과 동일).
 
   # ── Auto-Diagnosis ──────────────────────────
   diagnosis_threshold: 5        # Failures before root cause analysis
@@ -109,7 +110,6 @@ loop_limits:
 | Phase B-E 진입 | grind-phase-b.md + simon-dev phase-b-implementation.md + `~/.claude/skills/_shared/lazy-output-discipline.md` (Economy of Means) |
 | 에러 발생 시 | grind-error-resilience.md |
 | Cross-cutting 참조 시 | grind-cross-cutting.md |
-| Startup (workflow-state.json 초기화 후) | `~/.claude/skills/_shared/monitor-protocol.md` | on-demand, monitor 미실행 시 skip |
 
 > **Note**: 초기 로딩을 경량화하여 grind의 재시도 집약적 특성에서 컨텍스트를 절약한다.
 
@@ -134,32 +134,6 @@ You are executing **simon-grind** (열일모드). Follow the simon 19-step pipel
 ```
 
 Progress Detection이 이 Mini-Contract의 success_criteria를 기준으로 '진전 있음/없음'을 판단한다 — 기계적 비교(실패 수, 에러 메시지)에 목적 기반 판단을 추가하여 '목표 없는 반복'을 방지한다.
-
-## Cross-Cutting: Monitor Protocol (대시보드 연동)
-
-simon-dev의 Monitor Protocol을 상속한다 (`~/.claude/skills/_shared/monitor-protocol.md` 참조). emit.sh가 skill을 자동 감지한다.
-
-**grind 전용 이벤트 — 모든 재시도 시점에서 발신:**
-
-빌드/테스트 실패 시:
-```bash
-bash ~/.claude/skills/simon-monitor/scripts/emit.sh error "{STEP_ID}" "빌드/테스트 실패" '{"message":"에러 메시지","category":"build|test|lint|type","will_retry":true,"attempt":N,"max_attempts":10}'
-```
-
-재시도 시작 시:
-```bash
-bash ~/.claude/skills/simon-monitor/scripts/emit.sh retry "{STEP_ID}" "재시도 (N/10)" '{"attempt":N,"max_attempts":10,"tier":"early|mid|late|final","strategy":"direct|modified|pivot","changes":"변경 내용","previous_error":"이전 에러"}'
-```
-
-전략 전환(pivot) 시:
-```bash
-bash ~/.claude/skills/simon-monitor/scripts/emit.sh decision "{STEP_ID}" "전략 전환" '{"decision":"새 전략","rationale":"전환 근거","alternatives":[{"option":"이전 전략","rejected_reason":"실패 사유"}]}'
-```
-
-체크포인트 생성 시:
-```bash
-bash ~/.claude/skills/simon-monitor/scripts/emit.sh artifact "{STEP_ID}" "체크포인트 생성" '{"file":"checkpoint-step{N}-attempt{M}","action":"created","summary":"전략 전환 전 체크포인트"}'
-```
 
 ## Cross-Cutting: Error Resilience (Enhanced)
 
@@ -211,16 +185,6 @@ For detailed protocol, read `~/.claude/skills/simon-dev/references/context-separ
 simon-dev Startup과 동일 (P-001 브랜치명 자동 생성, P-009 Handoff Manifest 감지 포함) + 추가:
 3. **Initialize failure tracking**: `.claude/memory/failure-log.md` 생성/초기화 (Handoff Manifest의 `failure_context`가 있으면 초기값으로 설정)
 4. **Initialize checkpoints**: `.claude/memory/checkpoints.md` 생성/초기화
-5. **Monitor 상태 확인 + workflow_start 발신**:
-   1. 모니터 실행 여부를 확인한다: `[ -f /tmp/simon-monitor.pid ] && kill -0 $(cat /tmp/simon-monitor.pid) 2>/dev/null`
-   2. 모니터가 실행 중이지 않으면 사용자에게 1회 통보한다 (AskUserQuestion이 아닌 텍스트 출력):
-      `[Monitor] 실시간 대시보드가 꺼져 있습니다. 원하시면 새 터미널에서 /simon-monitor를 실행하세요. 워크플로는 계속 진행합니다.`
-   3. `~/.claude/skills/_shared/monitor-protocol.md` 읽기. 워크플로 시작 이벤트 발신:
-   ```bash
-   bash ~/.claude/skills/simon-monitor/scripts/emit.sh workflow_start "" "열일모드 워크플로 시작" '{"skill":"simon-grind","branch":"'"$BRANCH"'","task":"'"$TASK_SUMMARY"'","scope":"TBD","workflow_steps":[{"id":"A/0","name":"Scope Challenge","phase":"A"},{"id":"A/1-A","name":"Project Analysis","phase":"A"},{"id":"A/1-B","name":"Plan Creation","phase":"A"},{"id":"A/2","name":"Plan Review","phase":"A"},{"id":"A/3","name":"Meta Verification","phase":"A"},{"id":"A/4","name":"Over-engineering Check","phase":"A"},{"id":"A/4-B","name":"Expert Plan Review","phase":"A"},{"id":"B/5","name":"Implementation","phase":"B"},{"id":"B/6","name":"Purpose Alignment","phase":"B"},{"id":"B/7","name":"Code Review","phase":"B"},{"id":"B/8","name":"Regression Verification","phase":"B"},{"id":"B/17","name":"Production Readiness","phase":"B"},{"id":"review/18-A","name":"Work Report","phase":"review"},{"id":"review/18-B","name":"Review Sequence","phase":"review"},{"id":"review/19","name":"Code Review","phase":"review"}]}' \
-     2>/dev/null || true
-   ```
-   open http://localhost:3847 2>/dev/null || true
 
 ## Phase A: Planning (Enhanced with Structured Interviews)
 

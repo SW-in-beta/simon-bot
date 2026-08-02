@@ -2,8 +2,8 @@
 name: simon-auto-boost
 description: "자동 웹 검색 기반 스킬 개선 — Claude Code 공식 문서, Hacker News, YouTube, Medium, dev.to 등에서 최신 AI 코딩 에이전트 best practices를 자동 검색하고, 전문가 패널 분석을 거쳐 simon 계열 스킬을 개선합니다. Use when: (1) '자동으로 개선점 찾아줘', '최신 사례 검색해서 반영해줘', '새로운 거 있나 찾아봐', (2) 'auto boost', 'auto-boost', (3) '스킬 자동 업데이트', '최신 트렌드 반영', (4) Claude Code나 AI 에이전트 관련 최신 정보를 찾아 스킬에 반영하고 싶을 때. simon-boost와 다른 점: boost는 사용자가 링크를 제공하지만, auto-boost는 자동으로 웹 검색하여 최신 콘텐츠를 발견합니다."
 compatibility:
-  tools: [Agent, WebSearch, WebFetch, TeamCreate, SendMessage]
-  skills: [simon, simon-grind, simon-pm, simon-report, simon-sessions, simon-code-review, simon-company]
+  tools: [Agent, AskUserQuestion, WebSearch, WebFetch, TeamCreate, SendMessage]
+  # 분석 대상 스킬은 _shared/boost-target-skills.md(디렉토리 스캔)가 SSoT — frontmatter에 열거하지 않음 (drift 방지)
 ---
 
 # simon-auto-boost
@@ -20,8 +20,7 @@ compatibility:
 | 분석 | 전문가 패널 6인 | 전문가 패널 6인 (동일) |
 | 검증 | 기본 무결성 + 형식 품질 | 기본 무결성 + 형식 품질 + 스킬 가이드라인 + 스모크 테스트 |
 
-분석 대상 스킬은 simon-boost와 동일:
-simon, simon-grind, simon-pm, simon-report, simon-sessions, simon-code-review, simon-company
+분석 대상 스킬은 `~/.claude/skills/_shared/boost-target-skills.md`를 따른다 (simon-boost와 같은 SSoT — 디렉토리 스캔 기준).
 
 ## 상태 파일
 
@@ -191,16 +190,11 @@ coding agent skills workflow automation {year}
 
 전문가 제안을 심각도 순(CRITICAL → HIGH → MEDIUM → LOW)으로 정렬하여 사용자에게 제시한다.
 
-**인터랙티브 개별 리뷰**: 각 제안을 하나씩 상세히 설명하고 판단을 요청한다.
-10개+ 제안을 한 번에 판단하는 것은 과도한 부담이므로, 하나씩 맥락을 전달하고 즉시 판단을 받는다.
-
-각 제안 설명 시 포함:
-- **현재 상태**: 현재 코드/스킬이 어떻게 되어 있는지 (파일:줄 수준)
-- **제안 내용**: before/after 또는 추가 내용 예시
-- **기대 효과와 비용**: 왜 더 나은지 + 추가 비용
-- **기존 메커니즘과의 관계**: 유사 기능이 있다면 어떻게 다른지
-
-사용자 판단: **적용** / **보류** / **거부**
+**Severity 기반 배치 리뷰** (simon-boost Step 4와 동일 — expert-panel-boost.md의 Proposal Severity Rubric 기준):
+- **CRITICAL / HIGH / 전문가 간 이견 항목** → 하나씩 상세 설명 후 개별 확인. 설명에 반드시 포함: 현재 상태(파일:줄 수준), 제안 내용(before/after), 기대 효과와 비용, 기존 메커니즘과의 관계
+- **MEDIUM** → 클러스터(주제) 단위로 묶어 요약 설명 후 일괄 확인 — 클러스터 내 취사선택 가능
+- **LOW + 전문가 전원 동의** → 자동 적용하고 최종 요약에서 사후 보고 (사용자가 이의 시 롤백)
+- 판단 요청은 AskUserQuestion으로 수행
 
 ### Step 4-2: 변경 적용
 
@@ -250,14 +244,7 @@ FAIL 항목이 있으면 즉시 수정한다.
 
 > **Reference Loading**: `~/.claude/skills/simon-boost/references/skill-best-practices.md`를 반드시 Read한다.
 
-skill-best-practices.md의 6개 카테고리 전 항목을 변경된 스킬에 대해 명시적으로 실행한다:
-
-1. **Progressive Disclosure** — SKILL.md 500줄 이내, 3단계 로딩 활용, reference 포인터 명확, 로딩 시점 지시
-2. **Skill Decomposition** — 독립 sub-workflow 묶임 여부, 컨텍스트 소진 징후, 순환 의존
-3. **Description 트리거링** — "Use when:" 조건, 인접 스킬 경계, 실사용 키워드
-4. **Writing Patterns** — 명령형, Why 설명, 예시 포함, ALWAYS/NEVER 남용 없음
-5. **Frontmatter 유효성** — name/description 존재, description 길이, YAML 문법
-6. **Reference 구조** — 도메인별 분리, 로딩 시점 명시, 300줄 초과 시 TOC
+skill-best-practices.md의 **전 카테고리**를 변경된 스킬에 대해 명시적으로 실행하고, 카테고리별 결과를 테이블로 출력한다 (카테고리 개수·목록은 원본 파일이 SSoT — 여기 복제하지 않는다).
 
 결과를 카테고리별 테이블로 출력한다. FAIL 항목은 수정 후 재검증.
 
@@ -326,3 +313,4 @@ Agent를 spawn하여 해당 스킬의 대표적 트리거 프롬프트로 실행
 - 기존 스킬의 Global Forbidden Rules는 절대 약화시키지 않음
 - 모든 중간/최종 결과물은 `~/.claude/boost/`에 저장
 - 적용 기록(applied-log.md)은 항상 유지
+- **진행 체크포인트**: 각 Step 경계에서 1줄 진행 보고를 출력한다 — `[Step N 완료] {핵심 결과 요약} — Step N+1 시작` 형식. 전문가 패널 분석처럼 수 분간 무응답인 구간에서 사용자가 진행 상태를 알 수 있게 한다 (AskUserQuestion 아님, 단순 텍스트)

@@ -131,6 +131,8 @@ Spec이 확정되면 CTO, Design, DBA, DevOps가 **병렬로** 자신의 영역�
 - `ml-architecture.md` — 모델 아키텍처, 학습 파이프라인 (ML팀 활성 시)
 - `quality/expert-concerns.md` — Expert Panel 도메인 전문가 검증 결과
 
+Design 산출물에 텍스트 wireframes.md와 별개로 핵심 화면 1-2개의 클릭 가능 HTML 목업을 포함할 수 있다 (Phase 2 산출물 옵션) — 사용자의 unknown knowns(보면 아는 취향)를 구현 전에 드러낸다.
+
 **검증:** 각 산출물별 TRP (R1-각 팀 Self, R2-교차 검토, R3-CTO Lead 전체 정합성).
 모든 트랙 TRP 통과 후 PRD를 조립하여 사용자 최종 승인.
 
@@ -347,3 +349,14 @@ Phase 4 반복 사이클에서는 "완료 Sprint 상세"가 쌓이지 않도록 
 - **Phase 7** → `phase-7-delivery.md`
 - **TRP 실행 시** → `quality-gates.md`
 - **운영 프로토콜 참조 시** → `operational-protocols.md`
+
+---
+
+## Core Reminders (전 구간 상시 적용)
+
+파일 끝 배치는 의도적이다 — 긴 본문의 핵심 불변식을 세션 후반 시점에도 환기한다 (끝부분 리마인더 페어링 패턴):
+
+- **Phase 5(QA)·6(Deployment)·7(Delivery)는 생략 불가** — 컨텍스트 소진 시 state.json/체크리스트로 상태를 저장하고 세션을 분할해서라도 끝까지 실행한다.
+- **TRP(Triple Review Protocol)는 모든 Phase 산출물에 적용** — 통과하지 못하면 재작업한다.
+- **Spec이 곧 기준** — 모든 구현은 Spec에서 시작하고 Spec으로 검증한다.
+- **Sprint 경계 활용률 기준 준수** — 40-60%는 compact, 60% 이상은 세션 분할.

@@ -10,6 +10,7 @@ compatibility:
 사전 분석 보고서 작성 스킬. 전문가팀 토론 기반 심층 분석 후 사용자 지정 양식으로 문서를 생성합니다.
 
 > **자율주행모드 ON 입니다.** 여러 Agent와 병행하여 딥하게 조사해주세요.
+> 이 선언은 CLAUDE.md의 모호성 확인 규칙보다 우선한다 — 분석 진행 중 세부 모호함은 스스로 판단해 진행한다. 단, 분석 대상 자체(코드/레포/질문)가 특정되지 않는 수준의 모호함은 시작 전 1회만 확인한다.
 
 ## Instructions
 
@@ -29,18 +30,15 @@ PROJECT_SLUG=$(git rev-parse --show-toplevel | tr '/' '-')
 SESSION_ID="report-$(date +%Y%m%d-%H%M%S)"
 SESSION_DIR="${HOME}/.claude/projects/${PROJECT_SLUG}/sessions/${SESSION_ID}"
 mkdir -p "${SESSION_DIR}/reports"
+echo "${SESSION_DIR}" > ~/.claude/.report-readonly-active
 ```
 
 ### Read-Only Guard Hook
 
-Report 스킬의 "코드 수정 금지" ABSOLUTE 규칙을 결정론적으로 강제한다. 산문 지시는 compaction 후 소실될 수 있지만, hook은 세션 동안 100% 작동한다.
-
-`report-readonly-guard.sh` (PreToolUse):
-- `$TOOL_NAME`이 Edit 또는 Write일 때 활성화
-- `$FILE_PATH`가 `{SESSION_DIR}/reports/`나 `~/claude-reports/` 하위이면 → 허용 (exit 0)
-- 그 외 경로 → 차단 (exit 2), 메시지: "simon-report는 분석 전용입니다. 프로젝트 소스 코드 수정은 차단됩니다."
-
-settings.json에 등록하여 report 세션 동안만 활성화한다. simon의 `forbidden-guard.sh`와 독립 동작한다.
+`report-readonly-guard.sh`(PreToolUse, Write|Edit)가 report 세션 중 보고서 디렉토리 밖 파일 수정을 결정론적으로 차단한다. 활성화 방식:
+- Startup에서 marker 생성: `echo "${SESSION_DIR}" > ~/.claude/.report-readonly-active`
+- hook은 marker가 존재할 때만 동작하며, `{SESSION_DIR}/` 하위와 `~/claude-reports/` 하위만 허용
+- 스킬 종료(정상/중단 모두) 시 marker 제거: `rm -f ~/.claude/.report-readonly-active`
 
 ### Reference Loading Policy
 
@@ -131,23 +129,9 @@ settings.json에 등록하여 report 세션 동안만 활성화한다. simon의 
 
 **1-C: 설계 의도 추적 (코드만으로 "왜 이렇게?" 파악이 어려울 때)**
 
-코드를 읽어도 설계 의도가 불명확한 경우, **Agent 서브에이전트를 통해** Confluence와 Slack에서 관련 자료를 검색한다. 컨텍스트 효율을 위해 raw 결과는 파일에 저장하고 요약만 반환받는다.
+코드를 읽어도 설계 의도가 불명확한 경우, **Agent 서브에이전트를 통해** Confluence와 Slack에서 관련 자료를 검색한다. 반환 계약은 `_shared/preamble.md`의 Subagent Result-Only Contract를 따른다 (반환 형식: `STATUS: PASS/FAIL, 발견 {N}건, 저장: {경로}`).
 
-```
-Agent(subagent_type="general-purpose", model="sonnet"):
-  "다음 스크립트로 사내 자료를 검색하고, 결과를 파일에 저장한 뒤 요약만 반환하라.
-
-   검색 실행:
-   - Confluence: ~/.claude/skills/buzzvil-confluence/scripts/search.sh -q '{검색어}' -s {space} -f
-   - Slack: ~/.claude/skills/buzzvil-slack/scripts/search.sh -q '{검색어}' -c {channel}
-
-   결과 저장: {SESSION_DIR}/raw/design-intent-$(date +%s).txt
-   반환 형식 (요약만):
-   - Confluence: 발견된 문서 수, 각 문서 제목 + URL + 핵심 내용 1-2문장
-   - Slack: 관련 스레드 수, 각 스레드 핵심 논점 + permalink
-   - 설계 의도에 관한 핵심 발견 3줄 이내
-   - raw 파일 경로"
-```
+> **Reference Loading**: 사내 자료 검색 Agent는 `~/.claude/skills/_shared/internal-research-agent.md`의 템플릿으로 spawn한다.
 
 발견된 설계 의도는 **반드시 원문 URL(Confluence 페이지 또는 Slack permalink)**과 함께 보고서에 기록한다. URL 없는 사내 자료 인용 금지.
 
@@ -288,6 +272,11 @@ Agent(subagent_type="general-purpose", model="sonnet"):
   - **프로젝트 관리 (simon-pm)**: 분석 결과를 기반으로 PM 워크플로 시작
   - **양식 변경**: Step 4에서 다른 템플릿으로 재생성
   - **추가 리뷰**: 5-A로 돌아가 재리뷰
+
+세션 종료 시 (위 분기 중 어느 것을 선택하든, 또는 스킬이 중단되든) marker를 제거한다:
+```bash
+rm -f ~/.claude/.report-readonly-active
+```
 
 ### Configuration
 

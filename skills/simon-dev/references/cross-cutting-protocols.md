@@ -174,6 +174,10 @@ Step 20(마지막 단계)에 도달하지 못하더라도 사용자 피드백이
 
 **Anti-Oscillation Rule**: 기각한 전략을 재선택하려면, 기각 시점 이후에 **새로운 정보**(에러 메시지 변경, 환경 변화, 외부 의존성 업데이트 등)가 확인되었음을 기록해야 한다. "다시 해보자"는 허용되지 않는다 — 같은 전략을 같은 조건에서 반복하면 결과도 같다.
 
+## Blind-First 병렬 실행 원칙
+
+Blind-First/Fresh-Subagent로 설계된 검증(Adversarial Review, Devil's Advocate)은 정의상 이전 단계의 출력에 의존하지 않는다. 따라서 이전 단계와 **동시에 spawn**하고, **대조만** 이전 단계 완료 후 수행한다. 대조 전 두 결과 파일의 존재를 bash로 확인한다 (Deterministic Gate).
+
 ## Structured Step Result Protocol
 
 Step 완료 시 workflow-state.json에 해당 Step의 결과를 구조화하여 기록한다. compaction 후에도 오케스트레이터가 "어느 Step까지 어떤 결과로 완료했는지"를 즉시 파악할 수 있도록 SSoT 역할을 한다.

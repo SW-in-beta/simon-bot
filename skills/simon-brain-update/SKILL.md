@@ -1,3 +1,8 @@
+---
+name: simon-brain-update
+description: "simon* 스킬 결과물(MD 파일)이나 웹 URL을 받아 내용 기반으로 적합한 Obsidian vault를 자동 판별하고, raw/에 원본을 보존한 뒤 wiki로 정제·저장합니다. Use when: (1) '/simon-brain-update {파일경로|URL}' 호출, (2) 'brain update', '위키에 저장', 'brain에 넣어줘', (3) simon-brain-dump 완료 후 ingest 단계, (4) 여러 URL/파일의 대량 처리(Bulk 모드). raw/는 write-once 원본 보존 원칙을 따릅니다. 검색은 simon-brain-query, 세션 회고 추출은 simon-brain-dump 담당."
+---
+
 # simon-brain-update
 
 simon* 스킬 결과물이나 웹 URL을 받아, 내용 기반으로 적합한 vault를 자동 판별하고 `raw/`에 원본을 저장한 뒤 wiki로 정제한다.
@@ -115,7 +120,7 @@ ls -d ~/Obsidian/*-wiki/ 2>/dev/null
 ```
 그 아래 원본 내용 전체.
 
-**불변 원칙**: raw 파일은 절대 수정·번역·요약하지 않는다. 한국어 변환은 Step 4에서 wiki를 만들 때만 수행한다.
+**불변 원칙**: raw 파일은 절대 수정·번역·요약하지 않는다. 한국어 변환은 Step 4에서 wiki를 만들 때만 수행한다. (이 규칙은 `brain-guard.sh` PreToolUse hook이 결정론적으로 차단한다 — raw/는 write-once, 인덱스 3종은 index-kb.py 경유만 허용)
 
 **중복 감지**: 같은 이름 파일이 이미 raw/에 있으면 덮어쓰지 말고 사용자에게 알린다.
 
@@ -163,7 +168,7 @@ ingest 전에, 새 문서가 기존 wiki와 충돌하는지 확인한다.
 python3 ~/.claude/skills/simon-brain-update/scripts/index-kb.py ~/Obsidian/{vault-name}
 # 인자 없으면 ~/Obsidian/*-wiki/ 전체 처리
 ```
-이 스크립트가 wiki/ 디렉토리를 스캔하여 INDEX.md, TAGS.md, GRAPH.md를 재생성한다. LLM이 이 3개 파일을 직접 편집하는 것은 **금지**한다.
+이 스크립트가 wiki/ 디렉토리를 스캔하여 INDEX.md, TAGS.md, GRAPH.md를 재생성한다. LLM이 이 3개 파일을 직접 편집하는 것은 **금지**한다. (이 규칙은 `brain-guard.sh` PreToolUse hook이 결정론적으로 차단한다 — raw/는 write-once, 인덱스 3종은 index-kb.py 경유만 허용)
 
 ### Step 5: 완료 리포트
 

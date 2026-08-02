@@ -246,7 +246,9 @@ Save: `.claude/company/architecture.md`
 
 이 매핑 가이드는 Phase 3의 Component Contract에 포함되어 Frontend 팀의 구현 기준이 된다.
 
-Save: `.claude/company/design/` (wireframes.md, tokens.json, components.md, accessibility.md, user-flows.md, token-mapping.md)
+Save: `.claude/company/design/` (wireframes.md, tokens.json, components.md, accessibility.md, user-flows.md, token-mapping.md, `mockups/*.html` — 선택)
+
+`mockups/*.html` (선택) — 핵심 화면 1-2개의 클릭 가능한 self-contained HTML 목업. 텍스트 wireframe의 보완재로, 사용자가 화면 구성을 클릭해보며 판단하게 한다.
 
 ### 2-C: Data Model Design (DBA팀 활성 시)
 

@@ -218,6 +218,8 @@ date -u +"%Y-%m-%dT%H:%M:%SZ" > {SESSION_DIR}/memory/last-comment-check.md
        path: .path,
        line: .line,
        start_line: .start_line,
+       position: .position,
+       original_line: .original_line,
        diff_hunk: .diff_hunk,
        created_at: .created_at
      }]"
@@ -232,7 +234,18 @@ date -u +"%Y-%m-%dT%H:%M:%SZ" > {SESSION_DIR}/memory/last-comment-check.md
    - `diff_hunk`에서 `+`로 시작하는 라인들을 추출하여 선택 범위의 실제 식별자 목록을 구성
    - body 텍스트에서 식별자를 추론하는 것은 금지 — diff_hunk가 정보의 원천
 
+   **[필수] outdated 코멘트 분기 (`position: null`)**:
+   `position`이 `null`이거나 `line`이 `null`인 코멘트는 **이후 커밋으로 코드가 이동·변경되어 원래 위치가 유효하지 않은 상태**다. 이 경우 diff_hunk가 현재 코드와 대응하지 않으므로 위치만으로 대상을 확정할 수 없다. 아래를 순서대로 수행한다:
+
+   1. body에 백틱 또는 식별자 형태(`snake_case`/`camelCase`)로 언급된 함수·변수명을 추출한다
+   2. 그 식별자를 현재 브랜치에서 `grep`으로 찾아 실제 위치를 확정한다
+   3. 식별자 언급이 없거나 grep 결과가 복수/0건이면 **코드를 수정하기 전에** 대댓글로 되묻는다: `이 코멘트가 가리키는 대상이 {추정}인지 확인 부탁드립니다 — 코드 변경으로 원래 위치 정보가 유실되었습니다.`
+
+   잘못 추측해 다른 곳을 고치면 리뷰어가 "제가 코멘트를 남긴 부분은 그 부분이 아닌데요"를 다시 써야 하고, 이 되물음의 비용이 확인 질문 1회보다 훨씬 크다. 위치 정보가 살아 있는 코멘트(대다수)는 이 절차 대상이 아니다.
+
 3. **확인 시점 갱신**: 처리 완료 후 `last-comment-check.md`를 현재 시점으로 갱신
+
+> **Reference Loading**: Step 4-B 전문가 spawn 전 `~/.claude/skills/simon-dev/references/review-rubric.md`를 반드시 Read하여 spawn 프롬프트에 severity 판정 기준으로 포함한다 — 기준 없는 severity 판정은 세션마다 흔들린다.
 
 ### 4-A-2: Fix-First 분류
 
@@ -256,7 +269,7 @@ date -u +"%Y-%m-%dT%H:%M:%SZ" > {SESSION_DIR}/memory/last-comment-check.md
 분류 기준: 코드 **로직** 변경이 수반되는지. 로직 변경 없는 표면적 수정은 AUTO-FIX.
 severity가 CRITICAL이면 무조건 ASK. 분류가 애매하면 ASK 쪽으로.
 
-AUTO-FIX 항목은 즉시 수정 + 인라인 대댓글(`[R{N}] AUTO-FIX: {변경 내용}`).
+AUTO-FIX 항목은 즉시 수정하되, 대댓글은 건별로 달지 않는다 — 사용자의 코드 로직·결론을 바꾸지 않는 수정이므로 보고 비중도 그에 맞게 낮춘다. 한 리뷰 사이클 내 AUTO-FIX 항목을 모아 PR 일반 코멘트 1건으로 일괄 보고하고(`[R{N}] AUTO-FIX 일괄 반영: 오타 {n}건, rename {n}건 — 상세는 커밋 {hash}`), 각 인라인 코멘트 thread는 resolve 처리만 한다 ("반영됨" 표시는 유지, 건별 대댓글 텍스트는 생성하지 않음 — 코멘트 수만큼 알림이 발생하는 것을 방지).
 ASK 항목만 Step 4-B의 전문가 검증 파이프라인으로 전달.
 
 ### 4-B: 전문가 검증 + 코드 수정
@@ -268,6 +281,17 @@ ASK 항목만 Step 4-B의 전문가 검증 파이프라인으로 전달.
 
 1. 리뷰 사이클 카운터를 증가시킨다: `{SESSION_DIR}/memory/review-cycle-counter.md`의 값을 +1
 2. 코멘트 분류: 질문 / 수정 요청 / 승인
+
+   "질문"은 그대로 처리하지 않고 **아래 3종으로 재분류**한다 — 세 경우의 올바른 대응이 서로 다르고, 오판이 양방향으로 발생했다(의견을 물었는데 코드를 바꿔버림 / 지금 고치라는데 후속 PR로 미룸):
+
+   | 재분류 | 판별 신호 | 대응 |
+   |---|---|---|
+   | **기술 설명 요청** | "~는 무엇인가요", "~는 왜 필요한가요", "동작 원리가 궁금합니다" — 코드 동작 설명만 요구 | 코드 변경 없이 설명 대댓글만 작성 |
+   | **의견 요청** | "의견을 제시해주세요", "어떻게 생각하세요", "~하는게 좋을까요" **또는** 미래·가정 표현("~생기면", "나중에", "향후")으로 아직 없는 기능을 논의 | `OPINION` verdict — **코드를 먼저 바꾸지 않는다.** 옵션별 장단점을 제시하고 결정을 기다린다 |
+   | **수정 여부 판단 요청** | 현재 구현이 맞는지 묻는 질문 | 기존 AGREE/PARTIAL/COUNTER로 처리 |
+
+   기본값: 코멘트 대상이 **이번 diff가 이미 건드린 파일**이고 변경 범위가 작으면(같은 파일 내 시그니처·스타일 수준) **즉시 적용**한다. "범용성이 필요하다", "다른 PR이 맞겠다" 같은 자체 판단으로 후속 PR로 미루지 않는다 — 사용자가 먼저 요청한 경우만 예외다.
+
 3. **승인/OK**: 해당 코멘트 resolve 처리 (전문가 검증 불필요)
 4. **질문 또는 수정 요청** — 아래 순서를 반드시 따른다:
    a. 코멘트의 도메인 식별 (아키텍처, 성능, 보안, 테스트, 비즈니스 로직, 코드 스타일 등)
@@ -315,6 +339,8 @@ ASK 항목만 Step 4-B의 전문가 검증 파이프라인으로 전달.
    ```
 3. **4-E로 진행**: CI Watch는 background에서 실행하므로 4-E(수정 완료 안내)로 즉시 진행한다
 
+> **[GATE — verdict 대조]** Step 4-E 진입 전 bash로 `ls {SESSION_DIR}/memory/expert-verdicts/*.md | wc -l`과 이번 사이클에서 처리한 질문/수정요청 코멘트 수를 대조한다. 불일치하면 누락 코멘트를 식별해 Step 4-B로 회귀한다 — 전문가 검증 게이트가 prose로만 존재하면 긴 피드백 루프의 compaction에서 소실될 수 있기 때문이다.
+
 ### 4-E: 수정 완료 안내
 
 사용자에게 수정 내용 요약 보고:
@@ -334,16 +360,18 @@ Step 5 시작 시, 모든 검증 결과를 통합 대시보드로 사용자에�
 
 ```
 === Review Readiness ===
+VERDICT:    {READY TO MERGE | BLOCKED — {blocking items}}
+─────────────────────
 Build:      {CLEARED|NOT CLEARED}
 Tests:      {CLEARED|NOT CLEARED} ({passed}/{total})
 Lint:       {CLEARED|NOT CLEARED}
 Security:   {CLEARED|NOT CLEARED} (CRITICAL {N}, HIGH {N})
 CI:         {CLEARED|PENDING|NOT CLEARED} ({passed}/{total} checks)
 Comments:   {CLEARED|NOT CLEARED} ({unresolved} unresolved)
-─────────────────────
-VERDICT:    {READY TO MERGE | BLOCKED — {blocking items}}
 ===
 ```
+
+VERDICT를 최상단에 두는 이유: 반복 노출되는 상태 대시보드에서 사용자가 세부 항목을 읽지 않고도 "지금 머지 가능한가"를 즉시 판단할 수 있어야 한다 (outcome-first). 세부 항목은 결론의 근거로 아래에 배치한다.
 
 각 항목의 상태:
 - **CLEARED**: 해당 검증 통과
@@ -381,3 +409,12 @@ VERDICT는 모든 항목이 CLEARED일 때만 READY TO MERGE. 하나라도 NOT C
    - `gotchas_learned`: 세션 중 발견한 프로젝트 gotcha 요약
    - `unresolved`: 미해결 이슈 (있으면)
    - `state/` 디렉토리는 Phase A Startup에서 이미 생성되어 있음. INDEPENDENT 모드에서 디렉토리가 없으면 `mkdir -p`로 생성
+
+## Core Reminders (전 구간 상시 적용)
+
+파일 끝 배치는 의도적이다 — 긴 본문의 핵심 불변식을 세션 후반 시점에도 환기한다 (끝부분 리마인더 페어링 패턴):
+
+- **PR은 항상 Draft로 생성** — Ready 전환은 Step 5에서 사용자 승인 후에만.
+- **Step 2 인라인 리뷰는 절대 생략 불가** — push/PR 생성만으로 "완료" 처리 금지. 중단 후 재개 시에도 잔여 워크플로(인라인 리뷰 → CI Watch → 피드백 루프)를 끝까지 이어간다.
+- **Step 4-B 전문가 검증 게이트** 없이 코드 수정·대댓글 작성 금지.
+- **코드 변경을 push했다면 CI Watch 재시작 필수** (4-D).

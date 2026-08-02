@@ -160,7 +160,7 @@ First Check: "[도메인 우선순위 목록] 순서로 확인한다"
 
 ### Adversarial Review — 항상 실행 (CP-007)
 
-도메인팀 합의 완료 직후, **모든 경로에서 항상** `adversarial-reviewer` subagent를 spawn하여 팀들이 공통으로 놓쳤을 수 있는 blind spot을 능동 탐색한다. 전문가들의 findings 수와 무관하게 실행 — findings가 많아도 팀 전체가 같은 사각지대를 공유할 수 있기 때문이다 (IUI '24: DA는 경로에 관계없이 의사결정 정확도를 통계적으로 유의미하게 향상).
+도메인팀 spawn과 **동시에** adversarial-reviewer를 병렬 spawn한다 — Blind-First 설계상 도메인팀 출력에 의존하지 않으므로 대기할 이유가 없다. **대조는** 도메인팀 합의 확정 후 수행하며, 대조 전 두 결과 파일의 존재를 bash로 확인한다. 전문가들의 findings 수와 무관하게 실행 — findings가 많아도 팀 전체가 같은 사각지대를 공유할 수 있기 때문이다 (IUI '24: DA는 경로에 관계없이 의사결정 정확도를 통계적으로 유의미하게 향상).
 
 Cross-Examiner와 역할이 다르다 — Cross-Examiner는 "발견된 findings의 false positive"를 탐지하고, Adversarial Review는 "발견되지 않은 위험"을 능동 탐색한다.
 
@@ -286,25 +286,6 @@ MEDIUM → 기록만 하고 구현 시 참고
 - `memory/expert-plan-concerns.md` — 도메인 전문가 우려사항 (CRITICAL/HIGH/MEDIUM severity, trigger_condition, fact-checking 태그 포함)
 - `memory/plan-summary.md` — CRITICAL concern 반영 최종본 (Phase B 전체의 기준 문서)
 
-**▶ EMIT** `expert_panel` @ `A/4-B` — 도메인팀 Expert Plan Review 결과 (스텝 흐름의 일부, 생략 불가). `.pending-event.json` 작성 후 실행:
-```json
-{
-  "skill": "simon",
-  "step": "A/4-B",
-  "type": "expert_panel",
-  "title": "도메인팀 Expert Plan Review",
-  "data": {
-    "panel_name": "Domain Expert Panel",
-    "opinions": [CRITICAL/HIGH/MEDIUM findings를 {"role":"팀명", "opinion":"finding 요약", "severity":"레벨"} 형식으로],
-    "consensus": "전체 합의",
-    "action_items": ["CRITICAL/HIGH 대응 액션"]
-  }
-}
-```
-```bash
-bash ~/.claude/skills/simon-monitor/scripts/emit-event.sh --session "$SESSION_DIR" 2>/dev/null || true
-```
-
 ### Fact-checking 검증 (CRITICAL/HIGH concerns)
 
 expert-plan-concerns.md 저장 후, **CRITICAL/HIGH concerns 중 기술적 사실에 기반한 주장**을 독립 fact-checker subagent로 검증한다. 전문가의 환각 기반 concern이 검증 없이 전체 파이프라인(Step 5→7→17→18)을 관통하는 것을 방지한다.
@@ -364,27 +345,9 @@ Calibration Checklist의 검증 항목은 파일 존재 여부, 섹션 존재 �
 | 8 | Done-When Checks 존재 | 각 Unit별 기계적 검증 조건 명시 | → Step 1-B |
 | 9 | Behavioral Checks 존재 | Behavior Changes의 검증 가능 항목이 Done-When Behavioral Checks에 포함 | → Step 1-B |
 | 10 | 탐색 완성도 자기 평가 | code-design-analysis.md에 Structured Research Protocol(P-013)의 경쟁 가설 2개 이상 존재하고, 각 가설에 반박 증거 탐색이 수행되었는지 확인. "탐색 비중 높을수록 재작업 3~4배 감소" 원칙의 구조적 강제 | → Step 1-A |
+| 11 | Blind Spot Pass 실행 또는 스킵 근거가 Decision Journal에 기록됨 | Decision Journal에 `[Blind Spot Pass] 실행/스킵 — {근거}` 존재 | → Step 1-B |
 
 누락 항목 발견 시 사용자에게 보고하지 않고 자동으로 해당 단계를 재실행하여 보완한다.
-
-**▶ EMIT** `gate_pass`/`gate_fail` @ `A/calibration` — Calibration 결과 (스텝 흐름의 일부, 생략 불가). `.pending-event.json` 작성 후 실행:
-```json
-{
-  "skill": "simon",
-  "step": "A/calibration",
-  "type": "gate_pass 또는 gate_fail",
-  "title": "Phase A Calibration {통과|실패}",
-  "data": {
-    "gate_name": "Phase A Calibration Checklist",
-    "checks": [{"name": "항목명", "passed": true/false} 7개 항목],
-    "passed_count": N,
-    "total_count": 7
-  }
-}
-```
-```bash
-bash ~/.claude/skills/simon-monitor/scripts/emit-event.sh --session "$SESSION_DIR" 2>/dev/null || true
-```
 
 ### Phase A Retrospective Checkpoint
 

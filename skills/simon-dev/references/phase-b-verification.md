@@ -38,7 +38,7 @@
 구현 과정을 목격하지 않은 **fresh context alignment-checker** subagent에 위임한다. 구현 중 형성된 해석 편향을 제거하고, "계획서를 처음 읽는 개발자"의 시각으로 정합성을 검증한다 (`context-separation.md`의 Fresh Subagent 원칙).
 
 - Spawn `alignment-checker` (fresh subagent): **plan-summary.md + git diff만** 전달. 구현 과정 컨텍스트(inline-issues.md, 토론 기록 등)는 의도적으로 제외
-- 프롬프트: "당신은 이 계획서를 처음 읽는 개발자입니다. git diff가 계획서의 의도를 올바르게 구현했는지 검증하세요. **반드시 Acceptance Criteria의 각 항목(Mechanical Checks + Behavioral Checks)에 대해 아래 Verdict 테이블 형식으로 판정하세요.** '전반적으로 일치합니다' 같은 요약 판정은 금지합니다."
+- 프롬프트: "당신은 이 계획서를 처음 읽는 개발자입니다. git diff가 계획서의 의도를 올바르게 구현했는지 검증하세요. **반드시 Acceptance Criteria의 각 항목(Mechanical Checks + Behavioral Checks)에 대해 아래 Verdict 테이블 형식으로 판정하세요.** 항목별 판정 없이 종합 인상만 제시하는 모든 형태의 판정은 무효입니다." (포괄 판정 금지 정본: `review-rubric.md`의 Finding 품질 기준)
 
 ### AC별 Verdict 테이블
 
@@ -315,9 +315,9 @@ review-findings.md(사람 읽기용)와 함께 review-findings.jsonl(CLI 조회�
 
 ### Devil's Advocate (False Negative 탐지 — STANDARD+ only)
 
-Step 7 findings 확정 후, findings와 토론 기록을 **보지 않은** devil-advocate subagent를 spawn하여 false negative(보고되지 않은 문제)를 탐지한다. Verification Layer(P-003)가 false positive를 필터하는 것의 보완재다 (`context-separation.md`의 Fresh Subagent + Adversarial Default 원칙).
+**스폰 시점**: 7-A 토론 합의로 findings volume이 확정된 **이후**에 spawn한다 — Findings Volume-Adaptive Processing 표에서 Full pipeline(CRITICAL/HIGH 1+ 또는 high_impact_paths 예외)로 판정된 경우에만 spawn하고, skip 판정 경로에서는 spawn 자체를 하지 않는다. 지연 스폰이어도 blind 설계는 그대로 유지된다 — spawn **여부**만 findings volume에 의존할 뿐, spawn된 뒤의 분석은 여전히 git diff + plan-summary.md만 보고 findings와 토론 기록을 **보지 않은** 상태로 false negative(보고되지 않은 문제)를 탐지한다. Verification Layer(P-003)가 false positive를 필터하는 것의 보완재다 (`context-separation.md`의 Fresh Subagent + Adversarial Default 원칙). 대조는 Step 7 findings 확정 후 수행하며, 대조 전 두 결과 파일의 존재를 bash로 확인한다.
 
-- **트리거**: 모든 경로에서 적용
+- **트리거**: Volume-Adaptive 표의 Full pipeline 판정 경로 (STANDARD+ 한정) — "모든 경로 적용"이 아니다. skip 경로와의 상충을 제거하기 위해 스폰 결정은 표를 단일 기준으로 따른다
 - **전달**: git diff + plan-summary.md만. Step 7 findings, 토론 기록, inline-issues.md는 **의도적으로 제외** (What-not-Why Handoff)
 - **프롬프트**: "이 변경에서 발생할 수 있는 가장 위험한 문제 3가지를 찾으세요. 이미 누군가가 리뷰했다고 가정하지 마세요."
 - **결과 처리**:
@@ -472,7 +472,7 @@ ARC-AGI에서 영감을 받은 반복 개선 루프. 기존 Steps 9-16의 개별
    - 미해결 finding을 executor에게 전달하여 수정 후 재검증한다
 
 - Spawn **fresh `production-readiness-auditor`** subagent: **plan-summary.md + 최종 git diff + verify-commands.md만** 전달. 중간 과정 산출물(inline-issues.md, review-findings.md, 토론 기록)은 **의도적으로 제외**
-- 프롬프트: "당신은 이 코드를 처음 보는 시니어 엔지니어입니다. 프로덕션 배포 전 최종 검증을 수행하세요. **반드시 Success Criteria의 각 항목에 대해 Verdict 테이블 형식(PASS/FAIL/NEEDS-HUMAN-REVIEW)으로 판정하세요.** '전반적으로 양호합니다' 같은 요약 판정은 금지합니다."
+- 프롬프트: "당신은 이 코드를 처음 보는 시니어 엔지니어입니다. 프로덕션 배포 전 최종 검증을 수행하세요. **반드시 Success Criteria의 각 항목에 대해 Verdict 테이블 형식(PASS/FAIL/NEEDS-HUMAN-REVIEW)으로 판정하세요.** 항목별 판정 없이 종합 인상만 제시하는 모든 형태의 판정은 무효입니다." (포괄 판정 금지 정본: `review-rubric.md`의 Finding 품질 기준)
 - 별도로 `security-reviewer` (fresh subagent)를 parallel spawn — 보안 관점 독립 검증
 - **[Cross-Model]** Diff가 100줄 이상이면, Codex를 independent production auditor로 parallel spawn (`~/.claude/skills/_shared/cross-model-verification.md` 참조):
   - `codex review --base {base_branch} -c 'model_reasoning_effort="xhigh"' --enable web_search_cached "프로덕션 배포 전 최종 검증. 보안, 데이터 무결성, 성능 위험 집중."` (5분 타임아웃)

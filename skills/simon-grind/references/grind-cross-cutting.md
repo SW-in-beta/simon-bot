@@ -516,7 +516,7 @@ When human escalation is needed, generate `.claude/memory/escalation-report.md`:
 
 ## Agent Teams Fallback
 
-Agent Teams가 비활성 상태일 때의 대체 전략은 `~/.claude/skills/simon/references/agent-teams.md`의 Fallback 섹션을 따른다. grind의 "절대 멈추지 않는다" 원칙에 따라, Agent Teams 실패는 워크플로 중단 사유가 아니다. failure-log.md에 기록 후 subagent fallback으로 자동 전환한다.
+Agent Teams가 비활성 상태일 때의 대체 전략은 `~/.claude/skills/simon-dev/references/agent-teams.md`의 Fallback 섹션을 따른다. grind의 "절대 멈추지 않는다" 원칙에 따라, Agent Teams 실패는 워크플로 중단 사유가 아니다. failure-log.md에 기록 후 subagent fallback으로 자동 전환한다.
 
 ## Mini-Contract Protocol
 

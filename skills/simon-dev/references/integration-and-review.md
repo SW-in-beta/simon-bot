@@ -21,7 +21,15 @@
 3. If conflict: `architect` analyzes + `executor` resolves
 4. Full build + test pass verification
 5. **Working Example 재실행 (P-007)**: Step 6-B에서 정의한 Working Example 시나리오를 통합 환경에서 재실행하여 "테스트 통과 ≠ 실제 동작" 문제를 포착한다. `.claude/memory/unit-{name}/working-example.md`의 시나리오 참조. 실패 시 executor 수정 → 재검증 (max 3회).
-6. **[GATE — 필수, skip 불가] `/simplify` 스킬 실행**: 통합된 전체 변경 diff를 대상으로 재사용성·품질·효율성, 그리고 불필요한 주석 노이즈(주석 최소화 원칙 위반분)를 정리한다. 이 게이트는 모든 경로에서 구현 완료 후 **반드시 1회** 실행한다 — simplify는 변경 diff 전체를 보는 도구이므로, 모든 Unit이 병합된 이 시점이 권위 있는 단일 실행 지점이다. Phase B Step 5의 Post-Implementation Simplicity Check(per-unit 경량 자기 검증)와 달리, 여기서는 실제 `/simplify` 스킬을 호출한다.
+6-A. **[GATE — 필수, skip 불가, 결정론적] 주석 노이즈 스캔**: `.claude/workflow/scripts/check-comment-noise.sh` 를 실행한다(인자 없으면 origin/main→master→HEAD~1 자동 폴백).
+
+   - **exit 1 (FAIL)** — 코드 변경 없이 주석만 추가된 hunk / 변경 이력·이관 경과 서술 / 세션 산출물 참조(`design.md`, `Decision N`, `tasks N.N`)가 검출됐다. 이 세 패턴은 [phase-b-implementation.md](phase-b-implementation.md) 주석 최소화의 예외 1~5 어디에도 해당하지 않으므로 **AUTO-FIX로 제거**한다(로직 무변경이라 사용자 확인 불필요). 제거 후 스크립트를 재실행해 exit 0을 확인한다.
+   - **exit 0 + `[GATE-WARN]`** — 선언부에 붙지 않은 연속 3줄 이상 산문 주석 블록이거나 주석 비율이 임계를 넘었다. 목록의 각 주석에 대해 **"예외 1~5 중 몇 번인가"를 1줄로 답하고, 답하지 못하는 주석은 삭제**한다. 사용자가 명시적으로 요청한 주석은 유지한다. 이 판정은 LLM 몫이며 스크립트는 후보만 제시한다.
+   - **exit 0 + `[GATE-PASS]`** — 다음 단계로 진행.
+
+   Why 이 게이트가 `/simplify` 앞에 별도로 존재하는가: `/simplify`는 관점별 findings 상한이 있는 다중 에이전트 도구여서, 파일 전체에 산재한 100건 단위의 저-salience 주석 노이즈가 굵직한 발견들과 경쟁해 구조적으로 밀린다. 볼륨형 문제는 계수로 잡고, 판단형 문제만 `/simplify`에 맡긴다. 또한 주석 규칙은 이미 한 번(2026-06) 텍스트로만 강화되었다가 실패했으므로, 이번에는 측정 가능한 게이트를 둔다.
+
+6-B. **[GATE — 필수, skip 불가] `/simplify` 스킬 실행**: 6-A를 통과한 diff를 대상으로 재사용성·품질·효율성을 정리한다. 이 게이트는 모든 경로에서 구현 완료 후 **반드시 1회** 실행한다 — simplify는 변경 diff 전체를 보는 도구이므로, 모든 Unit이 병합된 이 시점이 권위 있는 단일 실행 지점이다. Phase B Step 5의 Post-Implementation Simplicity Check(per-unit 경량 자기 검증)와 달리, 여기서는 실제 `/simplify` 스킬을 호출한다. **주석 노이즈는 6-A가 담당하므로 `/simplify`에 위임하지 않는다.**
 7. Save: `.claude/memory/integration-result.md`
 8. Update: `CONTEXT.md` — Integration 완료 표시, 성공 기준 중간 갱신
 9. **Integration Retrospective Checkpoint**: **Phase-End Auto-Retrospective** 프로토콜을 실행한다 (SKILL.md Cross-Cutting Protocol 참조). Phase B-E 전체에서 축적된 사용자 피드백에서 반복 패턴을 탐지하고, 필요 시 boost-capture를 백그라운드로 트리거한다.
@@ -67,6 +75,11 @@ Refs: Unit {N} — {Unit 목적 한줄 요약}
   - Test results explained
   - NOT in scope items
   - Unresolved decisions (with "may bite you later" warnings)
+
+**Deviations from Plan**: writer subagent가 (a) decision-journal.md에서 plan-summary.md 서술과 다른 결정만 필터링, (b) inline-issues.md 중 계획 범위 관련 항목을 병합하여 "계획: X → 구현: Y — 사유: Z" 형식 3-5줄로 요약한다. 이탈이 없으면 "None"으로 명시한다. PR description에 포함되어 리뷰어가 계획 대비 실제 구현의 차이를 즉시 파악하게 한다. (새 데이터를 만들지 않는다 — 기존 두 로그의 재구성이다)
+
+**이해 체크 (LARGE 스코프 한정, 선택적)**: Work Report 말미에 변경사항에 대한 3문항 이내 이해 확인 질문을 포함한다 (예: "X 상황에서 동작이 어떻게 달라지는가"). 사용자가 답하면 실제 구현과 대조해 다른 지점을 짚어 재설명한다 — grind 재시도가 누적된 경로일수록 의도 표류 검증 가치가 크다. STANDARD/SMALL에는 생성하지 않는다.
+
 - Save: `.claude/reports/{feature-name}-report.md`
 
 ### 18-B: Review Sequence 생성
@@ -161,6 +174,8 @@ $E --type workflow_complete \
 이 단계의 목적: simon/simon-grind가 매 사용마다 조금씩 더 나아지는 자기 개선 루프를 만드는 것. 사용자가 반복적으로 같은 불편을 겪거나, 워크플로의 특정 부분이 계속 마찰을 일으킨다면, 그건 스킬 자체를 고쳐야 한다는 신호다.
 
 > **Phase-End Auto-Retrospective와의 관계**: Phase 경계에서 이미 캡처된 인사이트(`~/.claude/boost/insights/`)와 retrospective.md의 Phase-End Checkpoint 기록을 먼저 확인한다. 이미 캡처된 패턴은 중복 분석하지 않고, Step 20은 **Phase 간 교차 패턴** (여러 Phase에 걸쳐 반복되는 문제)에 집중한다. 컨텍스트 부족으로 Step 20이 실행되지 않아도, 핵심 인사이트는 Phase-end에서 이미 캡처된 상태이므로 안전하다.
+
+**자기 측정**: Harness Stress Test 데이터가 5세션 이상 누적되면 Step 20 자신을 '0건 발견 80%+ 병합 후보' 평가의 1순위 대상으로 삼는다 — 이미 Standup(Step 19)·Gotcha(Phase-End)가 선행 기록되므로, 데이터가 중복을 확인하면 Step 20을 Phase-End Auto-Retrospective로 흡수한다.
 
 ### 20-A: 피드백 종합
 
