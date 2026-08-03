@@ -349,7 +349,7 @@ git blame -L start,end file_path
 - Spawn `planner` in interview mode
 - Input: User request + Step 0 scope + Step 1-A analysis + `.claude/memory/code-design-analysis.md`
 - Split work into Units: max 3-5 files, 200 lines per Unit, single concern
-- Build dependency graph: parallel vs sequential groups
+- Build Execution Groups table: Units with disjoint Files Changed → same parallel Group; overlapping/dependent Units → separate sequential Groups (형식은 아래 STICC Task 섹션 참조)
 - Use Context7 for SDK documentation needed for implementation
 
 ### Step 1-B Interview Gating (Inversion Pattern)
@@ -432,7 +432,18 @@ planner는 초안 완성 직후 "이 요청을 다르게 해석할 수 있는 �
 **2. Task (구체적 작업)**:
 - Unit 분할 (max 3-5 files, 200 lines per Unit, single concern)
 - 각 Unit별 변경 대상 파일 목록 (파일 경로 + 변경 유형: 신규/수정/삭제)
-- Implementation order (dependency graph: parallel vs sequential)
+- **Execution Groups** — 아래 표로 명시한다. prose 설명(예: "A와 B는 병렬 가능")은 Phase B가 파싱할 수 없으므로 허용하지 않는다:
+
+  ```markdown
+  <!-- UNIT-GRAPH START -->
+  | Group | Units | Mode | 근거 |
+  |-------|-------|------|------|
+  | G1 | unit-a, unit-b | parallel | Files Changed 겹침 없음 |
+  | G2 | unit-c | sequential (G1 이후) | unit-c가 unit-a의 산출 인터페이스에 의존 |
+  <!-- UNIT-GRAPH END -->
+  ```
+
+  판정 규칙: 같은 Group 내 Unit들은 Files Changed 파일 집합이 서로 disjoint해야 한다(겹치면 별도 Group으로 분리한다). Group 번호가 낮을수록 먼저 실행되며, 같은 Group 내부는 전부 병렬이다. Unit이 1개뿐이면 이 표는 생략한다(비용 0). `<!-- UNIT-GRAPH START/END -->` 마커는 Unit 파싱 마커와 동일한 목적 — CLI에서 `sed`로 정확히 추출 가능하게 한다. 병렬 Group이 2개 이상이면 Phase B는 [parallel-unit-orchestration.md](parallel-unit-orchestration.md)의 절차를 로딩한다.
 - Development principles (TDD/DDD/Clean Architecture as confirmed)
 
 **3. Intent (의도와 목적)**:

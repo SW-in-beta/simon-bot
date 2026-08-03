@@ -52,6 +52,8 @@ workflow-state.json이 없으면 Startup부터 시작한다.
 }
 ```
 
+Unit이 2개 이상이면 위 스칼라 `current_step` 대신(또는 함께) `units: {"{name}": {"current_step": ..., "status": ...}}` 맵을 사용한다 — 전체 스키마와 단일 writer 원칙은 `parallel-unit-orchestration.md`의 "상태 스키마: units 맵" 참조. Unit 1개면 이 필드는 생성하지 않는다(하위 호환).
+
 `loaded_at` 필드가 없는 기존 항목은 "미지정 = 재로딩 필요"로 보수 처리한다 (호환성).
 
 ### Cross-Session State
@@ -122,6 +124,7 @@ ENV_INFRA로 테스트 실행 자체가 불가능한 경우, 사용자 명시적
 | Phase A 진입 | `phase-a-planning.md` | 1 | 계획 품질이 전체 파이프라인 품질을 결정 |
 | Phase A Steps 2-4, 4-B, Calibration 진입 | `phase-a-review.md` | 1 | Plan Review, Expert Review, Calibration Checklist 상세 지침 |
 | Phase B-E 구현 진입 | `phase-b-implementation.md` | 1 | TDD, Critical Rules 등 구현 핵심 |
+| Pre-Phase에서 Unit 2개 이상 + parallel Group 존재 판정 시 | `parallel-unit-orchestration.md` | 2 | Unit 워크트리 fan-out, 동시 spawn, fan-in 배리어, 병합 절차 |
 | Phase B-E 구현 진입 | `~/.claude/skills/_shared/lazy-output-discipline.md` | 1 | Economy of Means — 같은 커버리지를 최소 코드로 (테스트·검증은 제외) |
 | Phase B-E 검증 진입 (Step 6+) | `phase-b-verification.md` | 2 | Step 6+ 진입 시 로딩 |
 | Integration/Review 진입 | `integration-and-review.md` | 2 | 후반 단계 |
@@ -151,7 +154,7 @@ subagent는 다음 경우에 사용한다:
    - 결정론적 검증(빌드, 테스트 실행)은 제외 — 코드 실행으로 확인 가능한 것에 subagent를 쓰지 않음
 5. 중간 출력이 대량인 작업 — spec 파일 대조 검증, git 변경 기반 문서 작성, 타 서비스 코드베이스 요약
 
-단일 파일 수정, 간단한 검색, 단순 명령 실행은 직접 수행한다. 불필요한 subagent 생성은 컨텍스트를 낭비한다. Spawn 직전 오케스트레이터는 위 5개 기준 중 어느 것에 해당하는지 1줄로 인용한다 (예: `[Spawn] 기준 3 — 대량 코드 탐색`) — 인용할 기준이 없으면 직접 수행한다. 이 규율은 토큰 절약이 아니라 신뢰성 목적이다: 근거 없는 subagent 증식은 `_shared/preamble.md`의 Inter-Agent Communication Gotchas(병렬 파일 충돌, 프롬프트 핵심 지시 소실, API Contract 불일치)의 발생 확률을 높인다.
+단일 파일 수정, 간단한 검색, 단순 명령 실행은 직접 수행한다. 불필요한 subagent 생성은 컨텍스트를 낭비한다. Spawn 직전 오케스트레이터는 위 5개 기준 중 어느 것에 해당하는지 1줄로 인용한다 (예: `[Spawn] 기준 3 — 대량 코드 탐색`) — 인용할 기준이 없으면 직접 수행한다. 이 게이트는 "spawn 여부"만 판정한다 — 복수 Unit을 동시 spawn할지 순차 spawn할지는 별도 게이트(`parallel-unit-orchestration.md`의 Parallel Classification Gate)를 따른다. 이 규율은 토큰 절약이 아니라 신뢰성 목적이다: 근거 없는 subagent 증식은 `_shared/preamble.md`의 Inter-Agent Communication Gotchas(병렬 파일 충돌, 프롬프트 핵심 지시 소실, API Contract 불일치)의 발생 확률을 높인다.
 
 **Result-Only 반환 원칙** (오케스트레이터 컨텍스트 보호): 반환 계약과 상세 표는 `_shared/preamble.md`의 Subagent Result-Only Contract를 따른다.
 
@@ -367,8 +370,7 @@ For detailed step instructions, read [phase-a-planning.md](references/phase-a-pl
 
 For detailed step instructions, read [phase-b-implementation.md](references/phase-b-implementation.md).
 
-After Phase A, use background agents (`Agent(run_in_background=true)`) for parallel unit execution.
-Each Unit: isolated git worktree. Independent Units: parallel.
+Unit이 1개면 아래 절차 그대로 진행. **Unit 2개 이상이 parallel Group으로 확정되면** Pre-Phase는 Unit별 실제 git worktree를 만들고(fetch 없이 이미 검증된 feature 브랜치를 base로), Step 5는 같은 Group을 한 응답의 여러 tool call로 동시 spawn한다 — 상세 절차는 `parallel-unit-orchestration.md`(Reference Loading Policy 참조).
 
 **Pre-Phase**: Base branch sync → worktree 생성 → CONTEXT.md 생성
 - **Output**: `CONTEXT.md`, `memory/unit-{name}/runbook.md`

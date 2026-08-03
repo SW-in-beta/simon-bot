@@ -19,7 +19,7 @@
 Most AI coding assistants generate code and hope for the best. simon treats every task like a production deployment:
 
 - **Ship with confidence** — A 19-step pipeline with mandatory TDD, 5 expert-team reviews, and a success-criteria gate means code is verified before you ever see a PR.
-- **Scale without chaos** — Each work unit runs in an isolated git worktree. Parallel execution, zero interference, clean history.
+- **Scale without chaos** — Each work unit runs in its own git worktree; when 2+ units are classified as a parallel group, they fan out into separate worktrees and run concurrently with zero interference, then merge back automatically.
 - **Get smarter over time** — Built-in retrospectives feed back into future runs. A dedicated boost skill lets you teach it new tricks from articles, repos, and papers.
 - **Stay safe by default** — No force pushes, no real DB access, no destructive commands. Ever.
 - **Never lose your place** — State-Driven Execution restores the exact step position from workflow-state.json on every turn, surviving compaction and session resumption.
@@ -383,7 +383,7 @@ The following actions are **absolutely forbidden** at all times:
 
 ### Phase B-E: Implementation & Verification (Autonomous)
 
-Each unit runs in an isolated git worktree with mandatory TDD (RED -> GREEN -> REFACTOR).
+Each unit runs in an isolated git worktree with mandatory TDD (RED -> GREEN -> REFACTOR). When 2+ units are classified as a parallel group, they run concurrently in separate worktrees and merge back automatically once all units in the group complete.
 
 | Step | What happens |
 |------|-------------|

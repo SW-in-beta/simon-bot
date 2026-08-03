@@ -214,7 +214,7 @@ Phase 전환이 완료되면 (workflow-state.json의 `current_phase` 갱신 후)
 |-----------|---------------------|------|
 | Phase A → Phase B 진입 | `phase-a-review.md`, `context-separation.md`(Step 6 전까지), `review-rubric.md`(Step 6 전까지) | Phase B 구현 단계에서 Phase A 검토 지침은 불필요 |
 | Step 5 완료 → Step 6 진입 | `phase-b-implementation.md`의 TDD 섹션 상세 | Step 6부터는 검증 중심으로 전환 |
-| Integration 단계 진입 | `phase-b-verification.md`, `phase-b-implementation.md` 등 Phase B 전용 Tier 2 | Integration은 별도 컨텍스트 필요 |
+| Integration 단계 진입 | `phase-b-verification.md`, `phase-b-implementation.md`, `parallel-unit-orchestration.md`(로딩됐던 경우) 등 Phase B 전용 Tier 2 | Integration은 별도 컨텍스트 필요 — 단, `parallel-unit-orchestration.md`의 "Integration Stage: Unit 병합 절차" 섹션은 병합 스크립트 실행 시점까지는 유지 |
 
 **컨텍스트 활용률 45% 이상일 때 Phase 전환 시**: 즉시 `/compact`를 실행하며 이전 Phase Tier 2를 보존 프롬프트에서 명시적으로 제외한다. 구체적인 compact hint는 아래 "Phase별 Compact Hint" 테이블을 참조한다.
 

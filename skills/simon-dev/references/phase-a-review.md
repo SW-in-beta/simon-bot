@@ -346,6 +346,7 @@ Calibration Checklist의 검증 항목은 파일 존재 여부, 섹션 존재 �
 | 9 | Behavioral Checks 존재 | Behavior Changes의 검증 가능 항목이 Done-When Behavioral Checks에 포함 | → Step 1-B |
 | 10 | 탐색 완성도 자기 평가 | code-design-analysis.md에 Structured Research Protocol(P-013)의 경쟁 가설 2개 이상 존재하고, 각 가설에 반박 증거 탐색이 수행되었는지 확인. "탐색 비중 높을수록 재작업 3~4배 감소" 원칙의 구조적 강제 | → Step 1-A |
 | 11 | Blind Spot Pass 실행 또는 스킵 근거가 Decision Journal에 기록됨 | Decision Journal에 `[Blind Spot Pass] 실행/스킵 — {근거}` 존재 | → Step 1-B |
+| 12 | Unit이 2개 이상이면 Execution Groups 표 존재 + Group 내 파일 교집합 없음 | `<!-- UNIT-GRAPH START/END -->` 마커 존재, 같은 Group의 Unit들의 Files Changed 파일 집합이 disjoint(교집합 스크립트로 대조). Unit 1개면 표 자체가 없어야 하며 이 항목은 자동 PASS | → Step 1-B |
 
 누락 항목 발견 시 사용자에게 보고하지 않고 자동으로 해당 단계를 재실행하여 보완한다.
 

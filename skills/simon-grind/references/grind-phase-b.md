@@ -36,6 +36,8 @@ CONTEXT.md 추가 항목:
 - Retry Budget: 50/50 (잔여/전체)
 ```
 
+**Unit이 2개 이상이면(parallel-unit-orchestration.md 로딩 시)**: `checkpoint-initial` 태그와 Retry Budget은 **Unit별 워크트리 범위**로 관리한다 — 각 Unit이 자기 워크트리에서 독립적으로 체크포인트/재시도를 소진하며, 한 Unit의 재시도 소진이 다른 Unit의 예산에 영향을 주지 않는다. CONTEXT.md의 "열일 현황"도 feature 워크트리에서는 Unit별 표로 확장한다(형식은 parallel-unit-orchestration.md "진행 보고" 참조).
+
 ## Step 5: Implementation (with Build Resilience)
 
 추가 읽기: `.claude/memory/failure-log.md` (이전 Unit 패턴 확인)

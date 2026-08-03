@@ -108,6 +108,7 @@ loop_limits:
 | Startup | grind SKILL.md + simon-dev의 workflow-state.json 스키마 및 Reference Loading Policy 테이블만 참조 (전체 SKILL.md 로딩은 Phase 진입 시) |
 | Phase A 진입 | grind-phase-a.md + simon-dev phase-a-planning.md |
 | Phase B-E 진입 | grind-phase-b.md + simon-dev phase-b-implementation.md + `~/.claude/skills/_shared/lazy-output-discipline.md` (Economy of Means) |
+| Pre-Phase에서 Unit 2개 이상 + parallel Group 존재 판정 시 | simon-dev `parallel-unit-orchestration.md` (grind 전용 오버라이드는 grind-phase-b.md Pre-Phase 참조 — 재시도 예산은 Unit별 워크트리로 분리) |
 | 에러 발생 시 | grind-error-resilience.md |
 | Cross-cutting 참조 시 | grind-cross-cutting.md |
 

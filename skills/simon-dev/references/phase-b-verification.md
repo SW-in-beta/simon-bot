@@ -377,6 +377,8 @@ CRITICAL severity이면 AUTO-FIX 대상이라도 수정 후 반드시 사용자�
 
 regression 실패 발견 시, "기존 결함"이라는 주장은 증명 없이 수용하지 않는다:
 
+> **Unit이 2개 이상이면 (병렬 실행 중)**: 아래 1번의 `git stash`를 사용하지 않는다 — `refs/stash`는 같은 저장소를 공유하는 모든 워크트리에 걸쳐 공유되는 참조라, 다른 Unit이 같은 순간 자기 워크트리에서 stash를 실행하면 충돌할 수 있다. 대신 [parallel-unit-orchestration.md](parallel-unit-orchestration.md)의 "Blame Protocol의 병렬-안전 변형"(임시 WIP 커밋 방식)을 사용한다.
+
 1. regression 실패 감지 → `git stash` → base branch checkout → 동일 테스트 실행
 2. base에서도 실패 → `[PRE-EXISTING]` 태깅 — 이 regression은 자신의 변경과 무관함이 증명됨
 3. base에서 통과 → `[INTRODUCED]` 태깅 — 반드시 수정 필요
@@ -439,7 +441,7 @@ ARC-AGI에서 영감을 받은 반복 개선 루프. 기존 Steps 9-16의 개별
 
 **2. Fix (Self-improve)** — `executor`가 발견된 이슈를 일괄 수정
 
-**3. Verify (Verify)** — 수정 후 빌드/테스트/타입체크 실행 + `/simplify` 스킬로 코드 품질 검토
+**3. Verify (Verify)** — 수정 후 빌드/테스트/타입체크 실행 + Post-Implementation Simplicity Check(경량 자기검증, 실제 `/simplify` 스킬 호출 아님 — 권위 있는 `/simplify` 호출은 모든 Unit 병합 후 Integration Stage 6-B에서 diff 전체를 대상으로 1회만 실행한다. per-unit/per-iteration 중복 호출은 금지, `integration-and-review.md`/`phase-b-implementation.md` 참조)
 
 **4. Check (Correct)** — 새로운 이슈 발생 여부 확인:
 - 새 이슈 없음 → Cycle 종료, Step 17로 진행

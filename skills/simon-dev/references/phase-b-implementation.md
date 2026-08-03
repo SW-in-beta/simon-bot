@@ -1,7 +1,6 @@
 # Phase B-E: Implementation & Verification (Detailed Instructions)
 
-After Phase A is confirmed, use background agents (`Agent(run_in_background=true)`) for parallel unit execution.
-Each Unit runs in an **isolated git worktree**. Independent Units run in **parallel**.
+After Phase A is confirmed, spawn Units within the Pre-Phase feature worktree. Unit이 1개뿐이거나 Execution Groups 표(phase-a-planning.md)가 전부 sequential이면 아래 절차를 그대로 따른다. **Unit이 2개 이상 parallel Group으로 확정된 경우**, Pre-Phase 3-B와 Step 5 spawn은 [parallel-unit-orchestration.md](parallel-unit-orchestration.md)의 절차(Unit별 실제 워크트리 fan-out + 동시 spawn + fan-in 배리어)를 따른다 — 이 파일의 해당 스텝은 그 경우 대체된다.
 
 ## 목차
 - [Pre-Phase: Base Branch Sync & Worktree 생성](#pre-phase-base-branch-sync--worktree-생성)
@@ -53,17 +52,20 @@ Each Unit runs in an **isolated git worktree**. Independent Units run in **paral
    session-meta.json이 없으면 Startup에서 생성되지 않은 것이므로, Startup의 3-D 스키마로 초기화한 뒤 갱신한다.
 7. **[GATE — Base Stability]** worktree에서 빌드+기존 테스트를 실행하여 base branch가 안정적인지 검증한다. 깨진 base 위에 구현하면 Phase B 전체가 낭비되기 때문이다.
    - `verify-commands.md`의 빌드/테스트 명령 실행
-   - **PASS** → Unit Runbook 생성으로 진행
+   - **PASS** → Unit 수 확인(7-B) 또는 Unit Runbook 생성으로 진행
    - **FAIL** → 구현 진입 차단. 실패 원인을 분석하고 대응:
      - base branch 자체의 문제 → 사용자에게 보고 (`[Base Unstable] {실패 요약} — base branch 수정이 필요합니다.`)
      - 환경 설정 문제 (의존성 미설치 등) → setup-test-env.sh 재실행 후 재시도 (최대 2회)
    - **테스트 환경 미구성 시** (setup-test-env.sh exit code 1): 빌드+타입체크만 통과하면 PASS로 간주
+7-B. **Unit Worktree 생성 (Unit 2개 이상 + parallel Group 존재 시에만)**: plan-summary.md의 Execution Groups 표를 확인한다. 병렬 Group이 있으면 [parallel-unit-orchestration.md](parallel-unit-orchestration.md) 로딩 후 "Pre-Phase: Unit Worktree Fan-out" 절차를 실행한다(`scripts/create-unit-worktree.sh`로 Unit별 워크트리 생성, `workflow-state.json`에 `units` 맵 기록). Unit이 1개거나 전부 sequential이면 이 단계를 skip하고 아래 Unit Runbook 자동 생성으로 바로 진행한다.
 
 **중요:** 현재 로컬 브랜치를 checkout/변경하지 않음 (안전)
 
 ### Unit Runbook 자동 생성
 
-`plan-summary.md`에서 현재 Unit에 해당하는 정보만 추출하여 `.claude/memory/unit-{name}/runbook.md`를 생성한다. executor 에이전트에게 전체 계획서 대신 이 runbook만 전달하여 컨텍스트 소비를 줄이고 집중도를 높인다.
+`plan-summary.md`에서 해당 Unit에 해당하는 정보만 추출하여 `.claude/memory/unit-{name}/runbook.md`(Unit이 2개 이상이면 각 Unit 워크트리 안의 `.claude/memory/runbook.md` — [parallel-unit-orchestration.md](parallel-unit-orchestration.md) 참조)를 생성한다. executor 에이전트에게 전체 계획서 대신 이 runbook만 전달하여 컨텍스트 소비를 줄이고 집중도를 높인다.
+
+**Unit이 2개 이상이면 Step 5 spawn 전에 같은 Parallel Group의 모든 Unit runbook을 일괄 생성**한다 — "runbook 생성 → 즉시 spawn"을 Unit마다 반복하면 spawn 자체가 턴을 넘나들며 순차 발신되어, 이후 Step 5에서 `run_in_background=true`를 지정해도 실제로는 동시 실행되지 않는다(동시 실행은 같은 응답의 여러 tool call로만 성립한다). 배치 생성으로 모든 Unit의 runbook을 미리 준비해두어야 Step 5에서 한 응답으로 동시 spawn할 수 있다.
 
 ```markdown
 # Unit Runbook: {name}
@@ -162,6 +164,8 @@ Runbook에 위 "코드 생성 제약"을 **본문으로 인라인**한다 — ex
 - **진행 중**: Step {N} — {설명}
 - **마지막 검증**: {build/test/lint 결과 1줄 요약}
 - **블로커**: (없으면 생략)
+
+> Unit이 2개 이상이면 이 섹션 대신 Unit별 표를 사용한다 — 형식은 [parallel-unit-orchestration.md](parallel-unit-orchestration.md)의 "진행 보고" 섹션 참조.
 
 ## 성공 기준
 - [ ] RED→GREEN TDD 사이클 완료
@@ -266,7 +270,8 @@ $E --step "B/5" --type subagent_spawn \
   2>/dev/null || true
 ```
 
-- Spawn `executor`, parallel for independent files (maxTurns: SKILL.md Subagent 사용 기준 테이블 참조 — STANDARD 100, LARGE 200)
+- Unit이 2개 이상이면 spawn 직전 [parallel-unit-orchestration.md](parallel-unit-orchestration.md)의 "Parallel Classification Gate"를 적용한다(1줄 인용 후 같은 Group을 한 응답의 여러 tool call로 동시 spawn). Unit이 1개면 아래 절차를 그대로 따른다.
+- Spawn `executor` (maxTurns: SKILL.md Subagent 사용 기준 테이블 참조 — STANDARD 100, LARGE 200)
 - executor에게 코드를 전달할 때도 Context Preparation 원칙을 적용한다 — 파일 전체가 아닌 변경 대상 함수/메서드 단위로 추출하고, diff는 노이즈를 제거한 후 전달한다.
 - executor는 code-design-analysis.md의 컨벤션과 패턴을 따라 구현
 - 전문가 우려사항 중 HIGH 이상 항목을 구현 시 반드시 고려

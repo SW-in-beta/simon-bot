@@ -133,8 +133,10 @@ WorkflowError
 4. 6회 모두 실패 시 사용자에게 AskUserQuestion으로 상황 보고 + 선택지 제시:
    - 다른 접근법으로 재시도
    - 해당 단계를 건너뛰고 다음으로 진행
-   - **simon-grind로 전환** — 현재 상태를 유지한 채 재시도 한계를 10으로 상향하고 자동 진단/전략 전환을 활성화한다. 전환 시 `.claude/memory/failure-log.md`와 `.claude/memory/checkpoints.md`를 초기화하고, grind의 Escalation Ladder를 Attempt 1부터 시작한다.
+   - **simon-grind로 전환** — 현재 상태를 유지한 채 재시도 한계를 10으로 상향하고 자동 진단/전략 전환을 활성화한다. 전환 시 `.claude/memory/failure-log.md`와 `.claude/memory/checkpoints.md`를 초기화하고, grind의 Escalation Ladder를 Attempt 1부터 시작한다. **Unit이 2개 이상이면**(병렬 실행 중) 이 초기화와 grind 전환은 실패한 Unit의 워크트리 범위로 한정한다 — 다른 Unit의 진행에는 영향을 주지 않는다.
    - 워크플로 중단 (사용자가 명시적으로 선택한 경우에만)
+
+**Unit 2개 이상 실행 중 참고**: [parallel-unit-orchestration.md](parallel-unit-orchestration.md)에서 확정한 대로, 병렬 Unit은 각자 독립된 git worktree에서 실행되므로 한 Unit의 빌드/테스트가 다른 Unit의 미완성 코드에 영향받지 않는다 — 이 CODE_LOGIC 사다리는 정상적으로 자기 Unit의 실패 원인에만 수렴한다. 별도의 cross-unit 재분류 로직은 필요 없다.
 
 ## WORKFLOW_ERROR 실패 처리
 

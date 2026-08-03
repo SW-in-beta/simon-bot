@@ -6,7 +6,7 @@ simon 워크플로에서 사용되는 모든 게이트의 정의. 각 게이트�
 
 | Gate ID | 트리거 시점 | 통과 조건 | 실패 시 조치 | 스크립트 |
 |---------|-----------|----------|------------|---------|
-| **G-CAL** | Phase A 종료 (Phase B 진입 전) | Calibration Checklist 9개 항목 전체 충족 | 미충족 항목의 해당 Step으로 회귀 후 자동 보완 | `calibration-check.sh` (7항목) + LLM (2항목) |
+| **G-CAL** | Phase A 종료 (Phase B 진입 전) | Calibration Checklist 전체 항목 충족 (개수는 phase-a-review.md가 SSoT — Unit 병렬 여부에 따라 가변) | 미충족 항목의 해당 Step으로 회귀 후 자동 보완 | `calibration-check.sh` (7항목) + LLM (2항목) |
 | **G-STEP** | Step 전환 시 | verify-commands.md의 빌드/린트/테스트 통과 | 다음 Step 진입 차단 → 수정 후 재검증 | `verify-build.sh` / `typecheck.sh` / `run-tests.sh` 명시 호출 |
 | **G-STOP** | Edit/Write 후 (소스코드) | 빌드 + 린트 통과 (타입체크·테스트는 G-STEP 관할) | Stop-and-Fix → 수정 완료까지 다음 작업 차단 | `auto-verify.sh` (build+lint만) |
 | **G-HOOK** | PostToolUse (Edit/Write) | auto-verify.sh exit 0 | exit 1 → Stop-and-Fix Gate 진입 | `auto-verify.sh` (build+lint만) |
@@ -21,7 +21,7 @@ simon 워크플로에서 사용되는 모든 게이트의 정의. 각 게이트�
 
 **트리거**: Phase A 모든 Step 완료 후, Phase B 진입 직전.
 
-**검증 항목 (9개)**:
+**검증 항목** (아래 표는 발췌 — 전체 목록과 최신 항목 수는 phase-a-review.md의 Calibration Checklist가 SSoT):
 
 | # | 항목 | 확인 방법 |
 |---|------|----------|
@@ -100,7 +100,7 @@ simon 워크플로에서 사용되는 모든 게이트의 정의. 각 게이트�
 
 **통과 조건**:
 - `plan-summary.md`가 존재하고 비어있지 않음
-- G-CAL(Calibration Checklist) 9개 항목 전체 통과
+- G-CAL(Calibration Checklist) 전체 항목 통과
 
 **실패 시**: Phase A로 회귀하여 누락 항목 보완.
 
@@ -109,7 +109,7 @@ simon 워크플로에서 사용되는 모든 게이트의 정의. 각 게이트�
 **트리거**: 모든 Unit 구현 완료 후 Integration Stage 진입 시.
 
 **통과 조건**:
-- 모든 Unit의 Step 17 완료
+- 모든 Unit의 Step 17 완료 — `workflow-state.json`에 `units` 맵이 있으면(Unit 2개 이상, [parallel-unit-orchestration.md](parallel-unit-orchestration.md) 참조) `jq '.units | to_entries | all(.value.status == "completed")'`로 결정론적 판정. Unit 1개면 `current_step`이 `B/17` 이상인지로 판정
 - 전체 빌드 성공
 - 전체 테스트 스위트 통과
 - Working Example 재실행 통과 (P-007)

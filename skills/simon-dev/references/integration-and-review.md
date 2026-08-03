@@ -16,9 +16,9 @@
 
 ## Integration Stage (after all Units complete)
 
-1. 모든 변경사항은 Startup에서 생성한 worktree의 브랜치에 커밋
+1. Unit이 1개면 모든 변경사항은 Startup에서 생성한 worktree의 브랜치에 이미 존재한다(별도 병합 불필요). **Unit이 2개 이상이면** 먼저 `scripts/merge-units.sh`로 각 Unit 브랜치를 feature 브랜치에 병합한다 — 절차는 [parallel-unit-orchestration.md](parallel-unit-orchestration.md)의 "Integration Stage: Unit 병합 절차" 참조. 이 병합이 끝난 후에야 아래 2번부터 진행한다.
 2. 브랜치명: `.claude/memory/branch-name.md` 참조
-3. If conflict: `architect` analyzes + `executor` resolves
+3. If conflict: `architect` analyzes + `executor` resolves (병합 충돌은 `merge-units.sh`가 exit 2로 중단하며 이 절차로 넘어온다)
 4. Full build + test pass verification
 5. **Working Example 재실행 (P-007)**: Step 6-B에서 정의한 Working Example 시나리오를 통합 환경에서 재실행하여 "테스트 통과 ≠ 실제 동작" 문제를 포착한다. `.claude/memory/unit-{name}/working-example.md`의 시나리오 참조. 실패 시 executor 수정 → 재검증 (max 3회).
 6-A. **[GATE — 필수, skip 불가, 결정론적] 주석 노이즈 스캔**: `.claude/workflow/scripts/check-comment-noise.sh` 를 실행한다(인자 없으면 origin/main→master→HEAD~1 자동 폴백).
@@ -59,8 +59,8 @@ Refs: Unit {N} — {Unit 목적 한줄 요약}
 **IMPORTANT: Step 18은 반드시 foreground에서 실행한다.**
 
 > **Background Agent 사용 기준 (전체 워크플로 공통)**:
-> - **OK**: 빌드/테스트 검증, 독립적 Unit 병렬 실행
-> - **NO**: 다음 Step의 입력 파일을 생성하는 작업, 후속 단계가 즉시 의존하는 산출물
+> - **OK**: 빌드/테스트 검증, 독립적 Unit 병렬 실행(동일 Parallel Group 내 여러 Unit이 동시에 background로 실행되어 서로의 대기 시간을 상쇄하는 경우 — 산출물이 "다음 Step의 입력"이라는 사실 자체는 배제 사유가 아니다. Step 5의 산출물이 Step 6의 입력인 것이 그 예다)
+> - **NO**: 대기 중 병행할 다른 작업 없이 단일 background agent 하나만 spawn하고 그 결과만 기다리는 경우(백그라운드 전환의 이점이 없음), 후속 단계가 즉시 의존하는 산출물을 **단일** 에이전트가 생성하는 경우 (예: Step 18 Work Report — 여러 개를 동시에 만들어 대기 시간을 상쇄할 대상이 없으므로 foreground)
 
 ### 18-A: Report
 
